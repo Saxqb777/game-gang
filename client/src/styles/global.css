@@ -1,0 +1,65 @@
+:root {
+  --bg: #07080c;
+  --bg-2: #0d0f16;
+  --panel: rgba(18, 21, 30, 0.82);
+  --panel-solid: #12151e;
+  --line: rgba(255, 255, 255, 0.09);
+  --text: #f4f6fb;
+  --muted: #8b93a7;
+  --good: #3ddc84;
+  --warn: #ffb020;
+  --bad: #ff4d5e;
+  --accent: #ff8a1f;
+  --font: 'Chakra Petch', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.screen-centre {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.wordmark {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.wordmark span {
+  color: var(--accent);
+}

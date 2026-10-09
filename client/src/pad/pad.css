@@ -1,0 +1,541 @@
+/* Pad: a phone held sideways. Dark gamepad skin, the player's colour is the accent. */
+
+html:has(.pad),
+html:has(.pad-screen) {
+  /* iOS Safari: no bounce, no zoom on double tap, no text selection or callouts. */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
+.pad,
+.pad-screen {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pad {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.pad-screen {
+  --accent: #ff8a1f;
+  position: fixed;
+  inset: 0;
+  /* 100dvh avoids the classic iOS 100vh-behind-the-toolbar bug. */
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: max(14px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 55%),
+    radial-gradient(90% 70% at 100% 100%, rgba(255, 255, 255, 0.05), transparent 60%),
+    #07080c;
+  overflow: hidden auto;
+}
+
+.pad-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+.pad-room-chip {
+  padding: 5px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ---- Buttons ---------------------------------------------------------------- */
+
+.pad-btn {
+  appearance: none;
+  border: 0;
+  border-radius: 16px;
+  padding: 14px 22px;
+  background: var(--accent);
+  color: #0b0b0f;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow:
+    0 6px 0 color-mix(in srgb, var(--accent) 55%, #000),
+    0 10px 24px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+
+.pad-btn:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 0 color-mix(in srgb, var(--accent) 55%, #000),
+    0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.pad-btn:disabled {
+  opacity: 0.35;
+}
+
+.pad-btn--big {
+  width: 100%;
+  padding: 18px;
+  font-size: 22px;
+  margin-top: auto;
+}
+
+.pad-btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.pad-icon-btn {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0;
+}
+
+.pad-icon-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--muted);
+}
+
+/* ---- Message / connecting / code entry ------------------------------------ */
+
+.pad-message {
+  align-items: center;
+  text-align: center;
+}
+
+.pad-message .pad-brand {
+  align-self: stretch;
+}
+
+.pad-message h1 {
+  margin: auto 0 8px;
+  font-size: 26px;
+}
+
+.pad-message p {
+  margin: 0 auto 24px;
+  max-width: 420px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.pad-message .pad-btn {
+  margin-bottom: auto;
+}
+
+.pad-spinner {
+  width: 46px;
+  height: 46px;
+  margin-top: auto;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--accent);
+  animation: pad-spin 0.9s linear infinite;
+}
+
+.pad-spinner + h1 {
+  margin-top: 18px;
+}
+
+@keyframes pad-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pad-code-form {
+  display: grid;
+  gap: 16px;
+  margin: auto 0;
+  justify-items: center;
+}
+
+.pad-code-form label {
+  color: var(--muted);
+}
+
+.pad-code-input {
+  width: 240px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 2px solid var(--line);
+  background: #10131b;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  color: var(--accent);
+  outline: none;
+}
+
+.pad-code-input:focus {
+  border-color: var(--accent);
+}
+
+/* ---- Join ------------------------------------------------------------------- */
+
+.pad-join-grid {
+  flex: 1;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr;
+}
+
+@media (orientation: landscape) {
+  .pad-join-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+}
+
+.pad-join-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pad-label {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pad-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: #10131b;
+  /* 16px+ stops iOS zooming into the field. */
+  font-size: 20px;
+  font-weight: 700;
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.pad-input:focus {
+  border-color: var(--accent);
+}
+
+.pad-colours {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.pad-colour {
+  aspect-ratio: 1;
+  max-height: 54px;
+  border-radius: 14px;
+  border: 3px solid transparent;
+  background: var(--swatch);
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.25);
+}
+
+.pad-colour.is-on {
+  border-color: #fff;
+  box-shadow:
+    inset 0 -6px 0 rgba(0, 0, 0, 0.25),
+    0 0 0 3px var(--swatch);
+}
+
+.pad-colour:disabled {
+  opacity: 0.2;
+  background:
+    linear-gradient(45deg, transparent 46%, #fff 46% 54%, transparent 54%),
+    var(--swatch);
+}
+
+.pad-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pad-mode {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  border: 2px solid var(--line);
+  background: #10131b;
+  text-align: center;
+}
+
+.pad-mode svg {
+  width: 48px;
+  height: 32px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pad-mode strong {
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pad-mode small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pad-mode.is-on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, #10131b);
+}
+
+.pad-mode.is-on svg {
+  stroke: var(--accent);
+}
+
+.pad-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 176, 32, 0.12);
+  border: 1px solid rgba(255, 176, 32, 0.35);
+  color: #ffd27a;
+  font-size: 14px;
+}
+
+/* ---- Lobby ------------------------------------------------------------------ */
+
+.pad-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pad-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+  font-size: 20px;
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pad-me-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.pad-lobby-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (orientation: landscape) {
+  .pad-lobby-grid {
+    grid-template-columns: 1.1fr 1fr;
+  }
+}
+
+.pad-game-card {
+  display: grid;
+  align-content: end;
+  min-height: 110px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.pad-game-card small {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.pad-game-card strong {
+  font-size: 28px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.pad-game-card span {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.pad-players {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.pad-players li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+}
+
+.pad-players i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--swatch);
+}
+
+.pad-players span {
+  flex: 1;
+  font-weight: 700;
+}
+
+.pad-players em {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pad-players li.is-ready em {
+  color: var(--good);
+}
+
+.pad-players li.is-away {
+  opacity: 0.45;
+}
+
+.pad-ready {
+  margin-top: auto;
+  padding: 18px;
+  border-radius: 20px;
+  border: 3px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pad-ready.is-ready {
+  background: var(--accent);
+  color: #0b0b0f;
+  box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.pad-hint {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---- Settings sheet + banner -------------------------------------------------- */
+
+.pad-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+}
+
+.pad-sheet {
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: #10131b;
+}
+
+.pad-sheet h2 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pad-sheet-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.pad-banner {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 30;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 99px;
+  background: var(--warn);
+  color: #1a1100;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  animation: pad-blink 1s ease-in-out infinite alternate;
+}
+
+@keyframes pad-blink {
+  to {
+    opacity: 0.6;
+  }
+}

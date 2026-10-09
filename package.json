@@ -1,0 +1,37 @@
+{
+  "name": "gamer-gang",
+  "private": true,
+  "type": "module",
+  "description": "Gamer Gang - a party game console in the browser. TV is the screen, phones are the pads.",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "tsx server/src/dev.ts",
+    "build": "pnpm --filter @gamergang/client build",
+    "build:vercel": "node scripts/build-vercel.mjs",
+    "start": "pnpm build && tsx server/src/prod.ts",
+    "db:migrate": "tsx server/src/db/migrate.ts",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "eslint": "10.12.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.9",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "5.0.3"
+  }
+}

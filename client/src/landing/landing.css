@@ -1,0 +1,53 @@
+.landing {
+  background:
+    radial-gradient(1200px 600px at 20% 0%, rgba(255, 138, 31, 0.18), transparent 60%),
+    radial-gradient(900px 500px at 100% 100%, rgba(155, 92, 255, 0.16), transparent 60%),
+    var(--bg);
+}
+
+.landing-title {
+  font-size: clamp(40px, 9vw, 96px);
+  margin: 0 0 12px;
+}
+
+.landing-tagline {
+  color: var(--muted);
+  font-size: clamp(16px, 2.2vw, 22px);
+  margin: 0 0 40px;
+}
+
+.landing-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.landing-choice {
+  display: grid;
+  gap: 6px;
+  min-width: 260px;
+  padding: 22px 28px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--panel-solid);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.landing-choice:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.landing-choice strong {
+  font-size: 22px;
+}
+
+.landing-choice small {
+  color: var(--muted);
+  font-size: 14px;
+}

@@ -3,18 +3,20 @@
  * The hub feeds it pad inputs; it answers with race status and haptics for the pads.
  */
 import { colourHex, type ColourId, type InputMessage, type TvMessage } from '@gamergang/shared';
-import { Color, Fog, HemisphereLight, PMREMGenerator, Scene, Vector3 } from 'three';
+import { Color, Fog, HemisphereLight, PMREMGenerator, Scene, Vector3, type Sprite } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { CAR, INPUT, RESPAWN } from './config';
+import { CAR, INPUT, RENDER, RESPAWN } from './config';
 import { DebugOverlay } from './debug/debugOverlay';
 import { ViewportHud } from './hud/viewportHud';
 import { KeyboardDriver } from './input/keyboard';
 import { FixedStepLoop } from './loop';
 import { ChaseCamera } from './render/chaseCamera';
+import { OverviewCamera } from './render/overviewCamera';
 import { GameRenderer } from './render/renderer';
 import { Sun } from './render/sun';
-import { viewportLayout, type Rect } from './render/viewports';
+import { overviewCell, viewportLayout, type Rect } from './render/viewports';
 import { CarModelLibrary, type CarVisual } from './scene/carVisual';
+import { NAME_TAG_HEIGHT, createNameTag, disposeNameTag } from './scene/nameTag';
 import { createTestPlaneVisual } from './scene/testPlaneVisual';
 import type { Car } from './sim/car';
 import { NEUTRAL_INPUT, copyInput, mergeInputs, type DriveInput } from './sim/input';
@@ -40,6 +42,8 @@ interface Driver {
   player: GamePlayer;
   car: Car;
   visual: CarVisual;
+  /** Name floating above the car, shown in everyone else's viewport. */
+  tag: Sprite;
   camera: ChaseCamera;
   hud: ViewportHud;
   /** Latest input from the pad, and when it arrived (performance.now()). */
@@ -74,6 +78,11 @@ export class SplitWaysGame {
   private readonly statusTimer: ReturnType<typeof setInterval>;
   /** Viewport rectangles, recomputed only on resize. */
   private rects: Rect[] = [];
+  /** With 3 players the free quarter shows a broadcast-style overview of the pack. */
+  private overviewRect: Rect | null = null;
+  private readonly overview = new OverviewCamera();
+  private readonly overviewBadge = document.createElement('div');
+  private readonly carPositions: Vector3[];
   private stepTime = 0;
   private frames = 0;
   private fps = 0;
@@ -114,7 +123,13 @@ export class SplitWaysGame {
     pmrem.dispose();
     this.scene.environmentIntensity = 0.55;
     this.scene.add(new HemisphereLight(0xd6e6ff, 0x6d6457, 0.9));
-    this.sun = new Sun(this.scene, new Vector3(-0.45, 0.75, -0.5), new Color(0xfff0dc), 3.2);
+    this.sun = new Sun(
+      this.scene,
+      new Vector3(-0.45, 0.75, -0.5),
+      new Color(0xfff0dc),
+      3.2,
+      players.length > 2 ? RENDER.shadowMapSizeManyPlayers : RENDER.shadowMapSize,
+    );
 
     buildTestPlanePhysics(physics);
     this.scene.add(createTestPlaneVisual(this.renderer.webgl.capabilities.getMaxAnisotropy()));
@@ -128,13 +143,15 @@ export class SplitWaysGame {
       if (!spawn) throw new Error('No spawn points');
       const car = this.sim.addCar(spawn);
       const visual = models.create(colourHex(player.colour));
-      this.scene.add(visual.root);
+      const tag = createNameTag(player.name, colourHex(player.colour));
+      this.scene.add(visual.root, tag);
       // Keyboard players get a key set each; with no keyboard players WASD also drives the first car.
       const keyboardSet = player.local ? nextKeySet++ : !hasLocalPlayers && index === 0 ? 0 : null;
       return {
         player,
         car,
         visual,
+        tag,
         camera: new ChaseCamera(),
         hud: new ViewportHud(this.hudLayer, player.name, colourHex(player.colour)),
         padInput: copyInput({ ...NEUTRAL_INPUT }, NEUTRAL_INPUT),
@@ -145,6 +162,10 @@ export class SplitWaysGame {
       };
     });
 
+    this.carPositions = this.drivers.map((d) => d.visual.root.position);
+    this.overviewBadge.className = 'sw-overview-badge';
+    this.overviewBadge.textContent = 'Live';
+    this.hudLayer.appendChild(this.overviewBadge);
     this.debug = new DebugOverlay(container);
     this.resizeObserver = new ResizeObserver(() => this.layout());
     this.resizeObserver.observe(container);
@@ -184,6 +205,7 @@ export class SplitWaysGame {
     for (const driver of this.drivers) {
       driver.visual.dispose();
       driver.hud.dispose();
+      disposeNameTag(driver.tag);
     }
     this.sim.dispose();
     this.models.dispose();
@@ -207,6 +229,15 @@ export class SplitWaysGame {
       const rect = this.rects[i];
       if (rect) driver.hud.place(rect);
     });
+    this.overviewRect =
+      this.drivers.length === 3
+        ? overviewCell(this.renderer.width, this.renderer.height, VIEWPORT_GAP)
+        : null;
+    this.overviewBadge.hidden = this.overviewRect === null;
+    if (this.overviewRect) {
+      this.overviewBadge.style.left = `${this.overviewRect.x + 18}px`;
+      this.overviewBadge.style.top = `${this.overviewRect.y + 16}px`;
+    }
   }
 
   private step(): void {
@@ -258,7 +289,11 @@ export class SplitWaysGame {
   private render(alpha: number, seconds: number): void {
     const started = performance.now();
     this.renderer.beginFrame();
-    for (const driver of this.drivers) driver.visual.update(driver.car, alpha, seconds);
+    for (const driver of this.drivers) {
+      driver.visual.update(driver.car, alpha, seconds);
+      driver.tag.position.copy(driver.visual.root.position);
+      driver.tag.position.y += NAME_TAG_HEIGHT;
+    }
     for (let i = 0; i < this.drivers.length; i++) {
       const driver = this.drivers[i] as Driver;
       const rect = this.rects[i];
@@ -272,9 +307,18 @@ export class SplitWaysGame {
         rect.width / rect.height,
       );
       this.sun.focus(root.position);
+      // Your own name tag would only hover over your roof.
+      for (const other of this.drivers) other.tag.visible = other !== driver;
       this.renderer.renderView(this.scene, driver.camera.camera, rect);
       driver.hud.setSpeed(driver.car.speedKph);
       driver.hud.setStatus(driver.connected || driver.player.local ? '' : 'Reconnecting...');
+    }
+    if (this.overviewRect) {
+      const rect = this.overviewRect;
+      this.overview.update(seconds, this.carPositions, rect.width / rect.height);
+      for (const driver of this.drivers) driver.tag.visible = true;
+      this.sun.focus(this.overview.focus);
+      this.renderer.renderView(this.scene, this.overview.camera, rect);
     }
 
     this.frames++;

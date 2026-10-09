@@ -16,12 +16,18 @@ export class Sun {
   /** Unit vector from the ground towards the sun. */
   readonly direction: Vector3;
 
-  constructor(scene: Scene, direction: Vector3, colour: Color, intensity: number) {
+  constructor(
+    scene: Scene,
+    direction: Vector3,
+    colour: Color,
+    intensity: number,
+    private readonly mapSize: number = RENDER.shadowMapSize,
+  ) {
     this.direction = direction.clone().normalize();
     this.light = new DirectionalLight(colour, intensity);
     this.light.castShadow = true;
     const shadow = this.light.shadow;
-    shadow.mapSize.set(RENDER.shadowMapSize, RENDER.shadowMapSize);
+    shadow.mapSize.set(mapSize, mapSize);
     const extent = RENDER.shadowExtent;
     shadow.camera.left = -extent;
     shadow.camera.right = extent;
@@ -38,7 +44,7 @@ export class Sun {
 
   /** Centre the shadow on `target`, snapped to whole shadow texels so edges don't shimmer as you drive. */
   focus(target: Vector3): void {
-    const texel = (RENDER.shadowExtent * 2) / RENDER.shadowMapSize;
+    const texel = (RENDER.shadowExtent * 2) / this.mapSize;
     lightRight.crossVectors(WORLD_UP, this.direction).normalize();
     lightUp.crossVectors(this.direction, lightRight).normalize();
     const r = Math.round(target.dot(lightRight) / texel) * texel;

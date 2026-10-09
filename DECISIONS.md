@@ -152,3 +152,14 @@ Why things are the way they are. Newest milestone at the bottom of each section.
 - **No allocation in the frame loop:** physics state, cameras and visuals reuse scratch vectors;
   Rapier getters are called with target objects; viewport rects are cached and only rebuilt on resize.
   The only per-step allocations are collision events (rare) and the debug overlay (hidden by default).
+
+## M2: split screen
+
+- One renderer, one scene, one canvas; each viewport is a scissored rectangle with its own chase
+  camera. Viewport rectangles are cached and only recomputed on resize.
+- With 3 players the 4th quarter shows a broadcast camera rather than a black hole: it costs the same
+  as a 4-player frame, which is the budget we must hit anyway.
+- Name tags are sprites drawn without depth testing so you can spot a rival behind a wall; each
+  viewport hides its own car's tag.
+- The shadow map is re-rendered per viewport (aimed at that viewport's car), so its size scales with
+  the player count (2048 -> 1024 with 3-4 players).

@@ -80,3 +80,32 @@ the tilt/button steering maths.
 API: holding GAS on the phone accelerates the car on the TV, two-finger input (gas + steer) registers,
 keyboard drives the same car, Esc returns both screens to the lobby. Real phones and real 60 fps on
 the M1 are for you to confirm.
+
+## M2 - Split screen
+
+**Built**
+
+- Every player in the round gets a car and a viewport: 1 player full screen, 2 players top/bottom,
+  3-4 players in a 2x2 grid. With 3 players the free quarter shows a "LIVE" broadcast camera that
+  circles the pack.
+- Cars spawn on a 2x2 grid and collide with each other (and the scenery). Hard hits shake that
+  player's camera and buzz their phone.
+- Floating name tags in each player's colour above every car, hidden in your own view so you see who
+  is who in other viewports.
+- Shadow map resolution drops from 2048 to 1024 with 3-4 players (it is re-rendered per viewport).
+
+**Test it on your Mac + phones**
+
+1. `pnpm dev`, open the TV page, join with 2, 3 and then 4 phones (or add keyboard players with `K`).
+2. Everyone taps READY. Check the layout matches the player count, each phone drives its own car,
+   and name tags show over the other cars.
+3. Bump into each other: the hit should shake your view and buzz your phone (Android).
+4. Press backtick: with 4 players watch fps (target 60 on the M1), draw calls and triangles.
+
+**Automated checks**: new simulation test for head-on car-to-car collisions (both cars get the
+impact, nobody drives through anybody).
+
+**Verified here**: headless Chromium with 4 and then 3 phone pages: each phone's inputs reach its own
+car (debug overlay shows 4 independent input rows), layouts render as expected, the 3-player overview
+cell renders. 4 viewports = ~420 draw calls on the test plane. Real 60 fps on the M1 is for you to
+confirm.

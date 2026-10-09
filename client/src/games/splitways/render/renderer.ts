@@ -9,6 +9,8 @@ import {
 import { RENDER } from '../config';
 import type { Rect } from './viewports';
 
+const SEAM_COLOUR = 0x050608;
+
 /**
  * One WebGL renderer for every viewport: each player's view is drawn into its own scissored
  * rectangle of a single canvas, from one shared scene.
@@ -33,7 +35,6 @@ export class GameRenderer {
     // Draw-call and triangle counts are summed over all viewports for the debug overlay.
     this.webgl.info.autoReset = false;
     this.webgl.setScissorTest(true);
-    this.webgl.setClearColor(0x050608, 1);
   }
 
   setSize(width: number, height: number): void {
@@ -47,6 +48,8 @@ export class GameRenderer {
     this.webgl.info.reset();
     this.webgl.setScissor(0, 0, this.width, this.height);
     this.webgl.setViewport(0, 0, this.width, this.height);
+    // three.js leaves the scene background as the clear colour; the seams between viewports stay dark.
+    this.webgl.setClearColor(SEAM_COLOUR, 1);
     this.webgl.clear();
   }
 

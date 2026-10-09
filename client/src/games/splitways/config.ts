@@ -155,7 +155,11 @@ export const CAMERA = {
 export const RENDER = {
   /** Render at most this many pixels per CSS pixel. 1.25 is crisp on a TV without melting the GPU. */
   maxPixelRatio: 1.25,
-  /** Shadow map resolution and the size of the area around each car that gets shadows (metres). */
+  /**
+   * Shadow map resolution and the size of the area around each car that gets shadows (metres).
+   * The map is re-rendered for every viewport, so with 3-4 players a smaller map keeps 60 fps.
+   */
   shadowMapSize: 2048,
+  shadowMapSizeManyPlayers: 1024,
   shadowExtent: 34,
 } as const;

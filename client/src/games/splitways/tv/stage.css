@@ -123,3 +123,15 @@
     transform: rotate(360deg);
   }
 }
+
+.sw-overview-badge {
+  position: absolute;
+  padding: 4px 12px;
+  border-radius: 99px;
+  background: #ff2d4a;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}

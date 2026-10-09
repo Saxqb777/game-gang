@@ -41,7 +41,8 @@ export function sendJson(res: ServerResponse, status: number, body: unknown): vo
 /** Origin the request was made to, honouring the proxy headers Vercel sets. */
 export function requestOrigin(req: IncomingMessage): string {
   const forwardedHost = req.headers['x-forwarded-host'];
-  const host = (Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost) ?? req.headers.host;
+  const host =
+    (Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost) ?? req.headers.host;
   const forwardedProto = req.headers['x-forwarded-proto'];
   const proto =
     (Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto) ??

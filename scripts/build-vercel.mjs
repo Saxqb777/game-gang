@@ -30,7 +30,9 @@ await build({
   minify: true,
   keepNames: true,
   // Expose the default export as the module itself for the Node launcher.
-  footer: { js: 'module.exports = module.exports.default; module.exports.default = module.exports;' },
+  footer: {
+    js: 'module.exports = module.exports.default; module.exports.default = module.exports;',
+  },
   logLevel: 'info',
 });
 // The bundle is CommonJS; say so explicitly so no parent package.json can make Node treat it as ESM.

@@ -15,7 +15,8 @@ export function detectLanIp(): string {
   const candidates: { name: string; address: string }[] = [];
   for (const [name, addresses] of Object.entries(interfaces)) {
     for (const info of addresses ?? []) {
-      if (info.family === 'IPv4' && !info.internal) candidates.push({ name, address: info.address });
+      if (info.family === 'IPv4' && !info.internal)
+        candidates.push({ name, address: info.address });
     }
   }
   const pick =

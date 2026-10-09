@@ -140,7 +140,11 @@ export class PadTransport {
           room: this.room,
           from: this.clientId,
           to: TV_PEER_ID,
-          payload: { kind: 'candidate', session: attempt.session, candidate: candidatePayload(event.candidate) },
+          payload: {
+            kind: 'candidate',
+            session: attempt.session,
+            candidate: candidatePayload(event.candidate),
+          },
         })
         .catch(() => undefined);
     };

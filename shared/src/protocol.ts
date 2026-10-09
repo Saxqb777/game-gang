@@ -125,7 +125,11 @@ export const joinedSchema = z.object({
   type: z.literal('joined'),
   playerId: playerIdSchema,
   colour: colourSchema,
-  slot: z.number().int().min(0).max(MAX_PLAYERS - 1),
+  slot: z
+    .number()
+    .int()
+    .min(0)
+    .max(MAX_PLAYERS - 1),
 });
 
 export const lobbyPlayerSchema = z.object({
@@ -136,7 +140,11 @@ export const lobbyPlayerSchema = z.object({
   connected: z.boolean(),
   /** Has a role in the game currently being played (late joiners wait for the next round). */
   inGame: z.boolean(),
-  slot: z.number().int().min(0).max(MAX_PLAYERS - 1),
+  slot: z
+    .number()
+    .int()
+    .min(0)
+    .max(MAX_PLAYERS - 1),
 });
 
 export const lobbySchema = z.object({

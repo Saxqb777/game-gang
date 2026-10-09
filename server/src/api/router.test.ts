@@ -45,16 +45,31 @@ describe('api router', () => {
   });
 
   it('rejects malformed and misrouted signals', async () => {
-    const room = (await (await fetch(`${base}/api/room`, { method: 'POST' })).json()) as { code: string };
+    const room = (await (await fetch(`${base}/api/room`, { method: 'POST' })).json()) as {
+      code: string;
+    };
     const payload = { kind: 'offer', session: 'abcdef', sdp: 'v=0' };
-    expect((await post('/api/signal', { room: room.code, from: 'tv', to: 'tv', payload })).status).toBe(400);
     expect(
-      (await post('/api/signal', { room: room.code, from: 'aaaaaaaaaa', to: 'bbbbbbbbbb', payload })).status,
+      (await post('/api/signal', { room: room.code, from: 'tv', to: 'tv', payload })).status,
     ).toBe(400);
-    expect((await post('/api/signal', { room: room.code, from: 'aaaaaaaaaa', to: 'tv', payload: {} })).status).toBe(
-      400,
-    );
-    expect((await post('/api/signal', { room: room.code, from: 'aaaaaaaaaa', to: 'tv', payload })).status).toBe(200);
+    expect(
+      (
+        await post('/api/signal', {
+          room: room.code,
+          from: 'aaaaaaaaaa',
+          to: 'bbbbbbbbbb',
+          payload,
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (await post('/api/signal', { room: room.code, from: 'aaaaaaaaaa', to: 'tv', payload: {} }))
+        .status,
+    ).toBe(400);
+    expect(
+      (await post('/api/signal', { room: room.code, from: 'aaaaaaaaaa', to: 'tv', payload }))
+        .status,
+    ).toBe(200);
     expect((await fetch(`${base}/api/signal?room=${room.code}&peer=tv`)).status).toBe(401);
     expect((await fetch(`${base}/api/nope`)).status).toBe(404);
   });

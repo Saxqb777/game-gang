@@ -211,9 +211,7 @@
   justify-content: flex-end;
   padding: 1.2vw 1.6vw;
   border-radius: 1.2vw;
-  background:
-    linear-gradient(90deg, var(--slot-colour) 0 0.5vw, transparent 0.5vw),
-    var(--panel);
+  background: linear-gradient(90deg, var(--slot-colour) 0 0.5vw, transparent 0.5vw), var(--panel);
   border: 1px solid var(--line);
   overflow: hidden;
   animation: slot-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3);

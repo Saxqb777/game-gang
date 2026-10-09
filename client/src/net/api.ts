@@ -32,7 +32,9 @@ async function request<T>(schema: z.ZodType<T>, path: string, init?: RequestInit
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'error' in body ? String(body.error) : 'Request failed';
+      typeof body === 'object' && body !== null && 'error' in body
+        ? String(body.error)
+        : 'Request failed';
     throw new ApiError(response.status, message);
   }
   const parsed = schema.safeParse(body);
@@ -42,7 +44,8 @@ async function request<T>(schema: z.ZodType<T>, path: string, init?: RequestInit
 
 function query(params: Record<string, string | undefined>): string {
   const search = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) if (value !== undefined) search.set(key, value);
+  for (const [key, value] of Object.entries(params))
+    if (value !== undefined) search.set(key, value);
   return search.toString();
 }
 

@@ -11,5 +11,9 @@ export default function TvApp() {
     document.title = 'Gamer Gang · TV';
   }, []);
 
-  return <div className="tv">{state.phase === 'lobby' && <Lobby state={state} selectedGame={hub.game} />}</div>;
+  return (
+    <div className="tv">
+      {state.phase === 'lobby' && <Lobby state={state} selectedGame={hub.game} />}
+    </div>
+  );
 }

@@ -28,11 +28,17 @@ describe('store', () => {
 
   it('delivers signals once, in order, only to the addressed peer', async () => {
     const { code, hostKey } = await store.createRoom();
-    expect(await store.postSignal({ room: code, from: PAD, to: TV_PEER_ID, payload: offer })).toBe('ok');
+    expect(await store.postSignal({ room: code, from: PAD, to: TV_PEER_ID, payload: offer })).toBe(
+      'ok',
+    );
     const candidate: SignalPayload = {
       kind: 'candidate',
       session: 'sess01',
-      candidate: { candidate: 'candidate:1 1 udp 1 1.2.3.4 5 typ host', sdpMid: '0', sdpMLineIndex: 0 },
+      candidate: {
+        candidate: 'candidate:1 1 udp 1 1.2.3.4 5 typ host',
+        sdpMid: '0',
+        sdpMLineIndex: 0,
+      },
     };
     await store.postSignal({ room: code, from: PAD, to: TV_PEER_ID, payload: candidate });
 
@@ -50,23 +56,39 @@ describe('store', () => {
     const { code, hostKey } = await store.createRoom();
     const answer: SignalPayload = { kind: 'answer', session: 'sess01', sdp: 'v=0' };
     const wrongKey = '0'.repeat(32);
-    expect(await store.postSignal({ room: code, from: TV_PEER_ID, to: PAD, key: wrongKey, payload: answer })).toBe(
-      'forbidden',
-    );
-    expect(await store.postSignal({ room: code, from: TV_PEER_ID, to: PAD, key: hostKey, payload: answer })).toBe(
-      'ok',
-    );
+    expect(
+      await store.postSignal({
+        room: code,
+        from: TV_PEER_ID,
+        to: PAD,
+        key: wrongKey,
+        payload: answer,
+      }),
+    ).toBe('forbidden');
+    expect(
+      await store.postSignal({
+        room: code,
+        from: TV_PEER_ID,
+        to: PAD,
+        key: hostKey,
+        payload: answer,
+      }),
+    ).toBe('ok');
     await store.postSignal({ room: code, from: PAD, to: TV_PEER_ID, payload: offer });
     const stolen = await store.takeSignals(code, TV_PEER_ID, wrongKey);
     expect(stolen).toEqual({ status: 'forbidden', messages: [] });
     expect((await store.takeSignals(code, TV_PEER_ID, hostKey)).messages).toHaveLength(1);
-    expect((await store.takeSignals(code, PAD)).messages).toEqual([{ from: TV_PEER_ID, payload: answer }]);
+    expect((await store.takeSignals(code, PAD)).messages).toEqual([
+      { from: TV_PEER_ID, payload: answer },
+    ]);
   });
 
   it('caps a flooded inbox', async () => {
     const { code } = await store.createRoom();
     for (let i = 0; i < 64; i++) {
-      expect(await store.postSignal({ room: code, from: PAD, to: TV_PEER_ID, payload: offer })).toBe('ok');
+      expect(
+        await store.postSignal({ room: code, from: PAD, to: TV_PEER_ID, payload: offer }),
+      ).toBe('ok');
     }
     expect(await store.postSignal({ room: code, from: PAD, to: TV_PEER_ID, payload: offer })).toBe(
       'inbox-full',
@@ -88,8 +110,15 @@ describe('store', () => {
       { name: 'Sara', bestLapMs: 61_000 },
       { name: 'Omar', bestLapMs: 58_500 },
     ];
-    expect(await store.postLaps({ room: code, key: hostKey, track: 'corniche-run', laps })).toBe('ok');
-    await store.postLaps({ room: code, key: hostKey, track: 'corniche-run', laps: [{ name: 'sara', bestLapMs: 57_000 }] });
+    expect(await store.postLaps({ room: code, key: hostKey, track: 'corniche-run', laps })).toBe(
+      'ok',
+    );
+    await store.postLaps({
+      room: code,
+      key: hostKey,
+      track: 'corniche-run',
+      laps: [{ name: 'sara', bestLapMs: 57_000 }],
+    });
     expect(
       await store.postLaps({ room: code, key: '1'.repeat(32), track: 'corniche-run', laps }),
     ).toBe('forbidden');

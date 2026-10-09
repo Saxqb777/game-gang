@@ -33,7 +33,11 @@ export const iceCandidateSchema = z.object({
 export const signalPayloadSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('offer'), session: sessionIdSchema, sdp: z.string().max(16_000) }),
   z.object({ kind: z.literal('answer'), session: sessionIdSchema, sdp: z.string().max(16_000) }),
-  z.object({ kind: z.literal('candidate'), session: sessionIdSchema, candidate: iceCandidateSchema }),
+  z.object({
+    kind: z.literal('candidate'),
+    session: sessionIdSchema,
+    candidate: iceCandidateSchema,
+  }),
   z.object({ kind: z.literal('bye'), session: sessionIdSchema }),
 ]);
 export type SignalPayload = z.infer<typeof signalPayloadSchema>;

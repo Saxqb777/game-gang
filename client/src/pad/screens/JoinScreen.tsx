@@ -1,4 +1,10 @@
-import { NAME_MAX_LENGTH, PLAYER_COLOURS, colourHex, type ColourId, type LobbyMessage } from '@gamergang/shared';
+import {
+  NAME_MAX_LENGTH,
+  PLAYER_COLOURS,
+  colourHex,
+  type ColourId,
+  type LobbyMessage,
+} from '@gamergang/shared';
 import { useState, type CSSProperties } from 'react';
 import type { Profile, SteeringMode } from '../profile';
 import { Brand } from './Simple';
@@ -64,7 +70,9 @@ export function JoinScreen({
   const taken = new Set(lobby.players.filter((p) => p.id !== myId).map((p) => p.colour));
   const firstFree = PLAYER_COLOURS.find((c) => !taken.has(c.id))?.id ?? profile.colour;
   const [name, setName] = useState(profile.name);
-  const [colour, setColour] = useState<ColourId>(taken.has(profile.colour) ? firstFree : profile.colour);
+  const [colour, setColour] = useState<ColourId>(
+    taken.has(profile.colour) ? firstFree : profile.colour,
+  );
   const [mode, setMode] = useState<SteeringMode>(profile.mode);
   const trimmed = name.trim();
   const effectiveColour = taken.has(colour) ? firstFree : colour;

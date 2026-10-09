@@ -75,7 +75,10 @@ export function Lobby({ state, selectedGame }: { state: HubState; selectedGame: 
         <h2 className="lobby-heading">Game</h2>
         <div className="lobby-games">
           {GAME_LIST.map((g) => (
-            <article key={g.id} className={`game-card ${g.id === selectedGame ? 'is-selected' : ''}`}>
+            <article
+              key={g.id}
+              className={`game-card ${g.id === selectedGame ? 'is-selected' : ''}`}
+            >
               <div className="game-card-art" style={{ background: g.art }}>
                 <span className="game-card-badge">Selected</span>
               </div>

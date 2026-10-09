@@ -67,7 +67,10 @@ export interface LocalServers {
  * LAN. Created before Vite so its hot reload websocket can share both ports.
  */
 export async function createLocalServers(context: LocalContext): Promise<LocalServers> {
-  const cert = await loadDevCert(join(REPO_ROOT, 'node_modules', '.cache', 'gamergang'), context.lanIp);
+  const cert = await loadDevCert(
+    join(REPO_ROOT, 'node_modules', '.cache', 'gamergang'),
+    context.lanIp,
+  );
   let app: RequestListener = (_req, res) => res.writeHead(503).end();
   const handler: RequestListener = (req, res) => {
     if (req.url?.startsWith('/api/')) void context.api(req, res);

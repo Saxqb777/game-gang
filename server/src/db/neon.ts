@@ -10,7 +10,9 @@ export function createNeonRunner(databaseUrl: string): SqlRunner {
       if (queries.length === 1 && only) {
         return [(await sql.query(only.text, only.params)) as Row[]];
       }
-      const results = await sql.transaction(queries.map((query) => sql.query(query.text, query.params)));
+      const results = await sql.transaction(
+        queries.map((query) => sql.query(query.text, query.params)),
+      );
       return results as Row[][];
     },
   };

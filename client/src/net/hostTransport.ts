@@ -141,7 +141,10 @@ export class HostTransport implements HostTransportPort {
 
   private setRoom(room: RoomCredentials): void {
     this.room = room;
-    sessionStorage.setItem(SAVED_ROOM_KEY, JSON.stringify({ code: room.code, hostKey: room.hostKey }));
+    sessionStorage.setItem(
+      SAVED_ROOM_KEY,
+      JSON.stringify({ code: room.code, hostKey: room.hostKey }),
+    );
     this.events.onRoom({ code: room.code, padUrl: room.padUrl });
   }
 
@@ -205,7 +208,12 @@ export class HostTransport implements HostTransportPort {
     }
   }
 
-  private async answer(room: RoomCredentials, peerId: string, session: string, sdp: string): Promise<void> {
+  private async answer(
+    room: RoomCredentials,
+    peerId: string,
+    session: string,
+    sdp: string,
+  ): Promise<void> {
     const pc = createPeerConnection(room.iceServers);
     const link: Link = {
       peerId,
@@ -256,7 +264,11 @@ export class HostTransport implements HostTransportPort {
           from: TV_PEER_ID,
           to: peerId,
           key: room.hostKey,
-          payload: { kind: 'candidate', session: link.session, candidate: candidatePayload(event.candidate) },
+          payload: {
+            kind: 'candidate',
+            session: link.session,
+            candidate: candidatePayload(event.candidate),
+          },
         })
         .catch(() => undefined);
     };

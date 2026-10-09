@@ -74,7 +74,9 @@ export function LobbyScreen({
         {ready ? 'Ready!' : 'Ready up'}
       </button>
       <p className="pad-hint">
-        {ready ? 'Waiting for everyone else. Tap again to cancel.' : 'The race starts when everyone is ready.'}
+        {ready
+          ? 'Waiting for everyone else. Tap again to cancel.'
+          : 'The race starts when everyone is ready.'}
       </p>
     </main>
   );

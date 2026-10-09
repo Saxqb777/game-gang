@@ -82,7 +82,8 @@ export class Hub {
     this.transport.setIdlePollMs(IDLE_POLL_MS.lobby);
     this.transport.start();
     this.pingTimer = setInterval(() => {
-      for (const peerId of this.peers) this.transport.send(peerId, { type: 'ping', t: performance.now() });
+      for (const peerId of this.peers)
+        this.transport.send(peerId, { type: 'ping', t: performance.now() });
     }, PING_INTERVAL_MS);
   }
 
@@ -189,7 +190,8 @@ export class Hub {
         this.handleJoin(peerId, message);
         return;
       case 'ready':
-        if (this.player(peerId) && this.state.phase === 'lobby') this.setReady(peerId, message.ready);
+        if (this.player(peerId) && this.state.phase === 'lobby')
+          this.setReady(peerId, message.ready);
         return;
       case 'vote':
         this.handleVote(peerId);

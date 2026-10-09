@@ -22,7 +22,7 @@ import {
   Vector3,
   type Texture,
 } from 'three';
-import type { CarModelLibrary, CarVisual } from './carVisual';
+import { SHADOW_PROXY_LAYER, type CarModelLibrary, type CarVisual } from './carVisual';
 import { canvasTexture } from './textures';
 
 export interface PodiumEntry {
@@ -72,6 +72,7 @@ export class Podium {
     key.shadow.camera.top = 10;
     key.shadow.camera.bottom = -6;
     key.shadow.radius = 3;
+    key.shadow.camera.layers.enable(SHADOW_PROXY_LAYER);
     scene.add(key);
 
     const floorMaterial = this.track(
@@ -85,15 +86,21 @@ export class Podium {
     for (const entry of entries) {
       const height = HEIGHTS[entry.place];
       const numberTexture = this.track(
-        canvasTexture(256, 256, (ctx) => {
-          ctx.fillStyle = '#e9e6df';
-          ctx.fillRect(0, 0, 256, 256);
-          ctx.fillStyle = entry.place === 1 ? '#c99a1a' : entry.place === 2 ? '#8f98a3' : '#a0623a';
-          ctx.font = '700 190px "Chakra Petch", system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(String(entry.place), 128, 140);
-        }),
+        canvasTexture(
+          256,
+          256,
+          (ctx) => {
+            ctx.fillStyle = '#e9e6df';
+            ctx.fillRect(0, 0, 256, 256);
+            ctx.fillStyle =
+              entry.place === 1 ? '#c99a1a' : entry.place === 2 ? '#8f98a3' : '#a0623a';
+            ctx.font = '700 190px "Chakra Petch", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(String(entry.place), 128, 140);
+          },
+          8,
+        ),
       );
       const plain = this.track(new MeshStandardMaterial({ color: 0xe9e6df, roughness: 0.55 }));
       const front = this.track(new MeshStandardMaterial({ map: numberTexture, roughness: 0.55 }));

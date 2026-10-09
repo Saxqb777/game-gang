@@ -228,6 +228,15 @@ export class Race {
     }
   }
 
+  /** Debug: drop the car inside its next gate, as if it had driven there. */
+  skipToNextGate(racer: Racer): void {
+    const gate = this.track.checkpoints[racer.nextGate];
+    if (!gate) return;
+    const lane = ((racer.slot % 4) - 1.5) * (this.track.halfRoad * 0.5);
+    racer.car.placeAt(this.track.spawnAt(gate.distance - 2, lane));
+    this.track.project(racer.car.position, -1, racer.projection);
+  }
+
   /** Back on the track at the last gate, in this car's own lane, clear of other cars. */
   private teleport(racer: Racer): void {
     const gates = this.track.checkpoints;

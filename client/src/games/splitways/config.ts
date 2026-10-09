@@ -166,6 +166,13 @@ export const CAMERA = {
 export const RENDER = {
   /** Render at most this many pixels per CSS pixel. 1.25 is crisp on a TV without melting the GPU. */
   maxPixelRatio: 1.25,
+  /** Anti-aliasing samples for the 3D view. 0 turns it off (faster, jaggier). */
+  msaaSamples: 4,
+  /**
+   * Dynamic resolution: when fps drops below `lowFps` the 3D view renders at a lower scale (in
+   * `step`s, never below `minScale`), and creeps back up after `recoverSeconds` of smooth 60 fps.
+   */
+  dynamicResolution: { minScale: 0.6, step: 0.1, lowFps: 55, recoverSeconds: 5 },
   /**
    * Shadow map resolution and the size of the area around each car that gets shadows (metres).
    * The map is re-rendered for every viewport, so with 3-4 players a smaller map keeps 60 fps.
@@ -173,4 +180,44 @@ export const RENDER = {
   shadowMapSize: 2048,
   shadowMapSizeManyPlayers: 1024,
   shadowExtent: 34,
+} as const;
+
+export const LIGHTING = {
+  /** Compass bearing of the sun (0 north, 90 east, 180 south, 270 west). The sea is to the south. */
+  sunBearing: 240,
+  /** The sun is a directional light (it casts the shadows). Colour and strength. */
+  sunColour: 0xffd2a1,
+  sunIntensity: 6,
+  /** Soft light from the sky picture on every surface. Higher = flatter, brighter shadows. */
+  environmentIntensity: 1,
+  /**
+   * The sky picture's sun is capped at this brightness when it lights the scene (the directional
+   * light already plays the sun) and in the visible sky (so bloom around it stays a glow, not a
+   * flood).
+   */
+  skyLightCap: 8,
+  skyVisibleCap: 40,
+  /** Light bounced up from the sand (linear RGB): what the underside of a car sees. */
+  groundBounce: [0.3, 0.24, 0.17],
+  /** Haze: exponential fog density per metre. Higher = distant dunes and towers fade sooner. */
+  fogDensity: 0.0013,
+} as const;
+
+export const POST = {
+  /** Brightness before tone mapping (ACES). */
+  exposure: 1.5,
+  /** Bloom: only pixels brighter than `threshold` glow (with a soft `knee`); `strength` is how much. */
+  bloomThreshold: 2.5,
+  bloomKnee: 1,
+  bloomStrength: 0.08,
+  /** Darkening at the edges of each viewport, plus extra at top speed (0 = none). */
+  vignette: 0.2,
+  vignetteAtSpeed: 0.12,
+  /** Speed lines fade in from the first speed and are fully visible at the second (km/h). */
+  speedLinesFromKph: 115,
+  speedLinesFullKph: 175,
+  speedLinesOpacity: 0.2,
+  /** Golden-hour grade: colour multiplied into the image (r, g, b) and saturation (1 = unchanged). */
+  tint: [1.05, 1.0, 0.93],
+  saturation: 1.1,
 } as const;

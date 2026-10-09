@@ -1,6 +1,15 @@
+import type { Vector3 } from 'three';
 import type { Rect } from '../render/viewports';
+import type { Track } from '../track/track';
+import { Minimap } from './minimap';
 
 const ORDINAL_SUFFIX = ['st', 'nd', 'rd', 'th'];
+/** Speed bar steps, prebuilt so the per-frame update allocates nothing. */
+const BAR_STEPS = 40;
+const BAR_SCALE = Array.from({ length: BAR_STEPS + 1 }, (_, i) => `scaleX(${i / BAR_STEPS})`);
+/** The speed bar is full at this speed (km/h). */
+const BAR_FULL_KPH = 190;
+const SPEED_TEXT = Array.from({ length: 401 }, (_, i) => String(i));
 
 export function formatTime(ms: number): string {
   const total = Math.max(0, ms) / 1000;
@@ -24,14 +33,17 @@ export class ViewportHud {
   private readonly positionTotal: HTMLElement;
   private readonly lap: HTMLElement;
   private readonly lapTime: HTMLElement;
+  private readonly lastLap: HTMLElement;
   private readonly speedValue: HTMLElement;
+  private readonly speedBar: HTMLElement;
+  private readonly minimap: Minimap;
   private readonly countdown: HTMLElement;
   private readonly banner: HTMLElement;
   private readonly status: HTMLElement;
   private readonly fade: HTMLElement;
   private readonly shown = new Map<string, string | number>();
 
-  constructor(parent: HTMLElement, name: string, colourHex: string) {
+  constructor(parent: HTMLElement, name: string, colourHex: string, track: Track) {
     this.element.className = 'sw-hud';
     this.element.style.setProperty('--player', colourHex);
     parent.appendChild(this.element);
@@ -47,10 +59,18 @@ export class ViewportHud {
     const lapBox = element('sw-hud-lapbox', race);
     this.lap = element('sw-hud-lap', lapBox);
     this.lapTime = element('sw-hud-laptime', lapBox);
+    this.lastLap = element('sw-hud-lastlap', lapBox);
+    this.lastLap.hidden = true;
 
     const speed = element('sw-hud-speed', this.element);
-    this.speedValue = element('', speed, 'b');
-    element('', speed, 'small').textContent = 'km/h';
+    const readout = element('sw-hud-readout', speed);
+    this.speedValue = element('', readout, 'b');
+    element('', readout, 'small').textContent = 'km/h';
+    const bar = element('sw-hud-speedbar', speed);
+    this.speedBar = element('', bar, 'i');
+
+    this.minimap = new Minimap(track);
+    this.element.appendChild(this.minimap.canvas);
 
     this.countdown = element('sw-hud-countdown', this.element);
     this.banner = element('sw-hud-banner', this.element);
@@ -67,12 +87,32 @@ export class ViewportHud {
     style.width = `${rect.width}px`;
     style.height = `${rect.height}px`;
     // Scale type with the viewport so 1 and 4 player layouts both read well.
-    style.setProperty('--hud-scale', String(Math.min(rect.width / 1280, rect.height / 720) ** 0.6));
+    const scale = Math.min(rect.width / 1280, rect.height / 720) ** 0.6;
+    style.setProperty('--hud-scale', String(scale));
+    this.minimap.resize(
+      Math.max(64, Math.min(190, rect.height * 0.22)),
+      Math.min(window.devicePixelRatio, 2),
+    );
+  }
+
+  /** Every car's position and colour; `self` is this viewport's car. */
+  updateMinimap(positions: readonly Vector3[], colours: readonly string[], self: number): void {
+    this.minimap.update(positions, colours, self);
+  }
+
+  /** "LAST 0:41.23" under the lap clock for a few seconds after a lap; empty hides it. */
+  setLastLap(text: string): void {
+    if (!this.changed('lastlap', text)) return;
+    this.lastLap.textContent = text;
+    this.lastLap.hidden = text === '';
   }
 
   setSpeed(kph: number): void {
     const rounded = Math.round(kph);
-    if (this.changed('speed', rounded)) this.speedValue.textContent = String(rounded);
+    if (this.changed('speed', rounded))
+      this.speedValue.textContent = SPEED_TEXT[rounded] ?? String(rounded);
+    const step = Math.round(Math.min(1, kph / BAR_FULL_KPH) * BAR_STEPS);
+    if (this.changed('bar', step)) this.speedBar.style.transform = BAR_SCALE[step] ?? '';
   }
 
   setPosition(place: number, total: number): void {

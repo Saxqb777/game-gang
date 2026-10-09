@@ -6,18 +6,45 @@ import {
   Color,
   Group,
   type BufferGeometry,
+  Matrix4,
   Mesh,
+  MeshBasicMaterial,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
   type Material,
   type Object3D,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { Car, WHEEL_COUNT } from '../sim/car';
 import { WHEELS } from '../config';
 
 const MODEL_URL = '/models/sports-car.glb';
 const WHEEL_NODE_NAMES = ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr'] as const;
+/**
+ * Layer of the shadow-only stand-in: the whole car merged into one mesh, so each shadow pass draws
+ * one call per car instead of fourteen. The sun's shadow camera sees this layer; cameras don't.
+ */
+export const SHADOW_PROXY_LAYER = 1;
+
+/** The whole model as one position-only geometry, wheels at rest. */
+function mergedSilhouette(model: Object3D): BufferGeometry {
+  model.updateMatrixWorld(true);
+  const toRoot = new Matrix4().copy(model.matrixWorld).invert();
+  const parts: BufferGeometry[] = [];
+  model.traverse((object) => {
+    if (!(object instanceof Mesh)) return;
+    const part = (object.geometry as BufferGeometry).clone();
+    for (const name of Object.keys(part.attributes))
+      if (name !== 'position') part.deleteAttribute(name);
+    part.clearGroups();
+    part.applyMatrix4(new Matrix4().multiplyMatrices(toRoot, object.matrixWorld));
+    parts.push(part.index ? part.toNonIndexed() : part);
+  });
+  const merged = mergeGeometries(parts);
+  for (const part of parts) part.dispose();
+  return merged;
+}
 
 interface SharedMaterials {
   trim: MeshStandardMaterial;
@@ -70,10 +97,15 @@ function createSharedMaterials(): SharedMaterials {
 
 /** Loads the model once and hands out per-player cars. */
 export class CarModelLibrary {
+  private readonly silhouette: BufferGeometry;
+  private readonly silhouetteMaterial = new MeshBasicMaterial();
+
   private constructor(
     private readonly template: Object3D,
     private readonly shared: SharedMaterials,
-  ) {}
+  ) {
+    this.silhouette = mergedSilhouette(template);
+  }
 
   static async load(): Promise<CarModelLibrary> {
     const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
@@ -81,12 +113,19 @@ export class CarModelLibrary {
   }
 
   create(colourHex: string): CarVisual {
-    return new CarVisual(this.template.clone(true), this.shared, colourHex);
+    const visual = new CarVisual(this.template.clone(true), this.shared, colourHex);
+    const proxy = new Mesh(this.silhouette, this.silhouetteMaterial);
+    proxy.castShadow = true;
+    proxy.layers.set(SHADOW_PROXY_LAYER);
+    visual.root.add(proxy);
+    return visual;
   }
 
   dispose(): void {
     const { trim, accent, glass, headlight, rim, tyre } = this.shared;
     for (const material of [trim, accent, glass, headlight, rim, tyre]) material.dispose();
+    this.silhouette.dispose();
+    this.silhouetteMaterial.dispose();
     this.template.traverse((object) => {
       if (object instanceof Mesh) (object.geometry as BufferGeometry).dispose();
     });
@@ -126,7 +165,8 @@ export class CarVisual {
 
     model.traverse((object) => {
       if (!(object instanceof Mesh)) return;
-      object.castShadow = true;
+      // The merged stand-in casts the shadow (see SHADOW_PROXY_LAYER).
+      object.castShadow = false;
       object.receiveShadow = true;
       const materials = (
         Array.isArray(object.material) ? object.material : [object.material]

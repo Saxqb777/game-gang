@@ -5,6 +5,11 @@
   background: #000;
 }
 
+/* Class rules set display, which would otherwise beat the hidden attribute. */
+.sw-stage [hidden] {
+  display: none !important;
+}
+
 .sw-canvas {
   position: absolute;
   inset: 0;
@@ -94,14 +99,50 @@
   font-variant-numeric: tabular-nums;
 }
 
+.sw-hud-lastlap {
+  font-size: calc(17px * var(--hud-scale));
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #ffd60a;
+  font-variant-numeric: tabular-nums;
+}
+
 .sw-hud-speed {
   position: absolute;
   right: calc(28px * var(--hud-scale));
-  bottom: calc(18px * var(--hud-scale));
+  bottom: calc(22px * var(--hud-scale));
+  display: grid;
+  justify-items: end;
+  gap: calc(6px * var(--hud-scale));
+  font-variant-numeric: tabular-nums;
+}
+
+.sw-hud-readout {
   display: flex;
   align-items: baseline;
   gap: calc(8px * var(--hud-scale));
-  font-variant-numeric: tabular-nums;
+}
+
+.sw-hud-speedbar {
+  width: calc(200px * var(--hud-scale));
+  height: calc(6px * var(--hud-scale));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.sw-hud-speedbar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--player), #fff);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.sw-minimap {
+  position: absolute;
+  right: calc(18px * var(--hud-scale));
+  top: calc(16px * var(--hud-scale));
 }
 
 .sw-hud-speed b {

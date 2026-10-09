@@ -7,6 +7,9 @@ export interface DebugStats {
   drawCalls: number;
   triangles: number;
   pixelRatio: number;
+  /** Dynamic resolution scale (1 = full) and whether it is adjusting itself. */
+  renderScale: number;
+  autoResolution: boolean;
   viewports: number;
   autopilot: boolean;
 }
@@ -51,8 +54,10 @@ export class DebugOverlay {
     const lines = [
       `fps ${stats.fps.toFixed(0).padStart(3)}   frame ${stats.frameMs.toFixed(1)} ms   physics ${stats.physicsMs.toFixed(2)} ms/step`,
       `draw calls ${stats.drawCalls}   triangles ${(stats.triangles / 1000).toFixed(0)}k   viewports ${stats.viewports}   pixel ratio ${stats.pixelRatio.toFixed(2)}`,
+      `render scale ${stats.renderScale.toFixed(2)} (${stats.autoResolution ? 'auto' : 'fixed'}, R to toggle)`,
       '',
       stats.autopilot ? 'AUTOPILOT ON (P to stop)' : 'P: autopilot for every car (testing)',
+      'N: every car to its next checkpoint',
       '',
       'driver        steer  gas   brake hb horn  km/h  slip   rtt   P lap gate',
       ...drivers.map((d) => {

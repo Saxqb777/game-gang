@@ -108,3 +108,33 @@ returns both screens to the lobby. 60 fps on the M1 is yours to confirm.
 - Headless Chromium, TV + 2 pad pages: countdown, 3 laps, podium, results (2:04.55 / 2:06.02),
   leaderboard saved and shown, results on the pads, vote back to the lobby.
 - Not verified: 60 fps on the M1, real phones.
+
+## M4 - Look
+
+**Built**
+
+- Sky and light: CC0 HDRI sky, low late-afternoon sun (WSW), long soft shadows, haze that matches
+  the sky.
+- Post: HDR with 4x anti-aliasing, bloom, ACES, warm grade, vignette, speed lines from 115 km/h.
+  Dynamic resolution keeps 60 fps.
+- Sea with moving ripples, turquoise shallows and foam.
+- Skid marks that stay for the race, tyre smoke, sand dust and ruts on the shoulders.
+- Scenery: palms, street lamps, whitewashed city, glass skyline, grandstand with crowd, banners.
+- HUD: minimap, speed bar, last lap time (gold, marked BEST).
+- Debug: `N` moves every car to its next checkpoint, `R` pins the resolution.
+
+**Test**
+
+1. Race as in M3. The sun is behind you on the start straight and in your eyes on the inland
+   straight.
+2. Handbrake slide: black marks stay on the road, white smoke. Drive on the sand: dust and ruts.
+3. Above ~115 km/h: thin speed lines at the edges.
+4. With 4 players press `` ` ``: fps should read 60 and `render scale` 1.00. If the scale drops,
+   send me the number.
+
+**Verified here**
+
+- Headless Chromium (software rendering): all 8 checkpoints, a handbrake spin, 1, 3 and 4-player
+  layouts, the podium.
+- Tests, lint, typecheck, production build.
+- Not verified: frame rate on a real GPU (the M1).

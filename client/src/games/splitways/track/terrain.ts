@@ -9,6 +9,18 @@ import { TrackProximity } from './trackGeometry';
 
 export const SEA_LEVEL = -0.6;
 
+/** West of `x` the dunes flatten out into the low-rise city (blending over `blend` metres). */
+export const CITY = { x: -215, blend: 50 } as const;
+
+/** The shoreline z = base + sum(amplitude * sin(x * frequency + phase)). The sea shader reuses it. */
+export const COAST = {
+  base: 178,
+  waves: [
+    { frequency: 0.011, phase: 0, amplitude: 9 },
+    { frequency: 0.037, phase: 1.3, amplitude: 3 },
+  ],
+} as const;
+
 function hash(x: number, z: number): number {
   const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
   return s - Math.floor(s);
@@ -59,7 +71,9 @@ export class Terrain {
 
   /** The shoreline: where land meets the sea, south of the coastal straight (+Z is south). */
   coastZ(x: number): number {
-    return 178 + Math.sin(x * 0.011) * 9 + Math.sin(x * 0.037 + 1.3) * 3;
+    let z: number = COAST.base;
+    for (const wave of COAST.waves) z += Math.sin(x * wave.frequency + wave.phase) * wave.amplitude;
+    return z;
   }
 
   /** Where a point sits relative to the road. Points beyond `reach` count as outside the loop. */
@@ -91,8 +105,9 @@ export class Terrain {
     } else if (infield) {
       natural = 0.3 + fbm(x * 0.012, z * 0.012, 3) * 1.6;
     } else {
-      // Dunes grow taller the further you get from the road.
-      const growth = MathUtils.smoothstep(distance, edge + 10, edge + 160);
+      // Dunes grow taller the further you get from the road, except in the city.
+      const city = 1 - MathUtils.smoothstep(x, CITY.x - CITY.blend, CITY.x);
+      const growth = MathUtils.smoothstep(distance, edge + 10, edge + 160) * (1 - city);
       const ridges = fbm(x * 0.008 + 3.1, z * 0.011 - 1.7, 4);
       const sharp = 1 - Math.abs(ridges * 2 - 1);
       natural = 0.4 + growth * (4 + sharp * sharp * 22);

@@ -96,7 +96,7 @@ export class Gantry {
       const lamp = this.lamps[i] as MeshStandardMaterial;
       const on = green || i < lit;
       lamp.emissive.setHex(green ? 0x22ff66 : on ? 0xff1a1a : 0x000000);
-      lamp.emissiveIntensity = on ? 4 : 0;
+      lamp.emissiveIntensity = on ? 2 : 0;
     }
   }
 

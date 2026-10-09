@@ -2,10 +2,12 @@
  * The static world around the race: track surfaces and barriers, the land, the sea and the start
  * gantry. Loads its textures once and shares them between the track and the terrain.
  */
-import { Group, Mesh, MeshStandardMaterial, PlaneGeometry } from 'three';
-import { SEA_LEVEL, type Terrain } from '../track/terrain';
+import { Group, Mesh, type MeshStandardMaterial, type PlaneGeometry } from 'three';
+import type { Terrain } from '../track/terrain';
 import type { Track } from '../track/track';
 import { Gantry } from './gantry';
+import { Scenery } from './scenery';
+import { Sea } from './sea';
 import { createTerrainVisual } from './terrainVisual';
 import { disposePbrSet, loadPbrSet, type PbrSet } from './textures';
 import { createTrackVisual, type TrackVisual } from './trackVisual';
@@ -18,7 +20,8 @@ export class WorldVisual {
   readonly gantry: Gantry;
   private readonly trackVisual: TrackVisual;
   private readonly terrainGroup: Group;
-  private readonly sea: Mesh<PlaneGeometry, MeshStandardMaterial>;
+  private readonly sea = new Sea();
+  private readonly scenery: Scenery;
 
   private constructor(
     track: Track,
@@ -43,15 +46,15 @@ export class WorldVisual {
       minZ: minZ - LAND_MARGIN,
       maxZ: maxZ + LAND_MARGIN,
     });
-    this.sea = new Mesh(
-      new PlaneGeometry(9000, 9000),
-      new MeshStandardMaterial({ color: 0x0f5a6e, roughness: 0.08, metalness: 0 }),
-    );
-    this.sea.rotation.x = -Math.PI / 2;
-    this.sea.position.y = SEA_LEVEL;
-    this.sea.receiveShadow = true;
     this.gantry = new Gantry(track);
-    this.group.add(this.trackVisual.group, this.terrainGroup, this.sea, this.gantry.group);
+    this.scenery = new Scenery(track, terrain);
+    this.group.add(
+      this.trackVisual.group,
+      this.terrainGroup,
+      this.sea.mesh,
+      this.gantry.group,
+      this.scenery.group,
+    );
   }
 
   static async create(track: Track, terrain: Terrain, anisotropy: number): Promise<WorldVisual> {
@@ -62,6 +65,11 @@ export class WorldVisual {
     return new WorldVisual(track, terrain, { asphalt, sand }, anisotropy);
   }
 
+  /** Animates the water. */
+  update(dt: number): void {
+    this.sea.update(dt);
+  }
+
   dispose(): void {
     this.trackVisual.dispose();
     this.terrainGroup.traverse((object) => {
@@ -70,8 +78,8 @@ export class WorldVisual {
         (object.material as MeshStandardMaterial).dispose();
       }
     });
-    this.sea.geometry.dispose();
-    this.sea.material.dispose();
+    this.sea.dispose();
+    this.scenery.dispose();
     this.gantry.dispose();
     disposePbrSet(this.textures.asphalt);
     disposePbrSet(this.textures.sand);

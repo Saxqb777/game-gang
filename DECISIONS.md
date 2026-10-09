@@ -130,3 +130,35 @@ Where the build differs from the brief, and why. Tunable values live in
   fade in.
 - `debug/autopilot.ts` (backtick, then P) is a test tool, not an AI opponent. Tests use it for full
   4-car races: ~40 s laps, ~2:10 per race.
+
+## Look (M4)
+
+- Per viewport: scene → half-float target with 4x MSAA → 4-level bloom → one composite pass (warm
+  grade, ACES, vignette, speed lines, sRGB, dither) into that viewport's part of the canvas.
+  Viewports render one after another and share the targets, so memory is one viewport's worth and
+  bloom never bleeds across the seams. The canvas itself has no anti-aliasing or depth buffer.
+- Not three's EffectComposer: it would mean full-screen passes per effect and no per-viewport
+  effects.
+- Dynamic resolution: measured over 1 s windows. Below 55 fps the 3D view drops 10% (minimum 60%);
+  after 5 s at 60 fps it steps back up; a raise that fails doubles the wait. Debug key R pins it.
+- Sky: Poly Haven "Syferfontein 18d Clear (Pure Sky)", 2k HDR (4 MB). Its sun is at 18°, which
+  is also the directional light's elevation, so the visible sun, shadows and clearcoat reflections
+  agree (a lower-sun sky with a higher light would show two suns on the paint).
+- Sun bearing 240 (WSW): behind you on the start straight, straight ahead on the inland straight.
+- The HDRI is edited at load: sun capped at 8 for lighting (the directional light is the sun) and
+  40 for the visible sky (bloom stays a glow); below the horizon, sand for lighting and the horizon
+  colour for the visible sky; a dark smudge near the horizon painted out.
+- Haze: three's fog shader chunks are replaced so exponential fog takes the sky's horizon colour in
+  each direction (16 compass bins measured from the HDRI). Land and sea fade into the sky with no
+  edge.
+- Sea: one plane with the standard PBR material, two drifting layers of procedural ripple normals,
+  turquoise shallows from the distance to the shoreline function, foam at the waterline.
+- Skid marks: ring buffer of 8000 quads, one draw call, only new segments uploaded once per frame.
+  Dust and smoke: 700 instanced puffs.
+- Scenery is instanced or merged with seeded placement (about 10 draw calls). The dunes flatten
+  into the city west of x = -215.
+- Cars cast shadows through one merged stand-in mesh on its own layer (only the shadow camera sees
+  it): 14 → 1 draw call per car per shadow pass. 4 players: 724 → 481 draw calls per frame.
+- Minimap: a 2D canvas per viewport, redrawn 30 times a second.
+- Fixed an M3 bug: the empty "Reconnecting" overlay (35% black) was always on, because its class
+  set `display`, which beats the `hidden` attribute. M3 screenshots were darker than intended.

@@ -1,5 +1,6 @@
 import { DirectionalLight, Vector3, type Color, type Scene } from 'three';
 import { RENDER } from '../config';
+import { SHADOW_PROXY_LAYER } from '../scene/carVisual';
 
 const lightRight = new Vector3();
 const lightUp = new Vector3();
@@ -39,6 +40,7 @@ export class Sun {
     shadow.normalBias = 0.03;
     // Soft edges (PCF radius in texels).
     shadow.radius = 2.5;
+    shadow.camera.layers.enable(SHADOW_PROXY_LAYER);
     scene.add(this.light, this.light.target);
   }
 

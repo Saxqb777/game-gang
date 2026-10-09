@@ -4,6 +4,7 @@
  */
 import { colourHex, type ColourId, type InputMessage, type TvMessage } from '@gamergang/shared';
 import { Color, FogExp2, Scene, type DataTexture, type Sprite, type Vector3 } from 'three';
+import { RaceAudio } from './audio/raceAudio';
 import { CAR, INPUT, LIGHTING, POST, RACE, RENDER } from './config';
 import { autopilot } from './debug/autopilot';
 import { DebugOverlay } from './debug/debugOverlay';
@@ -56,6 +57,8 @@ export interface GameHooks {
   rttMs(playerId: string): number | null;
   /** The race is over and the podium is up: final standings, winner first. */
   onResults(results: RaceResult[]): void;
+  /** Where race sound goes; null plays silently. */
+  audio: AudioContext | null;
 }
 
 interface Driver {
@@ -74,6 +77,11 @@ interface Driver {
   /** Which keyboard key set drives this car, if any. */
   keyboardSet: number | null;
   lastHapticAt: number;
+  /** What the player is pressing, even while the race holds the car (engines rev on the grid). */
+  wantThrottle: number;
+  wantHorn: boolean;
+  /** On the sand shoulder (dust, ruts, rumble). */
+  onSand: boolean;
   /** "LAST 0:41.23" shows for a few seconds after each lap. */
   lastLapSeen: number | null;
   lastLapUntil: number;
@@ -114,6 +122,7 @@ export class SplitWaysGame {
   private readonly fullRect: Rect = { x: 0, y: 0, width: 1, height: 1 };
   private readonly overview = new OverviewCamera();
   private readonly skids = new SkidMarks();
+  private readonly audio: RaceAudio | null;
   private readonly dust = new Dust();
   private readonly overviewBadge = document.createElement('div');
   private readonly carPositions: Vector3[];
@@ -205,6 +214,7 @@ export class SplitWaysGame {
     this.race.onFinish = (racer) => {
       const driver = this.drivers.find((d) => d.racer === racer);
       if (driver) this.hooks.send(driver.player.id, { type: 'haptic', pattern: 'finish' });
+      this.audio?.cheer(racer.place === 1);
     };
 
     const hasLocalPlayers = ordered.some((p) => p.local);
@@ -229,12 +239,16 @@ export class SplitWaysGame {
         connected: true,
         keyboardSet,
         lastHapticAt: 0,
+        wantThrottle: 0,
+        wantHorn: false,
+        onSand: false,
         lastLapSeen: null,
         lastLapUntil: 0,
         lastLapText: '',
       };
     });
 
+    this.audio = hooks.audio ? new RaceAudio(hooks.audio, cars) : null;
     this.carPositions = this.drivers.map((d) => d.visual.root.position);
     this.carColours = this.drivers.map((d) => colourHex(d.player.colour));
     this.overviewBadge.className = 'sw-overview-badge';
@@ -284,6 +298,7 @@ export class SplitWaysGame {
       disposeNameTag(driver.tag);
     }
     this.podium?.dispose();
+    this.audio?.dispose();
     this.skids.dispose();
     this.dust.dispose();
     this.world.dispose();
@@ -334,7 +349,10 @@ export class SplitWaysGame {
     );
     this.drivers.forEach((driver, i) => {
       const rect = this.rects[i];
-      if (rect) driver.hud.place(rect);
+      if (!rect) return;
+      driver.hud.place(rect);
+      // Each car's sound leans towards its viewport's side of the screen.
+      this.audio?.setPan(i, ((rect.x + rect.width / 2) / this.renderer.width - 0.5) * 0.9);
     });
     if (this.mode === 'podium')
       this.renderer.setViewSize(this.renderer.width, this.renderer.height);
@@ -356,6 +374,8 @@ export class SplitWaysGame {
     for (const driver of this.drivers) {
       if (this.autopilotOn) {
         autopilot(this.track, driver.racer, driver.car.input);
+        driver.wantThrottle = driver.car.input.throttle;
+        driver.wantHorn = false;
         continue;
       }
       const padFresh = driver.connected && now - driver.padInputAt < INPUT.staleAfterMs;
@@ -365,6 +385,8 @@ export class SplitWaysGame {
           ? NEUTRAL_INPUT
           : (this.keyboard.inputs[driver.keyboardSet] ?? NEUTRAL_INPUT);
       mergeInputs(driver.car.input, pad, keys);
+      driver.wantThrottle = driver.car.input.throttle;
+      driver.wantHorn = driver.car.input.horn;
     }
     this.race.holdInputs();
 
@@ -372,10 +394,11 @@ export class SplitWaysGame {
     this.stepTime = now;
     this.sim.drainImpacts(this.onImpact);
     this.race.update(this.sim.dt);
-    for (const { car, racer } of this.drivers) {
-      const onSand = Math.abs(racer.projection.lateral) > this.track.halfRoad + 0.3;
-      this.skids.update(car, onSand);
-      this.dust.emit(car, onSand, this.sim.dt);
+    for (const driver of this.drivers) {
+      const { car, racer } = driver;
+      driver.onSand = Math.abs(racer.projection.lateral) > this.track.halfRoad + 0.3;
+      this.skids.update(car, driver.onSand);
+      this.dust.emit(car, driver.onSand, this.sim.dt);
     }
 
     if (this.race.phase === 'finished' && this.raceEndedAt === null) this.raceEndedAt = now;
@@ -392,7 +415,9 @@ export class SplitWaysGame {
     if (impact.force < IMPACT_THRESHOLD) return;
     const driver = this.drivers.find((d) => d.car === impact.car);
     if (!driver) return;
-    driver.camera.addShake(Math.min(1, (impact.force - IMPACT_THRESHOLD) / (IMPACT_THRESHOLD * 6)));
+    const strength = Math.min(1, (impact.force - IMPACT_THRESHOLD) / (IMPACT_THRESHOLD * 6));
+    driver.camera.addShake(strength);
+    this.audio?.impact(this.drivers.indexOf(driver), strength);
     if (this.stepTime - driver.lastHapticAt > HAPTIC_COOLDOWN_MS) {
       driver.lastHapticAt = this.stepTime;
       this.hooks.send(driver.player.id, { type: 'haptic', pattern: 'collision' });
@@ -419,6 +444,7 @@ export class SplitWaysGame {
     }));
     this.podium = new Podium(this.models, entries, this.scene.environment);
     this.hudLayer.hidden = true;
+    this.audio?.podium();
     this.layout();
     this.broadcast({ type: 'results', standings: results });
     this.hooks.onResults(results);
@@ -487,6 +513,13 @@ export class SplitWaysGame {
         this.clock,
       );
       this.paintHud(driver, i, countdownText);
+    }
+    if (this.audio) {
+      for (let i = 0; i < this.drivers.length; i++) {
+        const driver = this.drivers[i] as Driver;
+        this.audio.updateCar(i, driver.wantThrottle, driver.wantHorn, driver.onSand);
+      }
+      this.audio.updateRace(race.countdown, race.phase !== 'countdown');
     }
     if (this.overviewRect) {
       const rect = this.overviewRect;

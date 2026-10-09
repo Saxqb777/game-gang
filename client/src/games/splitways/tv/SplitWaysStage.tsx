@@ -3,6 +3,7 @@ import { colourHex, type LeaderboardEntry } from '@gamergang/shared';
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import type { Hub } from '../../../hub/hub';
 import { api } from '../../../net/api';
+import { audioContext } from '../../../tv/audio';
 import { SplitWaysGame, type RaceResult } from '../game';
 import { formatTime } from '../hud/viewportHud';
 import { CORNICHE_RUN } from '../track/cornicheRun';
@@ -117,6 +118,7 @@ export default function SplitWaysStage({ hub }: { hub: Hub }) {
         hub.send(playerId, message);
       },
       rttMs: (playerId) => hub.rttMs(playerId),
+      audio: audioContext(),
       onResults: (final) => {
         hub.finishGame();
         setResults(final);

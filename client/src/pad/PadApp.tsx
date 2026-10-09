@@ -149,6 +149,7 @@ export default function PadApp() {
           mode={profile.mode}
           colourHex={colourHex(myPlayer.colour)}
           onSettings={() => setSettingsOpen(true)}
+          onEnableTilt={() => changeMode('tilt')}
         />
       </Suspense>
     );

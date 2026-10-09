@@ -3,6 +3,7 @@ import type { RaceMessage } from '@gamergang/shared';
 import {
   useEffect,
   useRef,
+  useState,
   useSyncExternalStore,
   type CSSProperties,
   type PointerEvent,
@@ -74,17 +75,23 @@ function Button({ zone, label }: { zone: Zone; label: string }) {
   );
 }
 
+/** If tilt mode gets no gyro readings for this long, offer a tap to (re-)enable motion access. */
+const TILT_SILENCE_MS = 900;
+
 /** The phone as a steering wheel: tilt or button steering, gas, brake, handbrake and horn. */
 export default function SplitWaysController({
   store,
   mode,
   colourHex,
   onSettings,
+  onEnableTilt,
 }: PadControllerProps) {
   const race = useSyncExternalStore(store.subscribe, () => store.getState().race);
   const rootRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, Zone>());
+  // iOS forgets motion access on reload: the wheel then needs one tap to wake up.
+  const [needsTap, setNeedsTap] = useState(false);
 
   // Re-paint which zones are held without re-rendering React.
   const paintPressed = () => {
@@ -114,6 +121,8 @@ export default function SplitWaysController({
     const sender = new InputSender((input) => store.sendInput(input));
     let buttonSteer = 0;
     let last = performance.now();
+    const mountedAt = last;
+    let tapShown = false;
     let frame = 0;
 
     const tick = (now: number) => {
@@ -123,6 +132,11 @@ export default function SplitWaysController({
       let steer: number;
       if (tilt) {
         steer = tilt.update(dt);
+        const silent = !tilt.active && now - mountedAt > TILT_SILENCE_MS;
+        if (silent !== tapShown) {
+          tapShown = silent;
+          setNeedsTap(silent);
+        }
       } else {
         buttonSteer = rampSteer(buttonSteer, held.has('left'), held.has('right'), dt);
         steer = buttonSteer;
@@ -239,6 +253,20 @@ export default function SplitWaysController({
         <div className="ctl-overlay ctl-countdown" key={countdown}>
           {countdown}
         </div>
+      ) : null}
+      {mode === 'tilt' && needsTap ? (
+        <button
+          className="ctl-enable"
+          onClick={onEnableTilt}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <svg viewBox="0 0 64 64" aria-hidden>
+            <rect x="8" y="20" width="48" height="26" rx="5" />
+            <path d="M4 14 A30 30 0 0 1 22 6 M60 14 A30 30 0 0 0 42 6" />
+          </svg>
+          <b>Tap to enable wheel</b>
+          <small>Then turn your phone like a steering wheel</small>
+        </button>
       ) : null}
       {finished ? (
         <div className="ctl-overlay ctl-finished">

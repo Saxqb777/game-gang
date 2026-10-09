@@ -162,3 +162,20 @@ Where the build differs from the brief, and why. Tunable values live in
 - Minimap: a 2D canvas per viewport, redrawn 30 times a second.
 - Fixed an M3 bug: the empty "Reconnecting" overlay (35% black) was always on, because its class
   set `display`, which beats the `hidden` attribute. M3 screenshots were darker than intended.
+
+## Feel (M5)
+
+- All sound is synthesised with Web Audio: no files to license, download or decode, and the engine
+  can follow the car exactly.
+- Engine: sawtooth at the firing rate (4 pulses per rev, like a V8) plus a square an octave down,
+  soft-clipped, low-passed by throttle. A fake six-speed gearbox sets the revs; upshifts dip the
+  volume for 90 ms. Holding gas on the grid revs the engine.
+- Per car: tyre screech (band-passed noise by slide speed), wind (by speed squared), sand rumble,
+  horn. One-shots: impacts (noise burst + thump, by hit strength), countdown beeps, crowd applause
+  (generated claps over a low roar) at each finish and on the podium.
+- Each car is panned towards its viewport's side of the screen. A compressor on the master output
+  stops four engines plus a crash from clipping.
+- Browsers only start audio after a click or key press on the TV page; the TV shows a "Sound is off"
+  hint until then.
+- Pad: in tilt mode, if the gyro has sent nothing for 0.9 s (iOS forgets motion access on reload)
+  a full-screen "Tap to enable wheel" asks for it again. No sensor at all → buttons with a note.

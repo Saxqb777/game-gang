@@ -9,6 +9,8 @@ export interface PadControllerProps {
   mode: SteeringMode;
   colourHex: string;
   onSettings: () => void;
+  /** Asks for motion access again; call it straight from a tap (iOS only prompts during one). */
+  onEnableTilt: () => void;
 }
 
 export const PAD_CONTROLLERS: Record<

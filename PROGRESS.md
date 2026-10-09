@@ -138,3 +138,30 @@ returns both screens to the lobby. 60 fps on the M1 is yours to confirm.
   layouts, the podium.
 - Tests, lint, typecheck, production build.
 - Not verified: frame rate on a real GPU (the M1).
+
+## M5 - Feel
+
+**Built**
+
+- Sound on the TV: an engine per car with gear changes, tyre screech, wind, sand rumble, horn,
+  crash thuds, countdown beeps, crowd at the finish and on the podium. Each car's sound sits on its
+  viewport's side of the screen.
+- "Sound is off" hint on the TV until someone clicks or presses a key there (browser rule).
+- Pad: "Tap to enable wheel" when tilt is chosen but the gyro is silent (iPhone after a reload).
+- Already there from M0-M1: haptics, wake lock, auto-reconnect, tilt/buttons.
+
+**Test**
+
+1. Open the TV page and click once (or press a key): the yellow "Sound is off" pill disappears.
+2. Race: revs on the grid when you hold gas, beeps on each light, gear changes, screech when you
+   slide, a thud when you hit something, horn button, applause at the finish.
+3. iPhone in tilt mode: reload the pad page and rejoin the race. "Tap to enable wheel" appears;
+   tap it and allow motion access.
+
+**Verified here**
+
+- Offline render of the sound (16 s preview sent in chat): engine pitch follows speed and gears,
+  peak level 0.49 (no clipping).
+- No errors with audio running in a headless race. Tilt overlay appears while the gyro is silent
+  and falls back to buttons when there is no sensor.
+- Not verified: how it sounds on the TV speakers, real iPhone motion prompt.

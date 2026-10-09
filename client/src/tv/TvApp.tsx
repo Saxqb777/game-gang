@@ -1,6 +1,7 @@
 import './tv.css';
 import { Suspense, useEffect, useSyncExternalStore } from 'react';
 import type { Hub, HubState } from '../hub/hub';
+import { useSoundOn } from './audio';
 import { GAME_STAGES } from './gameStages';
 import { Lobby } from './Lobby';
 import { getHub } from './runtime';
@@ -61,6 +62,7 @@ export default function TvApp() {
   const hub = getHub();
   const state = useSyncExternalStore(hub.subscribe, hub.getState);
   const Stage = GAME_STAGES[hub.game];
+  const soundOn = useSoundOn();
 
   useEffect(() => {
     document.title = 'Gamer Gang · TV';
@@ -82,6 +84,7 @@ export default function TvApp() {
         </Suspense>
       )}
       <KeyHints phase={state.phase} />
+      {soundOn ? null : <div className="tv-sound">Sound is off · click or press any key</div>}
     </div>
   );
 }

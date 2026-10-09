@@ -221,3 +221,22 @@ export const POST = {
   tint: [1.05, 1.0, 0.93],
   saturation: 1.1,
 } as const;
+
+export const AUDIO = {
+  /** Overall volume, 0..1. */
+  master: 0.8,
+  /** Per-sound volumes. Engines are per car, so four cars add up. */
+  engine: 0.26,
+  screech: 0.32,
+  wind: 0.1,
+  sand: 0.22,
+  impact: 0.75,
+  horn: 0.2,
+  beeps: 0.3,
+  crowd: 0.45,
+  /** Engine revs at idle and at the top of each gear. The pitch is four pulses per rev, like a V8. */
+  idleRpm: 950,
+  redlineRpm: 7400,
+  /** Speed (m/s) at the top of gears 1-6. */
+  gearTops: [13, 21, 29, 37, 45, 54],
+} as const;

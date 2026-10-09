@@ -389,3 +389,48 @@
     display: grid;
   }
 }
+
+.ctl-enable {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  border: 0;
+  background: rgba(5, 6, 9, 0.86);
+  color: #fff;
+  font: inherit;
+  text-align: center;
+}
+
+.ctl-enable svg {
+  width: 96px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  animation: ctl-rock 1.4s ease-in-out infinite;
+}
+
+.ctl-enable b {
+  font-size: 30px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.ctl-enable small {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+@keyframes ctl-rock {
+  25% {
+    transform: rotate(-16deg);
+  }
+  75% {
+    transform: rotate(16deg);
+  }
+}

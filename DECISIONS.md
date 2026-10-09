@@ -179,3 +179,36 @@ Where the build differs from the brief, and why. Tunable values live in
   hint until then.
 - Pad: in tilt mode, if the gyro has sent nothing for 0.9 s (iOS forgets motion access on reload)
   a full-screen "Tap to enable wheel" asks for it again. No sensor at all → buttons with a note.
+
+## Items and speed tricks (M7)
+
+- Modes live in `shared` (`GAME_MODES`), so a future game declares its own. Items is the default;
+  `M` on the TV or any phone switches in the lobby. Lap records only come from Classic: item hits
+  make times incomparable.
+- Boxes: 4 rows of 4 per lap, each row on the straightest stretch near an evenly spaced point. A
+  taken box returns after 3 s. One item at a time; the slot spins 1 s before it can be used.
+- Catch-up odds: each item has a weight for leader, middle and last (`ITEMS.odds`), blended by
+  position. Oil and shields go to the front, nitro and rockets to the back. The bounty drone needs
+  3+ cars and never goes to the leader. Classic stays pure skill.
+- Six items: nitro (1 or 3), oil slick (25 s), rocket (car ahead), shield (10 s, blocks one hit),
+  shockwave (13 m shove), bounty drone (flies to the leader, big blast).
+- Rockets and drones move along the track's arc length plus a sideways offset instead of as
+  physics bodies: they never snag on walls or lose the road on the hairpin, and cost nothing.
+  Homing tightens in the last 40-60 m; a rocket that passes its target turns back.
+- Hits spin the car whole turns (1 for oil and rockets, 2 for the drone) with a yaw controller,
+  then zero the yaw rate, so the car always comes out facing the road. Speed drops to 25-55%, then
+  1.4 s without new hits. The victim's camera shakes and the phone gives a long buzz.
+- Speed tricks work in both modes. Boost is one forward push at the centre of the car plus +25% top
+  speed, so the grip assists keep working while boosting.
+  - Drift boost: a slide over 0.17 rad above 12 m/s for 0.4 / 0.9 / 1.5 s turns the sparks blue,
+    orange, purple and pays 0.5 / 0.9 / 1.4 s.
+  - Boost pads: placed automatically after the 4 tightest corner exits, away from the start and
+    each other. A flat strip is a sliver from a low chase camera, so each pad has light curtains.
+  - Slipstream: within 16 m behind a car, above 20 m/s: up to 55% less drag plus a push.
+- Item presses go over the reliable data channel (a lost press is a lost item). Steering stays on
+  the unreliable one.
+- Item and boost logic (`race/items.ts`, `race/boosts.ts`) is plain TypeScript with fixed pools and
+  callbacks, so it runs in Node tests, including a full 4-car items race.
+- Effects are instanced pools (boxes, slicks, missiles, rings, blasts, particles): nothing is
+  allocated per frame. Explosions use a fireball shader (hot core, soft edge) so a hit next to the
+  camera reads as fire, not a solid ball.

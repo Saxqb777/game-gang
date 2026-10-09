@@ -57,7 +57,7 @@ export class DebugOverlay {
       `render scale ${stats.renderScale.toFixed(2)} (${stats.autoResolution ? 'auto' : 'fixed'}, R to toggle)`,
       '',
       stats.autopilot ? 'AUTOPILOT ON (P to stop)' : 'P: autopilot for every car (testing)',
-      'N: every car to its next checkpoint',
+      'N: every car to its next checkpoint   I: give every car an item',
       '',
       'driver        steer  gas   brake hb horn  km/h  slip   rtt   P lap gate',
       ...drivers.map((d) => {

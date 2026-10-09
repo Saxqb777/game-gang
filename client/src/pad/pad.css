@@ -405,6 +405,40 @@ html:has(.pad-screen) {
   opacity: 0.9;
 }
 
+.pad-modes {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pad-modes button {
+  flex: 1;
+  padding: 8px 0;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
+.pad-modes button.is-on {
+  border-color: #fff;
+  background: #fff;
+  color: #111;
+}
+
+.pad-game-card em {
+  margin-top: 6px;
+  font-size: 12px;
+  font-style: normal;
+  opacity: 0.9;
+}
+
 .pad-players {
   list-style: none;
   margin: 0;

@@ -240,3 +240,71 @@ export const AUDIO = {
   /** Speed (m/s) at the top of gears 1-6. */
   gearTops: [13, 21, 29, 37, 45, 54],
 } as const;
+
+export const BOOSTS = {
+  /** Extra forward push while boosting (N), and how far the top speed rises (0.25 = +25%). */
+  force: 9000,
+  topSpeedGain: 0.25,
+  /** Drift boost: slide at least this angle (rad) above this speed (m/s) to charge it. */
+  driftMinSlip: 0.17,
+  driftMinSpeed: 12,
+  /** Seconds of sliding for blue, orange and purple sparks, and the boost each pays out (s). */
+  driftLevels: [0.4, 0.9, 1.5],
+  driftBoosts: [0.5, 0.9, 1.4],
+  /** A slide may dip below the angle for this long (s) without losing its charge. */
+  driftGrace: 0.15,
+  /** Boost pads on corner exits (tightest corners first): how many, and the boost each gives (s). */
+  padCount: 4,
+  padBoost: 1.1,
+  /** Slipstream: within this distance behind a car (m), this far off its line, above this speed. */
+  slipstreamRange: 16,
+  slipstreamWidth: 1.8,
+  slipstreamMinSpeed: 20,
+  /** At full slipstream: share of air drag removed, and an extra forward push (N). */
+  slipstreamDragCut: 0.55,
+  slipstreamPush: 1600,
+} as const;
+
+export const ITEMS = {
+  /** Rows of item boxes per lap, boxes per row, seconds until a taken box returns. */
+  boxRows: 4,
+  boxesPerRow: 4,
+  boxRespawnSeconds: 3,
+  /** The item slot spins this long before the item can be used. */
+  rollSeconds: 1,
+  nitroSeconds: 1.8,
+  shieldSeconds: 10,
+  oilSeconds: 25,
+  oilRadius: 2.3,
+  /** Rockets chase the car ahead; the drone chases the leader. Speeds in m/s, lives in s. */
+  rocketSpeed: 66,
+  rocketLife: 7,
+  bountySpeed: 80,
+  bountyLife: 12,
+  /** Shockwave: cars within this radius (m) are shoved this hard (m/s) and wobble. */
+  shockwaveRadius: 13,
+  shockwavePush: 9,
+  /** Per hit: spin-out seconds, full turns (the car ends up facing forward), share of speed kept. */
+  hits: {
+    oil: { seconds: 1, turns: 1, speedKept: 0.55 },
+    rocket: { seconds: 1.2, turns: 1, speedKept: 0.35 },
+    bounty: { seconds: 1.6, turns: 2, speedKept: 0.25 },
+    shockwave: { seconds: 0.5, turns: 0, speedKept: 0.8 },
+  },
+  /** No new hit for this long after one (s). */
+  hitImmunity: 1.4,
+  /**
+   * Catch-up odds: weight of each item for the [leader, middle, last] of the pack. Positions in
+   * between blend. The bounty drone only rolls with 3+ cars.
+   */
+  odds: {
+    nitro: [12, 30, 40],
+    oil: [38, 18, 6],
+    shield: [30, 14, 6],
+    rocket: [14, 26, 24],
+    shockwave: [6, 12, 10],
+    bounty: [0, 0, 14],
+  },
+  /** Chance that a nitro comes as three, for [leader, middle, last]. */
+  tripleNitro: [0, 0.3, 0.6],
+} as const;

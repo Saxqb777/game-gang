@@ -1,4 +1,4 @@
-import { colourHex, type LobbyMessage } from '@gamergang/shared';
+import { colourHex, type GameMode, type LobbyMessage } from '@gamergang/shared';
 import type { CSSProperties } from 'react';
 import { GAMES } from '../../games/registry';
 import type { SteeringMode } from '../profile';
@@ -34,12 +34,14 @@ export function LobbyScreen({
   myId,
   room,
   onReady,
+  onMode,
   onSettings,
 }: {
   lobby: LobbyMessage;
   myId: string;
   room: string;
   onReady: (ready: boolean) => void;
+  onMode: (mode: GameMode) => void;
   onSettings: () => void;
 }) {
   const me = lobby.players.find((p) => p.id === myId);
@@ -55,6 +57,20 @@ export function LobbyScreen({
           <small>Up next</small>
           <strong>{game.title}</strong>
           <span>{game.subtitle}</span>
+          <div className="pad-modes" role="radiogroup" aria-label="Mode">
+            {game.modes.map((m) => (
+              <button
+                key={m.id}
+                role="radio"
+                aria-checked={lobby.mode === m.id}
+                className={lobby.mode === m.id ? 'is-on' : ''}
+                onClick={() => onMode(m.id)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+          <em>{game.modes.find((m) => m.id === lobby.mode)?.hint}</em>
         </div>
         <ul className="pad-players">
           {lobby.players.map((p) => (

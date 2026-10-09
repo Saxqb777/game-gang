@@ -1,5 +1,6 @@
 import './tv.css';
 import { Suspense, useEffect, useSyncExternalStore } from 'react';
+import { GAME_MODES, type GameMode } from '@gamergang/shared';
 import type { Hub, HubState } from '../hub/hub';
 import { useSoundOn } from './audio';
 import { GAME_STAGES } from './gameStages';
@@ -39,6 +40,11 @@ function handleTvKey(hub: Hub, state: HubState, event: KeyboardEvent): void {
     case 'Enter':
       for (const player of localPlayers) hub.toggleLocalReady(player.id);
       return;
+    case 'KeyM': {
+      const modes: readonly GameMode[] = GAME_MODES[hub.game];
+      hub.setMode(modes[(modes.indexOf(state.mode) + 1) % modes.length] ?? state.mode);
+      return;
+    }
   }
 }
 
@@ -47,7 +53,8 @@ function KeyHints({ phase }: { phase: HubState['phase'] }) {
     <div className={`tv-keys ${phase === 'lobby' ? '' : 'tv-keys--game'}`}>
       {phase === 'lobby' ? (
         <>
-          <kbd>K</kbd> keyboard player · <kbd>Enter</kbd> ready · <kbd>F</kbd> fullscreen
+          <kbd>K</kbd> keyboard player · <kbd>Enter</kbd> ready · <kbd>M</kbd> mode · <kbd>F</kbd>{' '}
+          fullscreen
         </>
       ) : (
         <>

@@ -7,6 +7,7 @@ interface KeyMap {
   brake: string[];
   handbrake: string[];
   horn: string[];
+  item: string[];
 }
 
 /** Two drivers can share the TV keyboard: WASD + Space and the arrow keys + right Shift. */
@@ -18,6 +19,7 @@ const KEY_MAPS: readonly KeyMap[] = [
     brake: ['KeyS'],
     handbrake: ['Space'],
     horn: ['KeyE'],
+    item: ['KeyQ'],
   },
   {
     left: ['ArrowLeft'],
@@ -26,11 +28,20 @@ const KEY_MAPS: readonly KeyMap[] = [
     brake: ['ArrowDown'],
     handbrake: ['ShiftRight'],
     horn: ['Slash'],
+    item: ['Enter', 'NumpadEnter'],
   },
 ];
 
 const DRIVING_KEYS = new Set(
-  KEY_MAPS.flatMap((m) => [...m.left, ...m.right, ...m.gas, ...m.brake, ...m.handbrake, ...m.horn]),
+  KEY_MAPS.flatMap((m) => [
+    ...m.left,
+    ...m.right,
+    ...m.gas,
+    ...m.brake,
+    ...m.handbrake,
+    ...m.horn,
+    ...m.item,
+  ]),
 );
 
 /** Digital keyboard controls. The car's own steering rate turns the on/off keys into a smooth turn. */
@@ -39,6 +50,8 @@ export class KeyboardDriver {
     copyInput({ ...NEUTRAL_INPUT }, NEUTRAL_INPUT),
   );
   private readonly down = new Set<string>();
+  /** Item key presses not yet handed to the game, per key set. */
+  private readonly itemPresses = KEY_MAPS.map(() => 0);
 
   constructor() {
     window.addEventListener('keydown', this.onKeyDown);
@@ -59,6 +72,14 @@ export class KeyboardDriver {
     }
   }
 
+  /** True once per press of key set `set`'s item key. */
+  takeItemPress(set: number): boolean {
+    const presses = this.itemPresses[set] ?? 0;
+    if (presses === 0) return false;
+    this.itemPresses[set] = presses - 1;
+    return true;
+  }
+
   private held(keys: readonly string[]): boolean {
     for (const key of keys) if (this.down.has(key)) return true;
     return false;
@@ -74,6 +95,10 @@ export class KeyboardDriver {
     if (!DRIVING_KEYS.has(event.code)) return;
     event.preventDefault();
     this.down.add(event.code);
+    if (event.repeat) return;
+    KEY_MAPS.forEach((map, set) => {
+      if (map.item.includes(event.code)) this.itemPresses[set] = (this.itemPresses[set] ?? 0) + 1;
+    });
   };
 
   private readonly onKeyUp = (event: KeyboardEvent) => {

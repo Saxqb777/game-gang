@@ -4,7 +4,8 @@ A party game console in the browser. A laptop plugged into the TV opens one page
 another on their phones, and the phones become controllers. No installs, no accounts.
 
 First game: **Split Ways**. Up to 4 players race split screen around **Corniche Run**, a coastal
-circuit at golden hour, steering by tilting their phones.
+circuit at golden hour, steering by tilting their phones. **Items** mode adds mystery boxes
+(rockets, oil, shields, nitro); **Classic** is pure racing.
 
 ## Play at home
 
@@ -24,7 +25,8 @@ pnpm start        # production build, fastest
    - Android: Advanced → Proceed.
 4. Type a name, pick a colour, pick **Tilt** or **Buttons**, tap **JOIN**. iPhone asks for motion
    access: allow it.
-5. Everyone taps **READY**. The race starts when all connected players are ready.
+5. Pick **Items** or **Classic** on the game card (`M` on the TV, or any phone).
+6. Everyone taps **READY**. The race starts when all connected players are ready.
 
 ## Controls
 
@@ -34,13 +36,24 @@ pnpm start        # production build, fastest
 - Buttons: left thumb on the arrows, right thumb on gas and brake.
 - Both: handbrake (drift), horn, brake at a standstill to reverse. Settings (top right) switches
   steering any time.
+- Items mode: the **ITEM** button (tilt: above gas, and the horn moves to the middle of the wheel;
+  buttons: between handbrake and horn). Drive through a **?** box, wait for the slot to stop, tap.
+
+**Speed tricks (both modes)**
+
+- Drift boost: hold a handbrake slide until the sparks turn blue, orange, then purple. Straighten
+  up to cash it in; the longer the slide, the longer the boost.
+- Boost pads: the glowing blue strips after the tightest corners.
+- Slipstream: tuck in right behind another car at speed. The HUD shows SLIPSTREAM.
 
 **TV keyboard**
 
 | Key         | Lobby                               | Race                                |
 | ----------- | ----------------------------------- | ----------------------------------- |
 | `K`         | add a keyboard player (up to two)   |                                     |
-| `Enter`     | keyboard players ready              |                                     |
+| `Enter`     | keyboard players ready              | player 2 item                       |
+| `Q`         |                                     | player 1 item                       |
+| `M`         | switch Items / Classic              |                                     |
 | `Backspace` | remove a keyboard player            |                                     |
 | WASD, Space | drive player 1 (handbrake: Space)   | same                                |
 | Arrows      | drive player 2 (handbrake: R Shift) | same                                |
@@ -49,7 +62,7 @@ pnpm start        # production build, fastest
 | `F`         | fullscreen                          | fullscreen                          |
 
 With the debug overlay open: `P` autopilot for every car, `N` every car to its next checkpoint,
-`R` pin the resolution.
+`R` pin the resolution, `I` give every car an item.
 
 ## Troubleshooting
 
@@ -84,7 +97,7 @@ created on first use (or run `pnpm db:migrate` with `DATABASE_URL` set).
 | ------------------- | ------------------------------------------------------------------------ |
 | `pnpm start`        | Build, then serve on :4000 (TV) and https :4443 (phones)                 |
 | `pnpm dev`          | Same ports with hot reload                                               |
-| `pnpm test`         | Unit tests (signaling, car physics, race rules, steering)                |
+| `pnpm test`         | Unit tests (signaling, car physics, race rules, steering, items)         |
 | `pnpm check`        | Typecheck, lint, format check and tests                                  |
 | `pnpm build:vercel` | Build the Vercel deployment into `.vercel/output`                        |
 | `pnpm db:migrate`   | Create the Neon tables up front (optional, the API does it on first use) |

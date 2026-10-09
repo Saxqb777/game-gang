@@ -85,6 +85,8 @@ const HAPTICS: Record<HapticPattern, number[]> = {
   collision: [40],
   start: [90, 70, 220],
   finish: [120, 80, 120, 80, 320],
+  pickup: [14, 40, 14],
+  hit: [220, 60, 140],
 };
 
 export function vibrate(pattern: HapticPattern): void {

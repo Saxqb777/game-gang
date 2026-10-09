@@ -137,6 +137,7 @@ export default function PadApp() {
         myId={me.playerId}
         room={room}
         onReady={(ready) => store.setReady(ready)}
+        onMode={(mode) => store.setMode(mode)}
         onSettings={() => setSettingsOpen(true)}
       />
     );

@@ -185,3 +185,35 @@ returns both screens to the lobby. 60 fps on the M1 is yours to confirm.
 - `pnpm check` passes (typecheck, lint, format, 31 tests). `pnpm build:vercel` output: static
   files plus one API function.
 - Not verified: a real Vercel deployment and Neon database (needs your accounts).
+
+## M7 - Items and speed tricks
+
+**Built**
+
+- Items mode (default) and Classic, picked in the lobby from the TV (`M`) or any phone.
+- Mystery boxes and six items: nitro, oil slick, rocket, shield, shockwave, bounty drone. Odds
+  depend on race position.
+- Hits: spin-out, speed loss, camera shake, phone buzz. Shields block one hit.
+- Drift boost (blue, orange, purple sparks), 4 boost pads, slipstream. Both modes.
+- Phone: ITEM button with a spinning slot. TV: item slot in each HUD, SLIPSTREAM tag, new sounds.
+- Lap records only from Classic races.
+
+**Test**
+
+1. Lobby: Items is on. Press `M` or tap Classic on a phone: TV and phones switch together.
+2. Items race: drive through a row of **?** boxes. The slot spins on the TV and the phone, then
+   shows the item. Tap ITEM (keyboard: `Q` for player 1, `Enter` for player 2).
+3. Try each item: nitro flames, oil behind you, a rocket at the car ahead (it spins), a shield
+   bubble that eats one hit, a shockwave ring, the drone (last place, 3+ players) at the leader.
+4. Handbrake slide until the sparks go purple, then straighten. Drive over a blue pad after a
+   corner. Sit behind a car on the long straight: SLIPSTREAM.
+5. Classic: no boxes or ITEM button, and the finish saves lap records.
+
+**Verified here**
+
+- Headless Chromium: 4 phones in an items race with all six items, hits, shields, nitro, pads and
+  the SLIPSTREAM tag; ITEM button states on the phone; mode switch from the TV key and a phone.
+- Unit tests: odds, boxes, rocket homing and hit, shield, oil, pads, slipstream, drift boost, a full
+  4-car 3-lap items race.
+- Offline render of the new sounds (preview sent in chat).
+- Not verified: feel with real phones, frame rate on the M1 with every effect on screen.

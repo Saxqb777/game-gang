@@ -10,6 +10,7 @@ import {
   type RefObject,
 } from 'react';
 import type { PadControllerProps } from '../../../pad/controllers';
+import { ITEM_ICONS, ITEM_NAMES, MYSTERY_ICON, rollingIcon } from '../itemIcons';
 import { InputSender } from './inputSender';
 import { TiltSteering, rampSteer } from './steering';
 
@@ -67,6 +68,36 @@ function Pedal({ zone, label, hint }: { zone: Zone; label: string; hint: string 
   );
 }
 
+/** Items mode: shows the held item; a press uses it (sent reliably, so it can't get lost). */
+function ItemButton({
+  race,
+  iconRef,
+  onUse,
+}: {
+  race: RaceMessage | null;
+  iconRef: RefObject<HTMLImageElement | null>;
+  onUse: () => void;
+}) {
+  const item = race?.item ?? null;
+  const rolling = race?.rolling ?? false;
+  const charges = race?.charges ?? 0;
+  const state = rolling ? 'rolling' : item ? 'ready' : 'empty';
+  return (
+    <button
+      className={`ctl-item is-${state}`}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+        if (state === 'ready') onUse();
+      }}
+      aria-label={item && !rolling ? `Use ${ITEM_NAMES[item]}` : 'Item'}
+    >
+      <img ref={iconRef} alt="" src={item && !rolling ? ITEM_ICONS[item] : MYSTERY_ICON} />
+      {state === 'ready' && charges > 1 ? <b>×{charges}</b> : null}
+      <small>{rolling ? 'Rolling...' : item ? ITEM_NAMES[item] : 'Grab a ? box'}</small>
+    </button>
+  );
+}
+
 function Button({ zone, label }: { zone: Zone; label: string }) {
   return (
     <div className={`ctl-btn ctl-btn--${zone}`} data-zone={zone}>
@@ -87,8 +118,17 @@ export default function SplitWaysController({
   onEnableTilt,
 }: PadControllerProps) {
   const race = useSyncExternalStore(store.subscribe, () => store.getState().race);
+  const itemsMode = useSyncExternalStore(
+    store.subscribe,
+    () => store.getState().lobby?.mode === 'items',
+  );
   const rootRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef<SVGSVGElement>(null);
+  const itemIconRef = useRef<HTMLImageElement>(null);
+  const useItem = () => {
+    store.action('item');
+    if (typeof navigator.vibrate === 'function') navigator.vibrate(12);
+  };
   const pointers = useRef(new Map<number, Zone>());
   // iOS forgets motion access on reload: the wheel then needs one tap to wake up.
   const [needsTap, setNeedsTap] = useState(false);
@@ -123,6 +163,7 @@ export default function SplitWaysController({
     let last = performance.now();
     const mountedAt = last;
     let tapShown = false;
+    let shownIcon = '';
     let frame = 0;
 
     const tick = (now: number) => {
@@ -155,6 +196,14 @@ export default function SplitWaysController({
       if (wheel) {
         const degrees = tilt ? Math.max(-120, Math.min(120, tilt.angle)) : steer * 90;
         wheel.style.transform = `rotate(${degrees.toFixed(1)}deg)`;
+      }
+      // The item slot spins like a slot machine until the TV says it stopped.
+      const icon = itemIconRef.current;
+      if (icon && store.getState().race?.rolling) {
+        const next = rollingIcon(now);
+        if (next !== shownIcon) icon.src = shownIcon = next;
+      } else {
+        shownIcon = '';
       }
       frame = requestAnimationFrame(tick);
     };
@@ -202,10 +251,18 @@ export default function SplitWaysController({
           </section>
           <section className="ctl-centre">
             <RaceHud race={race} />
-            <Wheel wheelRef={wheelRef} />
+            <div className="ctl-wheel-wrap">
+              <Wheel wheelRef={wheelRef} />
+              {/* Like a real car: the horn is the middle of the wheel. */}
+              <div className="ctl-hub" data-zone="horn" aria-label="Horn" />
+            </div>
           </section>
-          <section className="ctl-side ctl-side--right">
-            <Button zone="horn" label="Horn" />
+          <section className={`ctl-side ctl-side--right ${itemsMode ? 'ctl-side--items' : ''}`}>
+            {itemsMode ? (
+              <ItemButton race={race} iconRef={itemIconRef} onUse={useItem} />
+            ) : (
+              <Button zone="horn" label="Horn" />
+            )}
             <Pedal zone="gas" label="Gas" hint="hold" />
           </section>
         </>
@@ -224,8 +281,9 @@ export default function SplitWaysController({
             </div>
           </section>
           <section className="ctl-drive">
-            <div className="ctl-drive-buttons">
+            <div className={`ctl-drive-buttons ${itemsMode ? 'ctl-drive-buttons--items' : ''}`}>
               <Button zone="handbrake" label="Handbrake" />
+              {itemsMode ? <ItemButton race={race} iconRef={itemIconRef} onUse={useItem} /> : null}
               <Button zone="horn" label="Horn" />
             </div>
             <div className="ctl-drive-pedals">

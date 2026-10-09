@@ -195,6 +195,44 @@
   color: var(--muted);
 }
 
+.game-modes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5vw;
+  margin-top: 1vw;
+}
+
+.game-modes span {
+  padding: 0.3vw 1vw;
+  border-radius: 99px;
+  border: 2px solid var(--line);
+  font-size: 1vw;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.game-modes span.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #111;
+}
+
+.game-modes small {
+  flex-basis: 100%;
+  font-size: 0.9vw;
+  color: var(--muted);
+}
+
+.game-modes kbd {
+  padding: 0 0.3vw;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.3vw;
+  font-family: inherit;
+}
+
 .lobby-slots {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

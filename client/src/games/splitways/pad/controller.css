@@ -187,10 +187,34 @@
   color: var(--text);
 }
 
-.ctl-wheel {
+.ctl-wheel-wrap {
+  position: relative;
   width: min(100%, 52vh);
   aspect-ratio: 1;
+}
+
+.ctl-wheel {
+  width: 100%;
+  aspect-ratio: 1;
   will-change: transform;
+}
+
+/* The wheel's hub is the horn. */
+.ctl-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.ctl-hub.is-pressed {
+  transform: translate(-50%, -50%) scale(0.92);
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 50%, transparent);
 }
 
 .ctl-wheel-rim {
@@ -264,6 +288,77 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   min-height: 0;
+}
+
+.ctl-drive-buttons--items {
+  grid-template-columns: 1fr 1.2fr 0.6fr;
+}
+
+/* ---- Item button (items mode) ----------------------------------------------------- */
+
+.ctl-side--items {
+  grid-template-rows: 36% 1fr;
+}
+
+.ctl-item {
+  position: relative;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  min-height: 0;
+  padding: 4px;
+  border: 2px solid var(--edge);
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface));
+  color: var(--text);
+  font: inherit;
+  overflow: hidden;
+  transition: transform 0.06s ease;
+}
+
+.ctl-item img {
+  width: clamp(28px, 11vh, 64px);
+  height: clamp(28px, 11vh, 64px);
+}
+
+.ctl-item small {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ctl-item b {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.ctl-item.is-rolling {
+  border-color: #fff;
+}
+
+.ctl-item.is-ready {
+  border-color: var(--accent);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 45%, transparent);
+  animation: ctl-item-ready 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.ctl-item.is-ready small {
+  color: var(--accent);
+}
+
+.ctl-item.is-ready:active {
+  transform: scale(0.95);
+}
+
+@keyframes ctl-item-ready {
+  from {
+    transform: scale(1.12);
+  }
 }
 
 /* ---- Settings, overlays --------------------------------------------------------- */

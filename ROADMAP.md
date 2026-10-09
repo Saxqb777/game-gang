@@ -18,6 +18,6 @@ Out of scope for v1. Written down so the v1 code leaves room for them, not built
 - AI opponents.
 - More tracks (the track builder takes a list of spline control points, so this is mostly content),
   more cars, unlockables.
-- Rubber band assist as an option (v1 is pure skill).
-- Drift scoring, boost pads, items.
+- Rubber band assist as an option (Classic is pure skill; Items only weights the item odds).
+- Drift scoring, more items, battle mode.
 - Spectator mode, replays, ghost laps.

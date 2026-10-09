@@ -1,6 +1,8 @@
 /** Pad-side state: link status plus the latest hub/game messages from the TV. */
 import type {
   ColourId,
+  GameAction,
+  GameMode,
   InputMessage,
   JoinedMessage,
   KickReason,
@@ -76,6 +78,16 @@ export class PadStore {
 
   voteAgain(): void {
     this.transport?.send({ type: 'vote', choice: 'again' });
+  }
+
+  /** Lobby: switch the game mode for everyone. */
+  setMode(mode: GameMode): void {
+    this.transport?.send({ type: 'mode', mode });
+  }
+
+  /** A one-shot button (e.g. use item), sent on the reliable channel so it can't get lost. */
+  action(action: GameAction): void {
+    this.transport?.send({ type: 'action', action });
   }
 
   sendInput(input: Omit<InputMessage, 'type'>): boolean {

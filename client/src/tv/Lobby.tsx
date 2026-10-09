@@ -86,6 +86,19 @@ export function Lobby({ state, selectedGame }: { state: HubState; selectedGame: 
                 <h3>{g.title}</h3>
                 <p className="game-card-subtitle">{g.subtitle}</p>
                 <p className="game-card-details">{g.details}</p>
+                {g.id === selectedGame ? (
+                  <div className="game-modes">
+                    {g.modes.map((m) => (
+                      <span key={m.id} className={m.id === state.mode ? 'is-on' : ''}>
+                        {m.label}
+                      </span>
+                    ))}
+                    <small>
+                      {g.modes.find((m) => m.id === state.mode)?.hint} · <kbd>M</kbd> or any phone
+                      to switch
+                    </small>
+                  </div>
+                ) : null}
               </div>
             </article>
           ))}

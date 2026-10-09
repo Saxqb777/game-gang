@@ -1,9 +1,10 @@
 /**
  * Race sound, all synthesised with Web Audio (no audio files): an engine per car with a fake
- * six-speed gearbox, tyre screech, wind, sand rumble, horn, impacts, countdown beeps and a crowd.
- * Each car is panned towards its viewport's side of the screen.
+ * six-speed gearbox, tyre screech, wind, sand rumble, horn, impacts, countdown beeps, a crowd,
+ * and the item and boost effects. Each car is panned towards its viewport's side of the screen.
  */
-import { AUDIO } from '../config';
+import type { ItemKind } from '@gamergang/shared';
+import { AUDIO, ITEMS } from '../config';
 import type { Car } from '../sim/car';
 
 /** Time constant for smoothly following per-frame targets (s). */
@@ -64,7 +65,7 @@ function applauseBuffer(ctx: BaseAudioContext, seconds: number): AudioBuffer {
 
 export class RaceAudio {
   private readonly master: GainNode;
-  private readonly noise: AudioBuffer;
+  private readonly whiteNoise: AudioBuffer;
   private readonly applause: AudioBuffer;
   private readonly voices: Voice[] = [];
   private readonly sources: AudioScheduledSourceNode[] = [];
@@ -75,7 +76,7 @@ export class RaceAudio {
     private readonly ctx: BaseAudioContext,
     cars: readonly Car[],
   ) {
-    this.noise = noiseBuffer(ctx, 2);
+    this.whiteNoise = noiseBuffer(ctx, 2);
     this.applause = applauseBuffer(ctx, 5);
     const limiter = ctx.createDynamicsCompressor();
     limiter.threshold.value = -10;
@@ -96,7 +97,7 @@ export class RaceAudio {
    * Once per frame per car. `throttle` and `horn` are what the player is pressing, even while the
    * car is held on the grid (so engines rev during the countdown).
    */
-  updateCar(index: number, throttle: number, horn: boolean, onSand: boolean): void {
+  updateCar(index: number, throttle: number, horn: boolean, onSand: boolean, draft: number): void {
     const voice = this.voices[index];
     if (!voice) return;
     const { car } = voice;
@@ -150,7 +151,8 @@ export class RaceAudio {
     voice.screechFilter.frequency.setTargetAtTime(1300 + Math.min(slide, 20) * 60, now, 0.05);
 
     const fast = Math.min(1, speed / 52);
-    voice.windGain.gain.setTargetAtTime(AUDIO.wind * fast * fast, now, 0.1);
+    // Slipstream: the wind roars louder in another car's wake.
+    voice.windGain.gain.setTargetAtTime(AUDIO.wind * fast * fast * (1 + 2.5 * draft), now, 0.1);
     voice.sandGain.gain.setTargetAtTime(
       onSand ? AUDIO.sand * Math.min(1, speed / 25) : 0,
       now,
@@ -175,7 +177,7 @@ export class RaceAudio {
     voice.lastImpact = now;
     const level = AUDIO.impact * (0.25 + 0.75 * strength);
     const source = this.ctx.createBufferSource();
-    source.buffer = this.noise;
+    source.buffer = this.whiteNoise;
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.value = 500 + strength * 1500;
@@ -237,6 +239,140 @@ export class RaceAudio {
     setTimeout(() => this.master.disconnect(), 400);
   }
 
+  /** Grabbed a box: a rising arpeggio, the slot ticking while it spins, a ding when it stops. */
+  pickup(index: number): void {
+    const now = this.ctx.currentTime;
+    const out = this.out(index);
+    [660, 880, 1320].forEach((f, k) => this.tone(out, 'square', f, f, now + k * 0.05, 0.08, 0.3));
+    for (let k = 0; k < 10; k++) {
+      this.tone(out, 'triangle', 1800, 1800, now + 0.15 + k * 0.085, 0.03, 0.18);
+    }
+    this.tone(out, 'sine', 1568, 1568, now + ITEMS.rollSeconds, 0.35, 0.4);
+  }
+
+  use(index: number, kind: ItemKind): void {
+    const now = this.ctx.currentTime;
+    const out = this.out(index);
+    switch (kind) {
+      case 'nitro':
+        this.noise(out, 'bandpass', 400, 3200, now, 0.6, 1.5);
+        this.tone(out, 'sawtooth', 110, 220, now, 0.5, 0.12);
+        break;
+      case 'oil':
+        this.noise(out, 'lowpass', 900, 200, now, 0.25, 0.45);
+        this.tone(out, 'sine', 120, 50, now, 0.2, 0.4);
+        break;
+      case 'rocket':
+        this.noise(out, 'bandpass', 2400, 600, now, 0.5, 1.3);
+        this.tone(out, 'sawtooth', 900, 300, now, 0.45, 0.24);
+        break;
+      case 'bounty':
+        // A siren rising as it sets off after the leader.
+        for (let k = 0; k < 3; k++)
+          this.tone(this.master, 'sawtooth', 500, 1100, now + k * 0.35, 0.33, 0.24);
+        break;
+      case 'shield':
+        this.tone(out, 'sine', 880, 1320, now, 0.5, 0.32);
+        this.tone(out, 'sine', 1108, 1660, now + 0.04, 0.5, 0.22);
+        break;
+      case 'shockwave':
+        this.tone(out, 'sine', 90, 35, now, 0.5, 0.7);
+        this.noise(out, 'lowpass', 1600, 200, now, 0.45, 0.5);
+        break;
+    }
+  }
+
+  /** A rocket or drone going off. */
+  explosion(big: boolean): void {
+    const now = this.ctx.currentTime;
+    this.noise(
+      this.master,
+      'lowpass',
+      2200,
+      150,
+      now,
+      big ? 1.1 : 0.7,
+      AUDIO.impact * (big ? 0.75 : 0.6),
+    );
+    this.tone(this.master, 'sine', 80, 30, now, 0.6, AUDIO.impact * 0.6);
+  }
+
+  /** The shield took a hit. */
+  blocked(index: number): void {
+    const now = this.ctx.currentTime;
+    const out = this.out(index);
+    this.tone(out, 'sine', 1200, 1150, now, 0.4, 0.25);
+    this.tone(out, 'sine', 1790, 1750, now, 0.3, 0.15);
+  }
+
+  boost(index: number, source: 'drift' | 'pad' | 'nitro'): void {
+    const now = this.ctx.currentTime;
+    const out = this.out(index);
+    if (source === 'pad') {
+      this.tone(out, 'square', 300, 1500, now, 0.25, 0.2);
+      this.noise(out, 'bandpass', 600, 3000, now, 0.4, 1);
+    }
+    if (source === 'drift') this.noise(out, 'bandpass', 800, 2600, now, 0.35, 1.2);
+  }
+
+  /** The drift sparks changed colour. */
+  driftLevel(index: number, level: number): void {
+    const now = this.ctx.currentTime;
+    const f = [880, 1175, 1568][level - 1] ?? 880;
+    this.tone(this.out(index), 'triangle', f, f, now, 0.12, 0.3);
+  }
+
+  /** Where a car's one-shot sounds go: its panner, so they sit on its side of the screen. */
+  private out(index: number): AudioNode {
+    return this.voices[index]?.panner ?? this.master;
+  }
+
+  private tone(
+    out: AudioNode,
+    type: OscillatorType,
+    from: number,
+    to: number,
+    start: number,
+    seconds: number,
+    level: number,
+  ): void {
+    const osc = this.ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(from, start);
+    if (to !== from) osc.frequency.exponentialRampToValueAtTime(to, start + seconds);
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(level, start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + seconds);
+    osc.connect(gain).connect(out);
+    osc.start(start);
+    osc.stop(start + seconds + 0.05);
+  }
+
+  private noise(
+    out: AudioNode,
+    type: BiquadFilterType,
+    from: number,
+    to: number,
+    start: number,
+    seconds: number,
+    level: number,
+  ): void {
+    const source = this.ctx.createBufferSource();
+    source.buffer = this.whiteNoise;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = type;
+    filter.Q.value = type === 'bandpass' ? 1.5 : 0.7;
+    filter.frequency.setValueAtTime(from, start);
+    filter.frequency.exponentialRampToValueAtTime(to, start + seconds);
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(level, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + seconds);
+    source.connect(filter).connect(gain).connect(out);
+    source.start(start, Math.random());
+    source.stop(start + seconds + 0.05);
+  }
+
   private beep(frequency: number, seconds: number): void {
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -281,7 +417,7 @@ export class RaceAudio {
 
     // One noise loop per car feeds the screech, the wind and the sand rumble.
     const noise = ctx.createBufferSource();
-    noise.buffer = this.noise;
+    noise.buffer = this.whiteNoise;
     noise.loop = true;
     this.started(noise, Math.random() * 2);
     const screechFilter = ctx.createBiquadFilter();

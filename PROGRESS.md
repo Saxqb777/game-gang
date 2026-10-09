@@ -165,3 +165,23 @@ returns both screens to the lobby. 60 fps on the M1 is yours to confirm.
 - No errors with audio running in a headless race. Tilt overlay appears while the gyro is silent
   and falls back to buttons when there is no sensor.
 - Not verified: how it sounds on the TV speakers, real iPhone motion prompt.
+
+## M6 - Ship
+
+**Built**
+
+- README: setup, controls, troubleshooting, deploy steps.
+- `pnpm start`: production build served from the Mac (TV on http :4000, phones on https :4443).
+
+**Test**
+
+1. `pnpm start`, then a full race as in M3-M5.
+2. Deploy as in README → Deploy. Open `/tv` on the Vercel URL and join with phones, including one
+   on mobile data (needs the TURN variables if it can't connect).
+
+**Verified here**
+
+- `pnpm start` serves the TV page, the https pad page, the API and the sky file.
+- `pnpm check` passes (typecheck, lint, format, 31 tests). `pnpm build:vercel` output: static
+  files plus one API function.
+- Not verified: a real Vercel deployment and Neon database (needs your accounts).

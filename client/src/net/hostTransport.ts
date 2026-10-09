@@ -42,6 +42,8 @@ export interface HostTransportPort {
   stop(): void;
   send(peerId: string, message: TvMessage): boolean;
   setIdlePollMs(ms: number): void;
+  /** The room code and host key, for API calls only the TV may make (e.g. posting lap times). */
+  credentials(): { code: string; hostKey: string } | null;
 }
 
 interface RoomCredentials extends RoomInfo {
@@ -104,6 +106,10 @@ export class HostTransport implements HostTransportPort {
 
   setIdlePollMs(ms: number): void {
     this.idlePollMs = ms;
+  }
+
+  credentials(): { code: string; hostKey: string } | null {
+    return this.room ? { code: this.room.code, hostKey: this.room.hostKey } : null;
   }
 
   send(peerId: string, message: TvMessage): boolean {

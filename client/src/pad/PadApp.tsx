@@ -14,6 +14,7 @@ import { getPadStore } from './padStore';
 import { loadProfile, saveProfile, type Profile, type SteeringMode } from './profile';
 import { JoinScreen } from './screens/JoinScreen';
 import { LobbyScreen, SettingsSheet } from './screens/LobbyScreen';
+import { ResultsScreen } from './screens/ResultsScreen';
 import { CodeEntryScreen, ConnectingScreen, MessageScreen } from './screens/Simple';
 
 function roomFromUrl(): string | null {
@@ -150,6 +151,17 @@ export default function PadApp() {
           onSettings={() => setSettingsOpen(true)}
         />
       </Suspense>
+    );
+  } else if (lobby.state === 'results') {
+    screen = (
+      <ResultsScreen
+        lobby={lobby}
+        results={state.results}
+        myId={me.playerId}
+        room={room}
+        onVote={() => store.voteAgain()}
+        onSettings={() => setSettingsOpen(true)}
+      />
     );
   } else {
     screen = (

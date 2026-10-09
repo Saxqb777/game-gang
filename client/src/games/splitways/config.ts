@@ -123,9 +123,20 @@ export const ASSISTS = {
   airDamping: 900,
 } as const;
 
+export const RACE = {
+  /** Red lights: 3, 2, 1, then green. */
+  countdownSeconds: 3,
+  /** Once the winner finishes, everyone else has this long to cross the line. */
+  finishTimeoutSeconds: 30,
+  /** Seconds after the race ends before the podium appears (time to see your own finish). */
+  podiumDelaySeconds: 3,
+} as const;
+
 export const RESPAWN = {
-  /** Upside down (or on its side) for this long = respawn. */
+  /** Upside down (or on its side) for this long = respawn at the last checkpoint. */
   flippedSeconds: 3,
+  /** Pressing gas or brake but going nowhere (wedged against a wall) for this long = respawn. */
+  stuckSeconds: 3,
   /** Counts as flipped when the car's up axis points less than this much upwards. */
   flippedUpDot: 0.35,
 } as const;

@@ -1,12 +1,106 @@
 import './stage.css';
-import { useEffect, useRef, useState } from 'react';
+import { colourHex, type LeaderboardEntry } from '@gamergang/shared';
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import type { Hub } from '../../../hub/hub';
-import { SplitWaysGame } from '../game';
+import { api } from '../../../net/api';
+import { SplitWaysGame, type RaceResult } from '../game';
+import { formatTime } from '../hud/viewportHud';
+import { CORNICHE_RUN } from '../track/cornicheRun';
+
+/** Posts this race's best laps (host only) and fetches the all-time board for the results screen. */
+async function syncLeaderboard(
+  hub: Hub,
+  results: readonly RaceResult[],
+): Promise<LeaderboardEntry[]> {
+  const credentials = hub.roomCredentials();
+  const laps = results
+    .filter(
+      (r): r is RaceResult & { bestLapMs: number } => r.bestLapMs !== null && r.bestLapMs >= 20_000,
+    )
+    .map((r) => ({ name: r.name, bestLapMs: r.bestLapMs }));
+  if (credentials && laps.length > 0) {
+    await api
+      .postLaps({ room: credentials.code, key: credentials.hostKey, track: 'corniche-run', laps })
+      .catch((error: unknown) => console.warn('[splitways] could not save lap times', error));
+  }
+  const board = await api.leaderboard(CORNICHE_RUN.id);
+  return board.entries;
+}
+
+function ResultsPanel({
+  hub,
+  results,
+  leaderboard,
+}: {
+  hub: Hub;
+  results: readonly RaceResult[];
+  leaderboard: readonly LeaderboardEntry[] | null;
+}) {
+  const state = useSyncExternalStore(hub.subscribe, hub.getState);
+  const voters = state.players.filter((p) => p.connected && !p.local).length;
+  const needed = Math.floor(voters / 2) + 1;
+  const names = new Set(results.map((r) => r.name.toLowerCase()));
+  return (
+    <div className="sw-results">
+      <section className="sw-results-card">
+        <h2>Results</h2>
+        <ol className="sw-results-list">
+          {results.map((r) => (
+            <li key={r.id} style={{ '--player': colourHex(r.colour) } as CSSProperties}>
+              <span className={`sw-results-place p${r.place}`}>{r.place}</span>
+              <span className="sw-results-name">{r.name}</span>
+              <span className="sw-results-time">
+                {r.totalMs === null ? 'DNF' : formatTime(r.totalMs)}
+              </span>
+              <span className="sw-results-best">
+                best {r.bestLapMs === null ? '-' : formatTime(r.bestLapMs)}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <section className="sw-results-card sw-results-board">
+        <h2>All-time best laps · {CORNICHE_RUN.name}</h2>
+        {leaderboard === null ? (
+          <p className="sw-results-muted">Loading...</p>
+        ) : leaderboard.length === 0 ? (
+          <p className="sw-results-muted">No laps on the board yet.</p>
+        ) : (
+          <ol className="sw-board-list">
+            {leaderboard.slice(0, 8).map((entry, i) => (
+              <li
+                key={`${entry.name}-${i}`}
+                className={names.has(entry.name.toLowerCase()) ? 'is-new' : ''}
+              >
+                <span>{i + 1}</span>
+                <span>{entry.name}</span>
+                <span>{formatTime(entry.bestLapMs)}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+      <footer className="sw-results-vote">
+        {voters > 0 ? (
+          <>
+            Tap <b>PLAY AGAIN</b> on your phone · {state.votes.length}/{needed} votes
+          </>
+        ) : (
+          <>
+            Press <b>Esc</b> to go back to the lobby
+          </>
+        )}
+      </footer>
+    </div>
+  );
+}
 
 /** Mounts the Split Ways game for the players the hub put in this round. */
 export default function SplitWaysStage({ hub }: { hub: Hub }) {
   const gameRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'loading' | 'running' | 'failed'>('loading');
+  const [results, setResults] = useState<RaceResult[] | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
 
   useEffect(() => {
     const container = gameRef.current;
@@ -19,8 +113,22 @@ export default function SplitWaysStage({ hub }: { hub: Hub }) {
       .map(({ id, name, colour, slot, local }) => ({ id, name, colour, slot, local }));
 
     SplitWaysGame.create(container, players, {
-      send: (playerId, message) => hub.send(playerId, message),
+      send: (playerId, message) => {
+        hub.send(playerId, message);
+      },
       rttMs: (playerId) => hub.rttMs(playerId),
+      onResults: (final) => {
+        hub.finishGame();
+        setResults(final);
+        syncLeaderboard(hub, final).then(
+          (entries) => {
+            if (!cancelled) setLeaderboard(entries);
+          },
+          () => {
+            if (!cancelled) setLeaderboard([]);
+          },
+        );
+      },
     }).then(
       (created) => {
         if (cancelled) {
@@ -61,6 +169,7 @@ export default function SplitWaysStage({ hub }: { hub: Hub }) {
           <span>Could not start the game. Press Esc to go back to the lobby.</span>
         </div>
       ) : null}
+      {results ? <ResultsPanel hub={hub} results={results} leaderboard={leaderboard} /> : null}
     </div>
   );
 }

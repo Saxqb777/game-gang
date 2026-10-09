@@ -117,6 +117,10 @@ export class Hub {
     return this.rtt.get(playerId) ?? null;
   }
 
+  roomCredentials(): { code: string; hostKey: string } | null {
+    return this.transport.credentials();
+  }
+
   send(playerId: string, message: TvMessage): void {
     if (!this.player(playerId)?.local) this.transport.send(playerId, message);
   }
@@ -240,12 +244,17 @@ export class Hub {
     }
   }
 
+  /** A strict majority of the connected phones. */
+  votesNeeded(): number {
+    const voters = this.state.players.filter((p) => p.connected && !p.local).length;
+    return Math.floor(Math.max(1, voters) / 2) + 1;
+  }
+
   private handleVote(peerId: string): void {
     if (this.state.phase !== 'results' || !this.player(peerId)) return;
     if (this.state.votes.includes(peerId)) return;
     this.update({ votes: [...this.state.votes, peerId] });
-    const voters = this.state.players.filter((p) => p.connected && !p.local).length;
-    if (this.state.votes.length > Math.max(1, voters) / 2) this.returnToLobby();
+    if (this.state.votes.length >= this.votesNeeded()) this.returnToLobby();
   }
 
   // ---- State helpers ---------------------------------------------------------
@@ -339,6 +348,7 @@ export class Hub {
         slot,
       })),
       votes: [...this.state.votes],
+      votesNeeded: this.votesNeeded(),
     };
   }
 

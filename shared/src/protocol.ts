@@ -155,6 +155,8 @@ export const lobbySchema = z.object({
   players: z.array(lobbyPlayerSchema).max(MAX_PLAYERS),
   /** Player ids that voted to play again (results phase only). */
   votes: z.array(playerIdSchema).max(MAX_PLAYERS),
+  /** Votes needed for a majority (results phase only). */
+  votesNeeded: z.number().int().min(1).max(MAX_PLAYERS),
 });
 
 /** Split Ways per-player race status, sent at 5 Hz while playing. */

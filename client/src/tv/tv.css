@@ -320,3 +320,17 @@
   border-radius: 0.3vw;
   font-family: inherit;
 }
+
+/* In a game the hints sit bottom-centre (clear of the HUD) and fade away after a few seconds. */
+.tv-keys--game {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: tv-keys-fade 1s ease 6s forwards;
+}
+
+@keyframes tv-keys-fade {
+  to {
+    opacity: 0;
+  }
+}

@@ -98,3 +98,57 @@ Why things are the way they are. Newest milestone at the bottom of each section.
 - The JOIN tap is the user gesture that asks iOS for motion permission (and Android for fullscreen).
   If permission is denied, the page is not secure, or no sensor reports within 1.5 s, the pad drops to
   Buttons with a short note.
+
+## M1: driving
+
+- **Car model:** "Sports" from the CC0 _Free Low Poly Vehicles Pack_ by Rgsdev (OpenGameArt). The
+  source is FBX only, so `pnpm assets:car` (`client/scripts/build-car-model.mjs`) downloads the pack,
+  checks its hash, bakes transforms, scales to a 4.6 m car, re-centres each wheel on its axle, smooths
+  normals on gentle curves while keeping panel edges sharp, merges the 80+ material groups into one
+  per material (220 -> 14 draw calls per car) and writes `assets/models/sports-car.glb` (66 KB).
+  All materials are replaced at runtime by our own PBR set (clearcoat paint tinted per player, dark
+  glossy glass, chrome rims, emissive head/tail lights; tail lights flare when braking).
+- **Coordinate convention:** +Y up, cars face +Z, right is -X. Steering input +1 = right.
+- **Physics:** Rapier `DynamicRayCastVehicleController`, fixed 60 Hz, render interpolates between the
+  last two physics states. Gravity is 13 m/s^2 (not 9.81): cars feel heavier, grip harder and land
+  jumps sooner. Car mass and inertia are set explicitly with a low centre of mass instead of coming
+  from the collider shape.
+- **Arcade assists on top of the raycast vehicle** (all in `config.ts`): speed-sensitive steering
+  angle and steering rate, engine falloff towards top speed, drag + rolling resistance, downforce
+  ~ speed^2, anti-roll and pitch damping, a yaw-rate limiter (spins stay recoverable), slide alignment
+  that is boosted when you counter-steer, air levelling, reverse when holding brake at a standstill.
+  Brake-induced oversteer lowers rear side grip while braking with steering above 12 m/s; the
+  handbrake drops rear grip and side stiffness and locks the rear wheels.
+- **Tuned numbers, measured headlessly** (`client/src/games/splitways/sim/car.test.ts` asserts them):
+
+  | Measure                          | Value                                                            |
+  | -------------------------------- | ---------------------------------------------------------------- |
+  | 0-100 km/h                       | 3.6 s                                                            |
+  | 0-150 km/h                       | 7.0 s                                                            |
+  | Top speed                        | ~176 km/h (asymptotic, engine fades towards 187)                 |
+  | 140-0 km/h                       | 64 m (~1.2 g)                                                    |
+  | Peak cornering grip              | ~2.6 g (gravity 13 x grip 1.9 + downforce)                       |
+  | Full lock at 46 km/h             | ~6 m radius, 8 deg slip                                          |
+  | Full lock at top speed           | slides (22 deg slip), sheds ~50 km/h in 2 s, never lifts a wheel |
+  | Mid-corner brake tap at 100 km/h | 15 deg tail slide                                                |
+  | Handbrake + steer at 100 km/h    | full drift; release + counter-steer catches it within 2 s        |
+  | Reverse                          | 11 km/h max                                                      |
+
+  Key values: mass 1300 kg, COM 0.28 m high, inertia (pitch/yaw/roll) 2300/2100/900, engine 11.5 kN
+  (30 % front), grip front 1.9 / rear 1.8, suspension stiffness 42, damping 4.2/5.2, brake impulse 62
+  per wheel (62 % front), handbrake rear grip x0.4 / side x0.35, steering 0.58 rad at low speed to
+  0.17 rad at 44 m/s, downforce 3.2, drag 0.42. These are first-pass values tuned from measurements,
+  not yet from a human driving with a phone: expect to adjust grip, steering rates and the drift
+  multipliers after the first couch session (debug overlay: backtick on the TV).
+
+- **Inputs:** pads send on change (max 30/s) plus a 100 ms heartbeat, because the input channel is
+  lossy on purpose and a lost "gas released" packet must not leave a car accelerating. The TV treats
+  600 ms without a pad packet as "coast" (no gas, no brake, wheel centred). Keyboard players on the
+  TV: press K in the lobby (WASD + Space, then arrows + right Shift). With no keyboard players, WASD
+  also drives the first car, so a laptop alone can test.
+- **Shadows:** one sun, re-aimed at each viewport's car before that viewport renders and snapped to
+  shadow texels to stop shimmering. three.js r186 deprecated `PCFSoftShadowMap`; we use
+  `PCFShadowMap` with `shadow.radius` for soft edges.
+- **No allocation in the frame loop:** physics state, cameras and visuals reuse scratch vectors;
+  Rapier getters are called with target objects; viewport rects are cached and only rebuilt on resize.
+  The only per-step allocations are collision events (rare) and the debug overlay (hidden by default).

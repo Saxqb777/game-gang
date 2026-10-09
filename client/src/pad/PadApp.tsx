@@ -1,5 +1,7 @@
 import './pad.css';
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { colourHex } from '@gamergang/shared';
+import { Suspense, useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { PAD_CONTROLLERS } from './controllers';
 import {
   enterFullscreen,
   keepScreenAwake,
@@ -137,12 +139,22 @@ export default function PadApp() {
         onSettings={() => setSettingsOpen(true)}
       />
     );
+  } else if (lobby.state === 'playing' && myPlayer.inGame) {
+    const Controller = PAD_CONTROLLERS[lobby.game];
+    screen = (
+      <Suspense fallback={<ConnectingScreen room={room} reconnecting={false} />}>
+        <Controller
+          store={store}
+          mode={profile.mode}
+          colourHex={colourHex(myPlayer.colour)}
+          onSettings={() => setSettingsOpen(true)}
+        />
+      </Suspense>
+    );
   } else {
     screen = (
       <MessageScreen title="Race in progress">
-        {myPlayer.inGame
-          ? 'Look at the TV!'
-          : 'You will be on the grid for the next race. Hang tight.'}
+        You will be on the grid for the next race. Hang tight.
       </MessageScreen>
     );
   }

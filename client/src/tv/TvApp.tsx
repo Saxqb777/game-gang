@@ -1,6 +1,5 @@
 import './tv.css';
 import { Suspense, useEffect, useSyncExternalStore } from 'react';
-import { GAME_MODES, type GameMode } from '@gamergang/shared';
 import type { Hub, HubState } from '../hub/hub';
 import { useSoundOn } from './audio';
 import { GAME_STAGES } from './gameStages';
@@ -40,24 +39,41 @@ function handleTvKey(hub: Hub, state: HubState, event: KeyboardEvent): void {
     case 'Enter':
       for (const player of localPlayers) hub.toggleLocalReady(player.id);
       return;
-    case 'KeyM': {
-      const modes: readonly GameMode[] = GAME_MODES[hub.game];
-      hub.setMode(modes[(modes.indexOf(state.mode) + 1) % modes.length] ?? state.mode);
-      return;
-    }
   }
 }
 
-function KeyHints({ phase }: { phase: HubState['phase'] }) {
+/** Keyboard players reset a stuck car with Q (WASD set) or Enter (arrows set). */
+function ResetHint({ keyboardPlayers }: { keyboardPlayers: number }) {
+  if (keyboardPlayers === 0) return null;
+  return (
+    <>
+      <kbd>Q</kbd>
+      {keyboardPlayers > 1 ? (
+        <>
+          /<kbd>Enter</kbd>
+        </>
+      ) : null}{' '}
+      reset ·{' '}
+    </>
+  );
+}
+
+function KeyHints({
+  phase,
+  keyboardPlayers,
+}: {
+  phase: HubState['phase'];
+  keyboardPlayers: number;
+}) {
   return (
     <div className={`tv-keys ${phase === 'lobby' ? '' : 'tv-keys--game'}`}>
       {phase === 'lobby' ? (
         <>
-          <kbd>K</kbd> keyboard player · <kbd>Enter</kbd> ready · <kbd>M</kbd> mode · <kbd>F</kbd>{' '}
-          fullscreen
+          <kbd>K</kbd> keyboard player · <kbd>Enter</kbd> ready · <kbd>F</kbd> fullscreen
         </>
       ) : (
         <>
+          <ResetHint keyboardPlayers={keyboardPlayers} />
           <kbd>Esc</kbd> back to lobby · <kbd>`</kbd> debug · <kbd>F</kbd> fullscreen
         </>
       )}
@@ -90,7 +106,10 @@ export default function TvApp() {
           <Stage hub={hub} />
         </Suspense>
       )}
-      <KeyHints phase={state.phase} />
+      <KeyHints
+        phase={state.phase}
+        keyboardPlayers={state.players.filter((p) => p.local && p.inGame).length}
+      />
       {soundOn ? null : <div className="tv-sound">Sound is off · click or press any key</div>}
     </div>
   );

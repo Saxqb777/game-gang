@@ -5,9 +5,17 @@ import {
   type ColourId,
   type LobbyMessage,
 } from '@gamergang/shared';
-import { useState, type CSSProperties } from 'react';
-import type { Profile, SteeringMode } from '../profile';
+import { useState, type CSSProperties, type ReactNode } from 'react';
+import { STEERING_MODES, type Profile, type SteeringMode } from '../profile';
 import { Brand } from './Simple';
+
+const MODE_INFO: Record<SteeringMode, { label: string; hint: string; icon: ReactNode }> = {
+  buttons: {
+    label: 'Buttons',
+    hint: 'Hold left / right arrows',
+    icon: <path d="M18 8l-8 8 8 8M30 8l8 8-8 8" />,
+  },
+};
 
 export function ModePicker({
   mode,
@@ -16,35 +24,30 @@ export function ModePicker({
   mode: SteeringMode;
   onChange: (mode: SteeringMode) => void;
 }) {
+  // A plain string: while there is a single mode its literal type makes `===` look constant.
+  const selected: string = mode;
   return (
     <div className="pad-modes" role="radiogroup" aria-label="Steering">
-      <button
-        type="button"
-        role="radio"
-        aria-checked={mode === 'tilt'}
-        className={`pad-mode ${mode === 'tilt' ? 'is-on' : ''}`}
-        onClick={() => onChange('tilt')}
-      >
-        <svg viewBox="0 0 48 32" aria-hidden>
-          <rect x="6" y="6" width="36" height="20" rx="4" transform="rotate(-14 24 16)" />
-          <path d="M4 26c3 3 7 4 11 4M44 6c-3-3-7-4-11-4" />
-        </svg>
-        <strong>Tilt</strong>
-        <small>Turn the phone like a wheel</small>
-      </button>
-      <button
-        type="button"
-        role="radio"
-        aria-checked={mode === 'buttons'}
-        className={`pad-mode ${mode === 'buttons' ? 'is-on' : ''}`}
-        onClick={() => onChange('buttons')}
-      >
-        <svg viewBox="0 0 48 32" aria-hidden>
-          <path d="M18 8l-8 8 8 8M30 8l8 8-8 8" />
-        </svg>
-        <strong>Buttons</strong>
-        <small>Hold left / right arrows</small>
-      </button>
+      {STEERING_MODES.map((id) => {
+        const info = MODE_INFO[id];
+        const on = selected === id;
+        return (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            className={`pad-mode ${on ? 'is-on' : ''}`}
+            onClick={() => onChange(id)}
+          >
+            <svg viewBox="0 0 48 32" aria-hidden>
+              {info.icon}
+            </svg>
+            <strong>{info.label}</strong>
+            <small>{info.hint}</small>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -54,7 +57,6 @@ export function JoinScreen({
   lobby,
   myId,
   profile,
-  note,
   submitLabel,
   onSubmit,
 }: {
@@ -62,9 +64,8 @@ export function JoinScreen({
   lobby: LobbyMessage;
   myId: string | null;
   profile: Profile;
-  note: string | null;
   submitLabel: string;
-  /** Runs inside the tap, so it may ask for motion permission. */
+  /** Runs inside the tap, which fullscreen needs. */
   onSubmit: (profile: Profile) => void;
 }) {
   const taken = new Set(lobby.players.filter((p) => p.id !== myId).map((p) => p.colour));
@@ -121,7 +122,6 @@ export function JoinScreen({
         <section className="pad-join-col">
           <span className="pad-label">Steering</span>
           <ModePicker mode={mode} onChange={setMode} />
-          {note ? <p className="pad-note">{note}</p> : null}
           <button className="pad-btn pad-btn--big" disabled={!trimmed}>
             {submitLabel}
           </button>

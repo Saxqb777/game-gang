@@ -1,12 +1,12 @@
 /**
- * Everything beside the track: palms, street lamps, the low-rise city, a distant skyline, a
- * grandstand at the start and trackside banners. Each kind is one instanced or merged mesh, about
- * ten draw calls per viewport in total. Placement is seeded, so every race looks the same.
+ * Everything beside the track: an interim pine forest (until the Track 1 dressing replaces it), a
+ * grandstand at the start and trackside banners. Each kind is one instanced or merged mesh, so the
+ * scenery costs a handful of draw calls per viewport. Placement is seeded, so every race looks the
+ * same.
  */
 import {
   BoxGeometry,
   Color,
-  DoubleSide,
   Group,
   InstancedMesh,
   Mesh,
@@ -18,18 +18,18 @@ import {
   type Texture,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { CITY, SEA_LEVEL, type Terrain } from '../track/terrain';
+import { fbm } from '../track/noise';
+import type { Terrain } from '../track/terrain';
 import type { Track } from '../track/track';
-import {
-  bannerTexture,
-  blockGeometry,
-  crowdTexture,
-  facadeMaterial,
-  lampGeometries,
-  lowRiseTexture,
-  palmGeometry,
-  towerTexture,
-} from './sceneryModels';
+import { bannerTexture, crowdTexture, pineGeometry } from './sceneryModels';
+
+/** Interim forest: candidate spacing (m), how far out it reaches, and the tile size for culling. */
+const PINE_SPACING = 15;
+const PINE_REACH = 230;
+const PINE_TILE = 200;
+/** Pines keep this far back from the barriers (m), and from the grandstand. */
+const PINE_ROAD_GAP = 7;
+const GRANDSTAND_CENTRE_AHEAD = 55;
 
 /** mulberry32: small, fast, seeded. */
 function seeded(seed: number): () => number {
@@ -58,8 +58,9 @@ const dummy = new Object3D();
 
 export class Scenery {
   readonly group = new Group();
-  private readonly geometries: BufferGeometry[] = [];
-  private readonly materials: Material[] = [];
+  // Sets: several instanced meshes may share one geometry and material.
+  private readonly geometries = new Set<BufferGeometry>();
+  private readonly materials = new Set<Material>();
   private readonly textures: Texture[] = [];
   private readonly random = seeded(20251009);
 
@@ -67,10 +68,7 @@ export class Scenery {
     private readonly track: Track,
     private readonly terrain: Terrain,
   ) {
-    this.addPalms();
-    this.addLamps();
-    this.addCity();
-    this.addSkyline();
+    this.addPines();
     this.addGrandstand();
     this.addBanners();
   }
@@ -107,8 +105,8 @@ export class Scenery {
     placements: readonly Placement[],
     shadows: boolean,
   ): InstancedMesh {
-    this.geometries.push(geometry);
-    this.materials.push(material);
+    this.geometries.add(geometry);
+    this.materials.add(material);
     const mesh = new InstancedMesh(geometry, material, placements.length);
     placements.forEach((p, i) => {
       dummy.position.set(p.x, p.y, p.z);
@@ -125,151 +123,91 @@ export class Scenery {
     return mesh;
   }
 
-  private addPalms(): void {
-    const { track, random } = this;
-    const placements: Placement[] = [];
-    const n = track.samples.length;
-    for (let i = 0; i < n; i += 15 + Math.floor(random() * 4)) {
-      for (const side of [-1, 1]) {
-        const lateral = side * (track.halfDrivable + 4.5 + random() * 2.5);
-        const { x, z } = this.beside(i, lateral);
-        const coastal = z > 95 && z < this.terrain.coastZ(x) - 12;
-        const city = x < CITY.x + 30;
-        const boulevard = z < -40 && side < 0 && x > -80 && x < 170;
-        if (!(coastal || city || boulevard) || !this.clear(x, z, 3.5)) continue;
-        const y = this.terrain.heightAt(x, z);
-        if (y < SEA_LEVEL + 0.4) continue;
-        const scale = 0.85 + random() * 0.4;
-        const shade = 0.85 + random() * 0.3;
-        placements.push({
+  /**
+   * Pines scattered on a jittered grid around the circuit, in clumps with clearings between them,
+   * thinning out into the hills. One instanced mesh per tile so off-screen tiles are culled.
+   */
+  private addPines(): void {
+    const { track, terrain, random } = this;
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+    for (const s of track.samples) {
+      minX = Math.min(minX, s.position.x);
+      maxX = Math.max(maxX, s.position.x);
+      minZ = Math.min(minZ, s.position.z);
+      maxZ = Math.max(maxZ, s.position.z);
+    }
+    const stand = this.grandstandFrame();
+    const tiles = new Map<string, Placement[]>();
+    for (let gx = minX - PINE_REACH; gx <= maxX + PINE_REACH; gx += PINE_SPACING) {
+      for (let gz = minZ - PINE_REACH; gz <= maxZ + PINE_REACH; gz += PINE_SPACING) {
+        const x = gx + (random() - 0.5) * PINE_SPACING * 0.9;
+        const z = gz + (random() - 0.5) * PINE_SPACING * 0.9;
+        const scale = 0.75 + random() * 0.55;
+        const yaw = random() * Math.PI * 2;
+        const shade = 0.8 + random() * 0.4;
+        const keep = random();
+        const { distance } = terrain.nearRoad(x, z, PINE_REACH);
+        const gap = distance - track.halfDrivable;
+        if (gap < PINE_ROAD_GAP || gap >= PINE_REACH - 2) continue;
+        // Clumps and clearings, and fewer trees the further out you look.
+        const clump = fbm(x * 0.011 + 40, z * 0.011 - 12, 3);
+        const thinning = 1 - 0.55 * Math.min(1, gap / PINE_REACH);
+        if (clump < 0.4 || keep > thinning) continue;
+        if (stand.covers(x, z)) continue;
+        const key = `${Math.floor(x / PINE_TILE)},${Math.floor(z / PINE_TILE)}`;
+        let tile = tiles.get(key);
+        if (!tile) tiles.set(key, (tile = []));
+        tile.push({
           x,
-          y: y - 0.2,
+          y: terrain.heightAt(x, z) - 0.3,
           z,
-          yaw: random() * Math.PI * 2,
+          yaw,
           sx: scale,
-          sy: scale,
+          sy: scale * (0.9 + keep * 0.2),
           sz: scale,
           tint: new Color(shade, shade, shade),
         });
       }
     }
-    const material = new MeshStandardMaterial({
-      vertexColors: true,
-      roughness: 0.85,
-      side: DoubleSide,
-    });
-    this.instanced(palmGeometry(), material, placements, true);
+    const geometry = pineGeometry();
+    const material = new MeshStandardMaterial({ vertexColors: true, roughness: 0.9 });
+    for (const placements of tiles.values()) this.instanced(geometry, material, placements, true);
   }
 
-  private addLamps(): void {
+  /** Where the grandstand stands: the start straight's infield side, ahead of the line. */
+  private grandstandFrame(): {
+    index: number;
+    offset: number;
+    covers(x: number, z: number): boolean;
+  } {
     const { track } = this;
-    const placements: Placement[] = [];
-    for (let i = 0; i < track.samples.length; i += 36) {
-      const s = track.sample(i);
-      const straight = Math.abs(s.curvature) < 1 / 250;
-      if (!straight) continue;
-      const lateral = track.halfDrivable + 1.6;
-      const { x, z, yaw } = this.beside(i, lateral);
-      if (!this.clear(x, z, 1)) continue;
-      placements.push({ x, y: this.terrain.heightAt(x, z), z, yaw, sx: 1, sy: 1, sz: 1 });
-    }
-    const { pole, head } = lampGeometries();
-    this.instanced(
-      pole,
-      new MeshStandardMaterial({ color: 0x9aa0a6, metalness: 0.6, roughness: 0.45 }),
-      placements,
-      true,
-    );
-    this.instanced(
-      head,
-      new MeshStandardMaterial({ color: 0x222222, emissive: 0xffd9a0, emissiveIntensity: 2.2 }),
-      placements,
-      false,
-    );
-  }
-
-  /** Whitewashed blocks: west of the track (where the dunes flatten) and in the infield's west. */
-  private addCity(): void {
-    const { random, terrain } = this;
-    const placements: Placement[] = [];
-    const tints = [
-      new Color(1, 1, 1),
-      new Color(1, 0.96, 0.88),
-      new Color(0.95, 0.9, 0.82),
-      new Color(0.98, 0.98, 0.95),
-    ];
-    const tryBlock = (x: number, z: number, margin: number) => {
-      const w = 14 + random() * 12;
-      const d = 14 + random() * 12;
-      const floors = 2 + Math.floor(random() * 5);
-      if (!this.clear(x, z, margin + Math.max(w, d) / 2)) return;
-      if (z > terrain.coastZ(x) - 45) return;
-      let y = Infinity;
-      for (const [cx, cz] of [
-        [x - w / 2, z - d / 2],
-        [x + w / 2, z - d / 2],
-        [x - w / 2, z + d / 2],
-        [x + w / 2, z + d / 2],
-      ] as const) {
-        y = Math.min(y, terrain.heightAt(cx, cz));
-      }
-      placements.push({
-        x,
-        y: y - 0.4,
-        z,
-        yaw: (Math.floor(random() * 4) * Math.PI) / 2 + (random() - 0.5) * 0.1,
-        sx: w,
-        sy: floors * 3.3 + 0.6,
-        sz: d,
-        tint: tints[Math.floor(random() * tints.length)],
-      });
+    const centre = track.startLine.distance + GRANDSTAND_CENTRE_AHEAD;
+    const index = Math.round(((centre % track.length) + track.length) % track.length);
+    const offset = track.halfDrivable + 9;
+    const s = track.sample(index);
+    return {
+      index,
+      offset,
+      covers: (x, z) => {
+        const dx = x - s.position.x;
+        const dz = z - s.position.z;
+        const ahead = dx * s.tangent.x + dz * s.tangent.z;
+        const lateral = dx * s.right.x + dz * s.right.z;
+        // The stand (64 m long, ~14 m deep with its roof) plus room for the crowns.
+        return Math.abs(ahead) < 40 && lateral < -offset + 8 && lateral > -offset - 22;
+      },
     };
-    for (let x = CITY.x - 30; x > -600; x -= 34) {
-      for (let z = -280; z < 240; z += 34)
-        tryBlock(x + (random() - 0.5) * 8, z + (random() - 0.5) * 8, 12);
-    }
-    for (let x = -160; x < -50; x += 30) {
-      for (let z = 30; z < 110; z += 30) {
-        if (terrain.nearRoad(x, z).infield)
-          tryBlock(x + (random() - 0.5) * 6, z + (random() - 0.5) * 6, 14);
-      }
-    }
-    const map = lowRiseTexture();
-    this.textures.push(map);
-    this.instanced(blockGeometry(), facadeMaterial(map, 3.4, 3.3, 0.8, 0), placements, true);
-  }
-
-  /** Glass towers on the horizon to the north-west, softened by the haze. */
-  private addSkyline(): void {
-    const { random } = this;
-    const placements: Placement[] = [];
-    for (let i = 0; i < 26; i++) {
-      const bearing = ((265 + random() * 85) * Math.PI) / 180;
-      const distance = 780 + random() * 380;
-      const footprint = 24 + random() * 18;
-      placements.push({
-        x: 20 + Math.sin(bearing) * distance,
-        y: -2,
-        z: 15 - Math.cos(bearing) * distance,
-        yaw: random() * Math.PI,
-        sx: footprint,
-        sy: 70 + random() * random() * 190,
-        sz: footprint * (0.7 + random() * 0.5),
-      });
-    }
-    const map = towerTexture();
-    this.textures.push(map);
-    this.instanced(blockGeometry(), facadeMaterial(map, 1.6, 3.6, 0.22, 0.55), placements, false);
   }
 
   /** Covered stand on the infield side of the start straight, facing the grid. */
   private addGrandstand(): void {
     const { track } = this;
     const length = 64;
-    const centre = track.startLine.distance + 55;
-    const index = Math.round(((centre % track.length) + track.length) % track.length);
+    const { index, offset } = this.grandstandFrame();
     const s = track.sample(index);
-    const offset = track.halfDrivable + 9;
     const group = new Group();
     const x = s.position.x - s.right.x * offset;
     const z = s.position.z - s.right.z * offset;
@@ -318,8 +256,8 @@ export class Scenery {
     ];
     for (const g of [...concrete, ...crowd]) g.dispose();
     for (const [geometry, material] of parts) {
-      this.geometries.push(geometry);
-      this.materials.push(material);
+      this.geometries.add(geometry);
+      this.materials.add(material);
       const mesh = new Mesh(geometry, material);
       mesh.castShadow = mesh.receiveShadow = true;
       group.add(mesh);
@@ -336,8 +274,6 @@ export class Scenery {
       if (Math.abs(s.curvature) > 1 / 300) continue;
       for (const side of [-1, 1]) {
         const { x, z, yaw } = this.beside(i, side * (track.halfDrivable + 1.4));
-        // Not along the sea: the railings there are for the view.
-        if (side > 0 && z > this.terrain.coastZ(x) - 60) continue;
         if (!this.clear(x, z, 0.8)) continue;
         placements.push({ x, y: this.terrain.heightAt(x, z) + 0.15, z, yaw, sx: 1, sy: 1, sz: 1 });
       }

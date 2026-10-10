@@ -13,13 +13,13 @@ import type {
 import { MathUtils, Quaternion, Vector3 } from 'three';
 import {
   ASSISTS,
-  BOOSTS,
   BRAKES,
   CAR,
   DRIFT,
   ENGINE,
   PHYSICS,
   RESPAWN,
+  SLIPSTREAM,
   STEERING,
   TYRES,
   WHEELS,
@@ -39,8 +39,6 @@ const LOCAL_UP = new Vector3(0, 1, 0);
 
 /** Lateral sliding speed (m/s) at a tyre contact above which it counts as skidding. */
 const SKID_SLIDE_SPEED = 2.2;
-/** Spin-out: how fast speed bleeds away (1/s). */
-const SPIN_DRAG = 1.6;
 
 export interface Spawn {
   x: number;
@@ -96,17 +94,8 @@ export class Car {
   groundedWheels = 0;
   /** Seconds the car has been upside down or on its side. */
   flippedTime = 0;
-  /** Boost strength this step, 0..1 (nitro, drift boost, boost pad). Set by the race. */
-  boost = 0;
-  /** Slipstream strength this step, 0..1. Set by the race. */
+  /** Slipstream strength this step, 0..1. Set by Slipstream. */
   draft = 0;
-  /** Seconds left of a spin-out after an item hit. Controls are ignored meanwhile. */
-  spinTime = 0;
-  /** Yaw rate while spinning (rad/s); 0 = just loses control for a moment. */
-  private spinRate = 0;
-  /** Heading when the spin started, and seconds into it (to land exactly on whole turns). */
-  private spinStartYaw = 0;
-  private spinElapsed = 0;
 
   // Per-wheel state for visuals, skid marks and sound.
   readonly wheelSpin = new Float32Array(WHEEL_COUNT);
@@ -195,40 +184,9 @@ export class Car {
     return Math.abs(this.forwardSpeed) * 3.6;
   }
 
-  /**
-   * Item hit: spin `turns` full turns over `seconds` (so the car comes out facing where it was
-   * going), keeping `speedKept` of the current speed.
-   */
-  spinOut(seconds: number, speedKept: number, turns: number): void {
-    this.spinTime = seconds;
-    this.spinRate = ((Math.random() < 0.5 ? -1 : 1) * turns * Math.PI * 2) / seconds;
-    this.spinElapsed = 0;
-    forward.copy(LOCAL_FORWARD).applyQuaternion(this.quaternion);
-    this.spinStartYaw = Math.atan2(forward.x, forward.z);
-    this.body.linvel(tmpVec);
-    tmpVec.x *= speedKept;
-    tmpVec.z *= speedKept;
-    this.body.setLinvel(tmpVec, true);
-  }
-
-  /** Instant change of velocity (m/s), e.g. a shockwave shove. */
-  push(x: number, y: number, z: number): void {
-    this.body.linvel(tmpVec);
-    tmpVec.x += x;
-    tmpVec.y += y;
-    tmpVec.z += z;
-    this.body.setLinvel(tmpVec, true);
-  }
-
   /** Applies controls and assists. Call before `world.step()`. */
   prePhysics(dt: number): void {
     const { body, vehicle } = this;
-    const spinning = this.spinTime > 0;
-    if (spinning) {
-      this.spinTime = Math.max(0, this.spinTime - dt);
-      copyInput(this.input, NEUTRAL_INPUT);
-      this.input.handbrake = true;
-    }
     body.rotation(tmpRot);
     tmpQuat.set(tmpRot.x, tmpRot.y, tmpRot.z, tmpRot.w);
     forward.copy(LOCAL_FORWARD).applyQuaternion(tmpQuat);
@@ -256,7 +214,7 @@ export class Car {
     impulse.set(0, 0, 0);
     torque.set(0, 0, 0);
     if (grounded > 0) {
-      this.addGroundAssists(dt, speed, forwardSpeed, lateralSpeed, grounded, spinning);
+      this.addGroundAssists(dt, speed, forwardSpeed, lateralSpeed, grounded);
     } else {
       // Airborne: rotate the car's up axis back towards the sky so jumps land on the wheels.
       scratch.crossVectors(up, WORLD_UP).multiplyScalar(ASSISTS.airLevelling);
@@ -270,25 +228,6 @@ export class Car {
     }
     body.applyImpulse(impulse.multiplyScalar(dt), true);
     body.applyTorqueImpulse(torque.multiplyScalar(dt), true);
-    if (spinning) {
-      // Turn like a top and bleed speed until the spin ends. Tyre friction eats some of the
-      // rotation, so steer towards where the spin should be by now to finish on whole turns.
-      if (this.spinRate !== 0) {
-        this.spinElapsed += dt;
-        const target = this.spinStartYaw + this.spinRate * this.spinElapsed;
-        const yaw = Math.atan2(forward.x, forward.z);
-        const error = Math.atan2(Math.sin(target - yaw), Math.cos(target - yaw));
-        body.angvel(tmpVec);
-        // On the last step, stop turning so the car doesn't carry on past whole turns.
-        tmpVec.y = this.spinTime > 0 ? this.spinRate + 8 * error : 0;
-        body.setAngvel(tmpVec, true);
-      }
-      body.linvel(tmpVec);
-      const keep = Math.exp(-SPIN_DRAG * dt);
-      tmpVec.x *= keep;
-      tmpVec.z *= keep;
-      body.setLinvel(tmpVec, true);
-    }
 
     this.flippedTime = up.y < RESPAWN.flippedUpDot ? this.flippedTime + dt : 0;
   }
@@ -342,8 +281,6 @@ export class Car {
     this.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     this.steerAngle = 0;
     this.flippedTime = 0;
-    this.spinTime = 0;
-    this.boost = 0;
     this.draft = 0;
     this.readPose();
     this.prevPosition.copy(this.position);
@@ -371,7 +308,8 @@ export class Car {
     const target = -this.input.steer * maxAngle;
     const turningFurther =
       Math.abs(target) > Math.abs(this.steerAngle) && target * this.steerAngle >= 0;
-    const rate = turningFurther ? STEERING.turnRate : STEERING.returnRate;
+    const rate =
+      (turningFurther ? STEERING.turnRateDegPerS : STEERING.returnRateDegPerS) * MathUtils.DEG2RAD;
     this.steerAngle = approach(this.steerAngle, target, rate * dt);
     for (const i of FRONT_WHEELS) this.vehicle.setWheelSteering(i, this.steerAngle);
   }
@@ -440,24 +378,16 @@ export class Car {
     forwardSpeed: number,
     lateralSpeed: number,
     grounded: number,
-    spinning: boolean,
   ): void {
     const contactShare = grounded / WHEEL_COUNT;
-
-    // Boosts push straight ahead, past the normal top speed.
-    if (this.boost > 0 && forwardSpeed > -1) {
-      const top = ENGINE.topSpeed * (1 + BOOSTS.topSpeedGain * this.boost);
-      const falloff = Math.max(0, 1 - (Math.max(0, forwardSpeed) / top) ** 2);
-      impulse.addScaledVector(forward, BOOSTS.force * this.boost * falloff * contactShare);
-    }
-    if (this.draft > 0) impulse.addScaledVector(forward, BOOSTS.slipstreamPush * this.draft);
 
     // Downforce: grip grows with speed.
     impulse.addScaledVector(up, -ASSISTS.downforce * speed * speed * contactShare);
 
     // Air drag and rolling resistance, against the direction of travel.
     if (speed > 0.05) {
-      const drag = ENGINE.drag * (1 - BOOSTS.slipstreamDragCut * this.draft);
+      // Slipstream is pure aero: the car in front takes some of the air drag.
+      const drag = ENGINE.drag * (1 - SLIPSTREAM.dragCut * this.draft);
       const resistance = drag * speed * speed + ENGINE.rollingResistance * Math.min(1, speed / 2);
       impulse.addScaledVector(velocity, -resistance / speed);
     }
@@ -471,8 +401,6 @@ export class Car {
     torque.addScaledVector(right, -ASSISTS.antiPitchDamping * angularVelocity.dot(right));
 
     // Yaw limiter: each step removes a share of any spin faster than the limit, so spins stay recoverable.
-    // An item spin-out is the one spin that is meant to happen.
-    if (spinning) return;
     const yawRate = angularVelocity.dot(up);
     const excess = Math.abs(yawRate) - ASSISTS.maxYawRate;
     if (excess > 0) {

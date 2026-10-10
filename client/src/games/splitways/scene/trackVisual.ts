@@ -1,13 +1,12 @@
 /**
- * Everything you see of the track itself: asphalt, sand shoulders, lane markings, kerbs on the
- * corners, barriers (concrete inland, steel railing along the sea) and the chequered start line.
- * Each surface is one merged mesh, so the whole track costs a handful of draw calls.
+ * Everything you see of the track itself: asphalt, grass shoulders, edge lines, kerbs on the
+ * corners, concrete jersey barriers and the chequered start line. Each surface is one merged mesh,
+ * so the whole track costs a handful of draw calls.
  */
 import {
   BufferAttribute,
   BufferGeometry,
   Color,
-  DoubleSide,
   Group,
   Mesh,
   MeshStandardMaterial,
@@ -15,13 +14,11 @@ import {
   type Material,
   type Texture,
 } from 'three';
-import type { Terrain } from '../track/terrain';
 import type { Track } from '../track/track';
 import { buildStrip, type Strip } from '../track/trackGeometry';
 import { canvasTexture, type PbrSet } from './textures';
 
 const ROAD_TILE = 5;
-const SAND_TILE = 4;
 const MARKING_LIFT = 0.012;
 const KERB_LIFT = 0.025;
 /** Corners tighter than this radius (m) get kerbs. */
@@ -98,11 +95,9 @@ function markings(track: Track): BufferGeometry {
   const builder = new MeshBuilder();
   const n = track.samples.length;
   const edge = track.halfRoad - 0.35;
-  // Solid edge lines.
+  // Solid edge lines; a circuit has no centre line.
   band(builder, track, 0, n, -edge - 0.1, -edge + 0.1, MARKING_LIFT, 0);
   band(builder, track, 0, n, edge - 0.1, edge + 0.1, MARKING_LIFT, 0);
-  // Dashed centre line: 3 m dash, 6 m gap.
-  for (let i = 0; i < n; i += 9) band(builder, track, i, i + 3, -0.09, 0.09, MARKING_LIFT, 0);
   return builder.build();
 }
 
@@ -137,13 +132,9 @@ function startLine(track: Track): BufferGeometry {
   return builder.build();
 }
 
-/** Concrete jersey barrier or steel railing, extruded along one side of the track. */
-function barriers(
-  track: Track,
-  terrain: Terrain,
-): { concrete: BufferGeometry; rail: BufferGeometry } {
+/** Concrete jersey barriers, extruded along both sides of the track. */
+function barriers(track: Track): BufferGeometry {
   const concrete = new MeshBuilder();
-  const rail = new MeshBuilder();
   const n = track.samples.length;
   const base = track.halfDrivable + 0.3;
   // Jersey profile: (outward offset from the barrier's road face, height).
@@ -158,29 +149,6 @@ function barriers(
   const step = 2;
   for (let i = 0; i < n; i += step) {
     for (const side of [-1, 1]) {
-      const s = track.sample(i);
-      const edgeX = s.position.x + s.right.x * side * base;
-      const edgeZ = s.position.z + s.right.z * side * base;
-      const seaside = side > 0 && edgeZ > terrain.coastZ(edgeX) - 60;
-      if (seaside) {
-        // Two steel rails on posts: you can see the sea through them.
-        for (const height of [0.45, 0.85]) {
-          along(track, i, side * base, height, p0);
-          along(track, i + step, side * base, height, p2);
-          p1.copy(p0).setY(p0.y + 0.12);
-          p3.copy(p2).setY(p2.y + 0.12);
-          if (side > 0) rail.quad(p0, p2, p1, p3, [0, 0, 1, 1]);
-          else rail.quad(p0, p1, p2, p3, [0, 0, 1, 1]);
-        }
-        if ((i / step) % 2 === 0) {
-          along(track, i, side * base, 0, p0);
-          along(track, i, side * (base + 0.08), 0, p1);
-          p2.copy(p0).setY(p0.y + 1);
-          p3.copy(p1).setY(p1.y + 1);
-          rail.quad(p0, p1, p2, p3, [0, 0, 1, 1]);
-        }
-        continue;
-      }
       for (let k = 0; k < profile.length - 1; k++) {
         const [o0, h0] = profile[k] as [number, number];
         const [o1, h1] = profile[k + 1] as [number, number];
@@ -194,7 +162,7 @@ function barriers(
       }
     }
   }
-  return { concrete: concrete.build(), rail: rail.build() };
+  return concrete.build();
 }
 
 export interface TrackVisual {
@@ -202,14 +170,13 @@ export interface TrackVisual {
   dispose(): void;
 }
 
-/** Builds the track meshes. The texture sets are shared with the terrain and owned by the caller. */
+/** Builds the track meshes. The asphalt texture set is owned by the caller. */
 export function createTrackVisual(
   track: Track,
-  terrain: Terrain,
-  textures: { asphalt: PbrSet; sand: PbrSet },
+  textures: { asphalt: PbrSet },
   anisotropy: number,
 ): TrackVisual {
-  const { asphalt, sand } = textures;
+  const { asphalt } = textures;
   const group = new Group();
   group.name = 'track';
   const materials: Material[] = [];
@@ -239,13 +206,14 @@ export function createTrackVisual(
     stripGeometry(buildStrip(track, -track.halfRoad, track.halfRoad, ROAD_TILE)),
     pbr(asphalt, 0x8a8a8a),
   );
-  const shoulderMaterial = pbr(sand, 0xd8b98f);
+  // Mown grass verges: untextured until the Track 1 dressing brings CC0 grass.
+  const shoulderMaterial = new MeshStandardMaterial({ color: 0x4a6b2f, roughness: 0.95 });
   add(
-    stripGeometry(buildStrip(track, -track.halfDrivable, -track.halfRoad, SAND_TILE, -0.01)),
+    stripGeometry(buildStrip(track, -track.halfDrivable, -track.halfRoad, ROAD_TILE, -0.01)),
     shoulderMaterial,
   );
   add(
-    stripGeometry(buildStrip(track, track.halfRoad, track.halfDrivable, SAND_TILE, -0.01)),
+    stripGeometry(buildStrip(track, track.halfRoad, track.halfDrivable, ROAD_TILE, -0.01)),
     shoulderMaterial,
   );
 
@@ -307,22 +275,11 @@ export function createTrackVisual(
     }),
   );
 
-  const walls = barriers(track, terrain);
   const concrete = add(
-    walls.concrete,
+    barriers(track),
     new MeshStandardMaterial({ color: new Color(0xe4e2dc), roughness: 0.82 }),
   );
   concrete.castShadow = true;
-  const rail = add(
-    walls.rail,
-    new MeshStandardMaterial({
-      color: 0xc8ccd2,
-      roughness: 0.32,
-      metalness: 0.9,
-      side: DoubleSide,
-    }),
-  );
-  rail.castShadow = true;
 
   return {
     group,

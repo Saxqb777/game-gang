@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { Simulation } from '../sim/simulation';
 import { PhysicsWorld } from '../sim/world';
-import { CORNICHE_RUN } from './cornicheRun';
-import { Track } from './track';
 import { buildTrackPhysics } from './trackPhysics';
+import { createPlaceholderTrack } from './tracks';
 
-describe('Corniche Run', () => {
-  const track = new Track(CORNICHE_RUN);
+describe('placeholder loop', () => {
+  const track = createPlaceholderTrack();
 
   it('is a ~1.2 km loop with room for the road at the tightest corner', () => {
     expect(track.length).toBeGreaterThan(1100);

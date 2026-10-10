@@ -1,4 +1,4 @@
-/* Split Ways pad: a phone held sideways like a wheel. Thumbs rest on the big zones. */
+/* Split Ways pad: a phone held sideways. Thumbs rest on the big zones. */
 
 .ctl {
   --accent: #ff8a1f;
@@ -28,23 +28,12 @@
   overflow: hidden;
 }
 
-.ctl--tilt {
-  grid-template-columns: 1fr minmax(160px, 0.9fr) 1fr;
-}
-
 .ctl--buttons {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto 1fr;
 }
 
 /* ---- Pedals and buttons ------------------------------------------------------ */
-
-.ctl-side {
-  display: grid;
-  grid-template-rows: 26% 1fr;
-  gap: 10px;
-  min-height: 0;
-}
 
 .ctl-pedal,
 .ctl-btn,
@@ -139,16 +128,7 @@
     0 0 28px rgba(255, 90, 100, 0.35);
 }
 
-/* ---- Centre: HUD + wheel ----------------------------------------------------- */
-
-.ctl-centre {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  justify-items: center;
-  align-items: center;
-  min-height: 0;
-  pointer-events: none;
-}
+/* ---- HUD ------------------------------------------------------------------------ */
 
 .ctl-hud {
   display: flex;
@@ -185,63 +165,6 @@
 .ctl-hud-speed b {
   font-size: 18px;
   color: var(--text);
-}
-
-.ctl-wheel-wrap {
-  position: relative;
-  width: min(100%, 52vh);
-  aspect-ratio: 1;
-}
-
-.ctl-wheel {
-  width: 100%;
-  aspect-ratio: 1;
-  will-change: transform;
-}
-
-/* The wheel's hub is the horn. */
-.ctl-hub {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 30%;
-  height: 30%;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: auto;
-}
-
-.ctl-hub.is-pressed {
-  transform: translate(-50%, -50%) scale(0.92);
-  background: color-mix(in srgb, var(--accent) 35%, transparent);
-  box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 50%, transparent);
-}
-
-.ctl-wheel-rim {
-  fill: none;
-  stroke: #1d2230;
-  stroke-width: 16;
-}
-
-.ctl-wheel-grip {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 16;
-  stroke-dasharray: 3 7;
-}
-
-.ctl-wheel-spoke {
-  fill: #1d2230;
-}
-
-.ctl-wheel-hub {
-  fill: #151924;
-  stroke: var(--accent);
-  stroke-width: 4;
-}
-
-.ctl-wheel-marker {
-  fill: var(--accent);
 }
 
 /* ---- Buttons mode -------------------------------------------------------------- */
@@ -288,77 +211,6 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   min-height: 0;
-}
-
-.ctl-drive-buttons--items {
-  grid-template-columns: 1fr 1.2fr 0.6fr;
-}
-
-/* ---- Item button (items mode) ----------------------------------------------------- */
-
-.ctl-side--items {
-  grid-template-rows: 36% 1fr;
-}
-
-.ctl-item {
-  position: relative;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 2px;
-  min-height: 0;
-  padding: 4px;
-  border: 2px solid var(--edge);
-  border-radius: 22px;
-  background: linear-gradient(180deg, var(--surface-hi), var(--surface));
-  color: var(--text);
-  font: inherit;
-  overflow: hidden;
-  transition: transform 0.06s ease;
-}
-
-.ctl-item img {
-  width: clamp(28px, 11vh, 64px);
-  height: clamp(28px, 11vh, 64px);
-}
-
-.ctl-item small {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.ctl-item b {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  font-size: 18px;
-  color: var(--accent);
-}
-
-.ctl-item.is-rolling {
-  border-color: #fff;
-}
-
-.ctl-item.is-ready {
-  border-color: var(--accent);
-  box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 45%, transparent);
-  animation: ctl-item-ready 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4);
-}
-
-.ctl-item.is-ready small {
-  color: var(--accent);
-}
-
-.ctl-item.is-ready:active {
-  transform: scale(0.95);
-}
-
-@keyframes ctl-item-ready {
-  from {
-    transform: scale(1.12);
-  }
 }
 
 /* ---- Settings, overlays --------------------------------------------------------- */
@@ -482,50 +334,5 @@
 @media (orientation: portrait) {
   .ctl-rotate {
     display: grid;
-  }
-}
-
-.ctl-enable {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 10px;
-  border: 0;
-  background: rgba(5, 6, 9, 0.86);
-  color: #fff;
-  font: inherit;
-  text-align: center;
-}
-
-.ctl-enable svg {
-  width: 96px;
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 3;
-  stroke-linecap: round;
-  animation: ctl-rock 1.4s ease-in-out infinite;
-}
-
-.ctl-enable b {
-  font-size: 30px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.ctl-enable small {
-  font-size: 16px;
-  color: var(--muted);
-}
-
-@keyframes ctl-rock {
-  25% {
-    transform: rotate(-16deg);
-  }
-  75% {
-    transform: rotate(16deg);
   }
 }

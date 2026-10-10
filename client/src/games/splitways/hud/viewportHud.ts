@@ -1,6 +1,4 @@
-import type { ItemKind } from '@gamergang/shared';
 import type { Vector3 } from 'three';
-import { ITEM_ICONS, rollingIcon } from '../itemIcons';
 import type { Rect } from '../render/viewports';
 import type { Track } from '../track/track';
 import { Minimap } from './minimap';
@@ -12,7 +10,6 @@ const BAR_SCALE = Array.from({ length: BAR_STEPS + 1 }, (_, i) => `scaleX(${i / 
 /** The speed bar is full at this speed (km/h). */
 const BAR_FULL_KPH = 190;
 const SPEED_TEXT = Array.from({ length: 401 }, (_, i) => String(i));
-const CHARGES_TEXT = ['', '', '×2', '×3'];
 
 export function formatTime(ms: number): string {
   const total = Math.max(0, ms) / 1000;
@@ -40,9 +37,6 @@ export class ViewportHud {
   private readonly speedValue: HTMLElement;
   private readonly speedBar: HTMLElement;
   private readonly tag: HTMLElement;
-  private readonly itemSlot: HTMLElement;
-  private readonly itemIcon = document.createElement('img');
-  private readonly itemCharges: HTMLElement;
   private readonly minimap: Minimap;
   private readonly countdown: HTMLElement;
   private readonly banner: HTMLElement;
@@ -81,12 +75,6 @@ export class ViewportHud {
     this.minimap = new Minimap(track);
     this.element.appendChild(this.minimap.canvas);
 
-    this.itemSlot = element('sw-hud-item', this.element);
-    this.itemSlot.hidden = true;
-    this.itemIcon.alt = '';
-    this.itemSlot.appendChild(this.itemIcon);
-    this.itemCharges = element('sw-hud-charges', this.itemSlot, 'b');
-
     this.countdown = element('sw-hud-countdown', this.element);
     this.banner = element('sw-hud-banner', this.element);
     this.status = element('sw-hud-status', this.element);
@@ -113,20 +101,6 @@ export class ViewportHud {
   /** Every car's position and colour; `self` is this viewport's car. */
   updateMinimap(positions: readonly Vector3[], colours: readonly string[], self: number): void {
     this.minimap.update(positions, colours, self);
-  }
-
-  /** Items mode: the held item, spinning through icons while `rolling`. `seconds` animates it. */
-  setItem(kind: ItemKind | null, charges: number, rolling: boolean, seconds: number): void {
-    if (this.changed('slot', 1)) this.itemSlot.hidden = false;
-    const icon = rolling ? rollingIcon(seconds * 1000) : kind ? ITEM_ICONS[kind] : '';
-    if (this.changed('icon', icon)) {
-      this.itemIcon.hidden = icon === '';
-      if (icon) this.itemIcon.src = icon;
-    }
-    const shown = rolling ? 0 : charges;
-    if (this.changed('charges', shown)) this.itemCharges.textContent = CHARGES_TEXT[shown] ?? '';
-    const state = rolling ? 'rolling' : kind ? 'ready' : 'empty';
-    if (this.changed('itemstate', state)) this.itemSlot.dataset.state = state;
   }
 
   /** Small label over the speed (e.g. "SLIPSTREAM"); empty hides it. */

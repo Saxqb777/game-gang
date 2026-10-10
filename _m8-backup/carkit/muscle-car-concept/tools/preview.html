@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#888}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script></head>
+<body><script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1600, H = +q.get('h') || 1000;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setPixelRatio(1);
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = +(q.get('exp') || 1.0);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.background = new THREE.Color(0xc4c7cc);
+const key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(4, 9, 6); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 0.5, far: 30 }); key.shadow.bias = -0.0004; key.shadow.radius = 5;
+scene.add(key);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(16, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xa4a7ab, roughness: 0.92 }));
+ground.receiveShadow = true; scene.add(ground);
+const gltf = await new GLTFLoader().loadAsync('/model.glb');
+const car = gltf.scene;
+const mode = q.get('mode') || 'pbr';
+const CLASS = { paint: 0x2e8b57, trim: 0x444444, trim_cutout: 0x777777, interior: 0xd2691e, headlight: 0xffff66, taillight: 0xff2222, plate: 0x3366ff, glass: 0x66ccff, rim: 0xcccccc, tyre: 0x111111, brake: 0xaa00aa, chassis: 0x8b4513, engine: 0x9932cc, accent: 0xffffff };
+const info = {};
+car.traverse((o) => { if (!o.isMesh) return; o.castShadow = true; o.receiveShadow = true;
+  info[o.material.name] = (info[o.material.name] || 0) + 1;
+  if (mode === 'class') { const n = o.material.name.replace(/\.b$/, ''); o.material = new THREE.MeshStandardMaterial({ color: CLASS[n] ?? 0xff00ff, roughness: 0.6, transparent: n === 'glass', opacity: n === 'glass' ? 0.35 : 1, side: THREE.DoubleSide }); }
+  if (mode === 'white') { o.material = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.5, side: THREE.DoubleSide }); }
+});
+if (q.get('hide')) for (const n of q.get('hide').split(',')) car.traverse((o) => { if (o.isMesh && (o.name === n || o.material.name === n || o.parent?.name === n)) o.visible = false; });
+if (q.get('only')) { const keep = q.get('only').split(','); car.traverse((o) => { if (o.isMesh && !keep.some((k) => o.name.startsWith(k) || o.material.name === k || o.parent?.name?.startsWith(k))) o.visible = false; }); }
+const spin = +(q.get('spin') || 0), steer = +(q.get('steer') || 0);
+if (spin || steer) for (const n of ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr']) {
+  const w = car.getObjectByName(n); if (!w) continue;
+  const pivot = new THREE.Group(); pivot.position.copy(w.position); w.parent.add(pivot); w.position.set(0, 0, 0); pivot.add(w);
+  if (n === 'wheel_fl' || n === 'wheel_fr') pivot.rotation.y = steer;
+  w.rotation.x = spin;
+}
+scene.add(car);
+const box = new THREE.Box3().setFromObject(car); const ctr = box.getCenter(new THREE.Vector3());
+console.log('bbox', JSON.stringify(box.min), JSON.stringify(box.max), JSON.stringify(info));
+const cam = new THREE.PerspectiveCamera(+q.get('fov') || 30, W / H, 0.05, 100);
+const view = q.get('view') || 'front34';
+const dist = +q.get('dist') || 10.5;
+const V = { front34: [0.62, 0.24, 0.75], rear34: [-0.62, 0.26, -0.75], side: [1, 0.07, 0], front: [0, 0.1, 1], rear: [0, 0.12, -1], top: [0.0001, 1, 0.0001], under: [0.001, -1, 0.001], sideR: [-1, 0.07, 0], cockpit: [0.3, 0.9, 0.25] };
+const dir = new THREE.Vector3(...(q.get('dir') ? q.get('dir').split(',').map(Number) : V[view])).normalize();
+const target = q.get('target') ? new THREE.Vector3(...q.get('target').split(',').map(Number)) : new THREE.Vector3(ctr.x, ctr.y * 0.75, ctr.z);
+cam.position.copy(target).addScaledVector(dir, dist); cam.lookAt(target);
+if (view === 'under' || q.get('noground')) ground.visible = false;
+renderer.render(scene, cam);
+window.__done = true;
+</script></body></html>

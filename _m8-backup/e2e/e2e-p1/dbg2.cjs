@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+(async () => {
+  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+  const tv = await (await browser.newContext({ viewport: { width: 1280, height: 720 } })).newPage();
+  tv.on('pageerror', (e) => console.log('[tv] pageerror', e.message));
+  await tv.goto('http://localhost:4000/tv');
+  await tv.waitForSelector('.lobby-code', { timeout: 30000 });
+  await sleep(1000);
+  await tv.keyboard.press('KeyK'); await sleep(300);
+  const t0 = Date.now();
+  await tv.keyboard.press('Enter');
+  await tv.waitForSelector('.sw-canvas', { state: 'attached', timeout: 120000 });
+  console.log('canvas attached after', Date.now() - t0);
+  await tv.waitForFunction(() => !document.querySelector('.sw-loading'), null, { timeout: 120000 });
+  console.log('loading gone after', Date.now() - t0);
+  await sleep(3000);
+  await tv.screenshot({ path: '/tmp/claude-0/e2e-p1/dbg2.png' });
+  await browser.close();
+})();

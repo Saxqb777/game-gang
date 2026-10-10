@@ -1,0 +1,11 @@
+import { readFileSync } from 'node:fs';
+const b = readFileSync(process.argv[2]); const jl = b.readUInt32LE(12); const j = JSON.parse(b.subarray(20, 20 + jl).toString());
+console.log('asset', j.asset, 'extensionsUsed', j.extensionsUsed);
+console.log('nodes', j.nodes.length, 'meshes', j.meshes.length, 'materials', j.materials.length, 'textures', j.textures?.length, 'images', j.images?.length);
+for (const im of j.images ?? []) console.log(' image', im.name, im.mimeType, j.bufferViews[im.bufferView].byteLength);
+let tris = 0; for (const m of j.meshes) for (const p of m.primitives) tris += j.accessors[p.indices].count / 3;
+console.log('tris', tris);
+const root = j.nodes[j.scenes[0].nodes[0]];
+const show = (i, d) => { const n = j.nodes[i]; console.log('  '.repeat(d) + n.name + (n.translation ? ' t=' + n.translation.map((v) => v.toFixed(4)) : '') + (n.mesh !== undefined ? ' mesh' : '')); (n.children || []).forEach((c) => show(c, d + 1)); };
+show(j.scenes[0].nodes[0], 0);
+for (const m of j.materials) console.log(' mat', m.name, m.alphaMode ?? 'OPAQUE', m.doubleSided ? 'ds' : '', JSON.stringify(m.extensions ?? {}), 'tex', ['baseColorTexture', 'metallicRoughnessTexture'].map((k) => m.pbrMetallicRoughness?.[k]?.index ?? '-').join('/'), m.normalTexture?.index ?? '-', m.emissiveTexture?.index ?? '-', JSON.stringify(m.extras ?? {}));

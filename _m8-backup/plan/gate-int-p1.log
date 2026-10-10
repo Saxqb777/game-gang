@@ -1,0 +1,77 @@
+
+> gamer-gang@ check /home/user/m8-wt/int
+> pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
+
+
+> gamer-gang@ typecheck /home/user/m8-wt/int
+> pnpm -r typecheck
+
+Scope: 3 of 4 workspace projects
+shared typecheck$ tsc -p tsconfig.json
+shared typecheck: Done
+client typecheck$ tsc -p tsconfig.json
+server typecheck$ tsc -p tsconfig.json
+server typecheck: Done
+client typecheck: Done
+
+> gamer-gang@ lint /home/user/m8-wt/int
+> eslint .
+
+
+> gamer-gang@ format:check /home/user/m8-wt/int
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> gamer-gang@ test /home/user/m8-wt/int
+> vitest run
+
+
+ RUN  v5.0.3 /home/user/m8-wt/int
+
+
+ Test Files  9 passed (9)
+      Tests  39 passed (39)
+   Start at  10:18:07
+   Duration  18.61s (tests 93%, import 4%, transform 3%)
+
+
+> gamer-gang@ build /home/user/m8-wt/int
+> pnpm --filter @gamergang/client build
+
+
+> @gamergang/client@ build /home/user/m8-wt/int/client
+> vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 226 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                               0.90 kB │ gzip:     0.45 kB
+dist/assets/chakra-petch-latin-700-normal-CnDBPjkL.woff2      9.90 kB
+dist/assets/chakra-petch-latin-500-normal-BR1ody1F.woff2      9.95 kB
+dist/assets/chakra-petch-latin-700-normal-D1s_c2du.woff      13.33 kB
+dist/assets/chakra-petch-latin-500-normal-CnUQnZ4D.woff      13.40 kB
+dist/assets/Landing-C_whLd-i.css                              0.79 kB │ gzip:     0.42 kB
+dist/assets/index-B-8k-AD2.css                                1.29 kB │ gzip:     0.65 kB
+dist/assets/SplitWaysController-DNU2wxf1.css                  4.71 kB │ gzip:     1.55 kB
+dist/assets/TvApp-CAspBYpf.css                                4.80 kB │ gzip:     1.63 kB
+dist/assets/SplitWaysStage-BQWhB5Gr.css                       7.15 kB │ gzip:     1.96 kB
+dist/assets/PadApp-DyvFQV0I.css                               8.43 kB │ gzip:     2.27 kB
+dist/assets/Landing-DR3OmExj.js                               0.85 kB │ gzip:     0.37 kB
+dist/assets/SplitWaysController-llBF6W3W.js                   5.06 kB │ gzip:     2.00 kB
+dist/assets/PadApp-BUTJ3Rs0.js                               16.73 kB │ gzip:     5.88 kB
+dist/assets/TvApp-2sbVau5Z.js                                39.61 kB │ gzip:    14.17 kB
+dist/assets/registry-By-DFZ2q.js                             92.29 kB │ gzip:    26.92 kB
+dist/assets/index-BlM6Jxj7.js                               222.48 kB │ gzip:    69.81 kB
+dist/assets/SplitWaysStage-D47Gtcry.js                    5,055.75 kB │ gzip: 1,861.81 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 3000 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.39s
+M8 gate: PASS

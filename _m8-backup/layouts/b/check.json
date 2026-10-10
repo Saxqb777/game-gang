@@ -1,0 +1,37 @@
+{
+ "length_m": 3337.6,
+ "closure_gap_m": 0.0,
+ "heading_error_deg": -0.0,
+ "net_turns": -1.0,
+ "z_closure_m": 0.0,
+ "min_radius_m": 30,
+ "max_grade_pct": 6.0,
+ "elevation_range_m": 22.5,
+ "min_leg_separation_m": 208.0,
+ "closest_legs_at_s": [
+  2051,
+  2554
+ ],
+ "straight_behind_start_m": 220.0,
+ "straight_after_start_m": 280.0,
+ "longest_straight_m": 430.0,
+ "heavy_braking_zones": [
+  [
+   280,
+   "T1 Gatehouse entry",
+   48
+  ],
+  [
+   386,
+   "Cathedral entry",
+   68
+  ],
+  [
+   430,
+   "Kingfisher entry",
+   30
+  ]
+ ],
+ "corners": 32,
+ "FAILS": []
+}

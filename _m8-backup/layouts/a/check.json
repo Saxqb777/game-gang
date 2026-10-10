@@ -1,0 +1,42 @@
+{
+ "length_m": 3315.5,
+ "closure_gap_m": 0.0,
+ "heading_error_deg": 0.0,
+ "net_turns": -1.0,
+ "z_closure_m": 0.0,
+ "min_radius_m": 30,
+ "max_grade_pct": 6.67,
+ "elevation_range_m": 21.5,
+ "min_leg_separation_m": 132.0,
+ "closest_legs_at_s": [
+  1690,
+  2194
+ ],
+ "straight_behind_start_m": 220.0,
+ "straight_after_start_m": 380.0,
+ "longest_straight_m": 660.9,
+ "heavy_braking_zones": [
+  [
+   380,
+   "T1 Sawmill",
+   42
+  ],
+  [
+   661,
+   "Creek hairpin",
+   30
+  ],
+  [
+   280,
+   "Twin Pines one",
+   60
+  ],
+  [
+   380,
+   "Lantern",
+   55
+  ]
+ ],
+ "corners": 10,
+ "FAILS": []
+}

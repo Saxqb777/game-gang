@@ -1,0 +1,511 @@
+{
+ "nodes": {},
+ "meshes": [
+  {
+   "name": "paint",
+   "parent": "body",
+   "material": "paint",
+   "triangles": 30874,
+   "vertices": 16885,
+   "sourceParts": [
+    "body",
+    "doorl",
+    "doorr",
+    "front-bumper",
+    "hood",
+    "hood-grill",
+    "rear-bumper",
+    "rearview-mirrorl",
+    "rearview-mirrorr",
+    "side-fenderl",
+    "side-fenderr",
+    "trunk"
+   ]
+  },
+  {
+   "name": "body_trim",
+   "parent": "body",
+   "material": "body_trim",
+   "triangles": 18917,
+   "vertices": 13463,
+   "sourceParts": [
+    "body",
+    "front-bumper-frame",
+    "front-bumper-lip",
+    "headlight-basel",
+    "headlight-baser",
+    "hood",
+    "hood-grill",
+    "rear-diffusor-v2",
+    "rearview-mirror_basel",
+    "rearview-mirror_baser",
+    "side-fender-aerol",
+    "side-fender-aeror"
+   ]
+  },
+  {
+   "name": "trim",
+   "parent": "body",
+   "material": "trim",
+   "triangles": 1840,
+   "vertices": 1324,
+   "sourceParts": [
+    "body",
+    "trunk",
+    "wiper-left",
+    "wiper-right"
+   ]
+  },
+  {
+   "name": "rubber",
+   "parent": "body",
+   "material": "rubber",
+   "triangles": 960,
+   "vertices": 480,
+   "sourceParts": [
+    "windows-triml",
+    "windows-trimr"
+   ]
+  },
+  {
+   "name": "glass",
+   "parent": "body",
+   "material": "glass",
+   "triangles": 400,
+   "vertices": 231,
+   "sourceParts": [
+    "glass-windshield"
+   ]
+  },
+  {
+   "name": "glass_tinted",
+   "parent": "body",
+   "material": "glass_tinted",
+   "triangles": 976,
+   "vertices": 587,
+   "sourceParts": [
+    "glass-rear",
+    "window-frontl",
+    "window-frontr",
+    "window-rearl",
+    "window-rearr"
+   ]
+  },
+  {
+   "name": "mirror",
+   "parent": "body",
+   "material": "mirror",
+   "triangles": 270,
+   "vertices": 164,
+   "sourceParts": [
+    "rearview-mirrorl",
+    "rearview-mirrorr"
+   ]
+  },
+  {
+   "name": "grille",
+   "parent": "body",
+   "material": "grille",
+   "triangles": 16,
+   "vertices": 15,
+   "sourceParts": [
+    "front-grille-texture"
+   ]
+  },
+  {
+   "name": "headlight",
+   "parent": "body",
+   "material": "headlight",
+   "triangles": 1816,
+   "vertices": 936,
+   "sourceParts": [
+    "headlight-drll",
+    "headlight-drlr",
+    "headlightsl",
+    "headlightsr"
+   ]
+  },
+  {
+   "name": "headlight_lens",
+   "parent": "body",
+   "material": "headlight_lens",
+   "triangles": 604,
+   "vertices": 330,
+   "sourceParts": [
+    "headlight-lensl",
+    "headlight-lensr"
+   ]
+  },
+  {
+   "name": "indicator",
+   "parent": "body",
+   "material": "indicator",
+   "triangles": 960,
+   "vertices": 710,
+   "sourceParts": [
+    "headlight-indicatorl",
+    "headlight-indicatorr"
+   ]
+  },
+  {
+   "name": "taillight",
+   "parent": "body",
+   "material": "taillight",
+   "triangles": 1024,
+   "vertices": 555,
+   "sourceParts": [
+    "taillight-01",
+    "taillight-led"
+   ]
+  },
+  {
+   "name": "reverse_light",
+   "parent": "body",
+   "material": "reverse_light",
+   "triangles": 576,
+   "vertices": 328,
+   "sourceParts": [
+    "taillight-01"
+   ]
+  },
+  {
+   "name": "brake_caliper_fl",
+   "parent": "caliper_fl",
+   "material": "brake",
+   "triangles": 1084,
+   "vertices": 1162,
+   "sourceParts": [
+    "brake-caliper"
+   ]
+  },
+  {
+   "name": "brake_caliper_fr",
+   "parent": "caliper_fr",
+   "material": "brake",
+   "triangles": 1084,
+   "vertices": 1162,
+   "sourceParts": [
+    "brake-caliper002"
+   ]
+  },
+  {
+   "name": "brake_caliper_rl",
+   "parent": "caliper_rl",
+   "material": "brake",
+   "triangles": 1084,
+   "vertices": 1162,
+   "sourceParts": [
+    "brake-caliper001"
+   ]
+  },
+  {
+   "name": "brake_caliper_rr",
+   "parent": "caliper_rr",
+   "material": "brake",
+   "triangles": 1084,
+   "vertices": 1162,
+   "sourceParts": [
+    "brake-caliper003"
+   ]
+  },
+  {
+   "name": "chassis",
+   "parent": "chassis",
+   "material": "chassis",
+   "triangles": 2250,
+   "vertices": 3010,
+   "sourceParts": [
+    "Circle",
+    "Cube",
+    "damper",
+    "engine",
+    "engine-bay",
+    "engine-bay001",
+    "exhaust-muffler",
+    "exhaust-pipe",
+    "filters",
+    "floor",
+    "radiator",
+    "wheel-arch-rear"
+   ]
+  },
+  {
+   "name": "interior",
+   "parent": "interior",
+   "material": "interior",
+   "triangles": 16883,
+   "vertices": 14006,
+   "sourceParts": [
+    "Plane",
+    "dashboard-base",
+    "interior-door-panel",
+    "interior-floor",
+    "interior-roof-rear-trim",
+    "interior-roof-rear-trim002",
+    "seat-back-01",
+    "seat-back-01001",
+    "seat-bottom-01",
+    "seat-bottom-01001",
+    "steering-wheel-base"
+   ]
+  },
+  {
+   "name": "screen",
+   "parent": "interior",
+   "material": "screen",
+   "triangles": 196,
+   "vertices": 125,
+   "sourceParts": [
+    "dashboard-base"
+   ]
+  },
+  {
+   "name": "steering_wheel_mesh",
+   "parent": "steering_wheel",
+   "material": "interior",
+   "triangles": 2568,
+   "vertices": 2139,
+   "sourceParts": [
+    "steering-wheel-center",
+    "steering-wheel-frame",
+    "steering-wheel-rim"
+   ]
+  },
+  {
+   "name": "rim_fl",
+   "parent": "wheel_fl",
+   "material": "rim",
+   "triangles": 6189,
+   "vertices": 5725,
+   "sourceParts": [
+    "wheel-full"
+   ]
+  },
+  {
+   "name": "brake_disc_fl",
+   "parent": "wheel_fl",
+   "material": "brake",
+   "triangles": 320,
+   "vertices": 336,
+   "sourceParts": [
+    "brake-disc"
+   ]
+  },
+  {
+   "name": "tyre_fl",
+   "parent": "wheel_fl",
+   "material": "tyre",
+   "triangles": 528,
+   "vertices": 390,
+   "sourceParts": [
+    "tire-low"
+   ]
+  },
+  {
+   "name": "rim_fr",
+   "parent": "wheel_fr",
+   "material": "rim",
+   "triangles": 6189,
+   "vertices": 5725,
+   "sourceParts": [
+    "wheel-full002"
+   ]
+  },
+  {
+   "name": "brake_disc_fr",
+   "parent": "wheel_fr",
+   "material": "brake",
+   "triangles": 320,
+   "vertices": 336,
+   "sourceParts": [
+    "brake-disc002"
+   ]
+  },
+  {
+   "name": "tyre_fr",
+   "parent": "wheel_fr",
+   "material": "tyre",
+   "triangles": 528,
+   "vertices": 390,
+   "sourceParts": [
+    "tire-low002"
+   ]
+  },
+  {
+   "name": "rim_rl",
+   "parent": "wheel_rl",
+   "material": "rim",
+   "triangles": 6189,
+   "vertices": 5725,
+   "sourceParts": [
+    "wheel-full001"
+   ]
+  },
+  {
+   "name": "brake_disc_rl",
+   "parent": "wheel_rl",
+   "material": "brake",
+   "triangles": 320,
+   "vertices": 336,
+   "sourceParts": [
+    "brake-disc001"
+   ]
+  },
+  {
+   "name": "tyre_rl",
+   "parent": "wheel_rl",
+   "material": "tyre",
+   "triangles": 528,
+   "vertices": 390,
+   "sourceParts": [
+    "tire-low001"
+   ]
+  },
+  {
+   "name": "rim_rr",
+   "parent": "wheel_rr",
+   "material": "rim",
+   "triangles": 6189,
+   "vertices": 5725,
+   "sourceParts": [
+    "wheel-full003"
+   ]
+  },
+  {
+   "name": "brake_disc_rr",
+   "parent": "wheel_rr",
+   "material": "brake",
+   "triangles": 320,
+   "vertices": 336,
+   "sourceParts": [
+    "brake-disc003"
+   ]
+  },
+  {
+   "name": "tyre_rr",
+   "parent": "wheel_rr",
+   "material": "tyre",
+   "triangles": 528,
+   "vertices": 390,
+   "sourceParts": [
+    "tire-low003"
+   ]
+  }
+ ],
+ "materials": [
+  "paint",
+  "body_trim",
+  "trim",
+  "rubber",
+  "glass",
+  "glass_tinted",
+  "mirror",
+  "grille",
+  "headlight",
+  "headlight_lens",
+  "indicator",
+  "taillight",
+  "reverse_light",
+  "brake",
+  "chassis",
+  "interior",
+  "screen",
+  "rim",
+  "tyre"
+ ],
+ "triangles": 113614,
+ "bbox": {
+  "min": [
+   -1.137205719947815,
+   7.760585118976593e-9,
+   -2.324608325958252
+  ],
+  "max": [
+   1.137205719947815,
+   1.3524247407913208,
+   2.40059757232666
+  ],
+  "size": [
+   2.27441143989563,
+   1.3524247330307357,
+   4.725205898284912
+  ]
+ },
+ "wheelPivots": {
+  "fl": [
+   0.8382,
+   0.379,
+   1.4716
+  ],
+  "fr": [
+   -0.8329,
+   0.379,
+   1.4696
+  ],
+  "rl": [
+   0.8355,
+   0.378,
+   -1.4698
+  ],
+  "rr": [
+   -0.8403,
+   0.378,
+   -1.4713
+  ]
+ },
+ "tyre": {
+  "fl": {
+   "width": 0.309,
+   "diameter": 0.756
+  },
+  "rl": {
+   "width": 0.358,
+   "diameter": 0.756
+  }
+ },
+ "wheelbase": 2.941,
+ "trackFront": 1.671,
+ "trackRear": 1.676,
+ "steeringWheel": {
+  "center": [
+   0.4382694587111473,
+   0.8276812207498241,
+   0.0370936078909799
+  ],
+  "axis": [
+   0.000175126624707598,
+   -0.35375883509051276,
+   0.9353366537916008
+  ]
+ },
+ "source": {
+  "triangles": 113614,
+  "meshes": 84,
+  "materials": [
+   "wheel-brake-disc",
+   "tire-low.001",
+   "mechanics",
+   "front-grille-texture",
+   "car-body",
+   "interior",
+   "mirror",
+   "media",
+   "Glass - Clear - Ridged ",
+   "wipers",
+   "black-metal",
+   "Glass ext-tinted",
+   "Rubber - Black",
+   "Glass ext",
+   "Glass - Clear",
+   "Glass - Red - Rough",
+   "Glass - Red",
+   "Glass - Clear - Ridged - UV",
+   "Glass - Clear - Bumps"
+  ]
+ },
+ "shift": [
+  -1.1920928955078125e-7,
+  -0.0013648879824964411,
+  0.3148422997434185
+ ]
+}

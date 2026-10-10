@@ -1,0 +1,197 @@
+ours length 3359 m
+TUM:MexicoCity                                          procr 0.203  turn 0.716     len    4297
+OSM:Mexico                                              procr 0.203  turn 0.720     len    4305
+F1:Autódromo Hermanos Rodríguez                         procr 0.203  turn 0.718     len    4296
+SD:e-track-4                                            procr 0.204  turn 0.598     len    7042
+OSM:Pembrey                                             procr 0.206  turn 0.568  M  len    2325
+F1:Circuito de Madring                                  procr 0.208  turn 0.687  M  len    5414
+OSM:Brainerd                                            procr 0.209  turn 0.668     len    3884
+OSM:MalloryPark                                         procr 0.211  turn 0.574  M  len    2089
+OSM:BrandsHatchIndy                                     procr 0.211  turn 0.478     len    1922
+F1:Indianapolis Motor Speedway                          procr 0.212  turn 0.624  M  len    4069
+TUM:Melbourne                                           procr 0.216  turn 0.674     len    5299
+SD:g-track-2                                            procr 0.217  turn 0.547  M  len    3186
+OSM:Indianapolis                                        procr 0.218  turn 0.697  M  len    3928
+F1:Albert Park Circuit                                  procr 0.221  turn 0.672     len    5258
+F1:Autodromo Nazionale Monza                            procr 0.222  turn 0.579     len    5766
+TUM:Monza                                               procr 0.222  turn 0.580     len    5790
+SD:forza                                                procr 0.223  turn 0.602     len    5876
+OSM:OultonPark                                          procr 0.225  turn 0.628     len    4305
+SD:dirt-1                                               procr 0.232  turn 0.573     len    1073
+OSM:WillowSprings                                       procr 0.235  turn 0.584  M  len    3937
+OSM:MidOhio                                             procr 0.238  turn 0.646     len    3633
+OSM:Albi                                                procr 0.255  turn 0.641  M  len    3565
+OSM:Bathurst                                            procr 0.260  turn 0.713     len    6175
+F1:Autodromo Enzo e Dino Ferrari                        procr 0.261  turn 0.773  M  len    4893
+OSM:Imola                                               procr 0.262  turn 0.776  M  len    4898
+OSM:RoadAtlanta                                         procr 0.263  turn 0.646     len    4081
+F1:Las Vegas Street Circuit                             procr 0.272  turn 0.763     len    6202
+OSM:Monza                                               procr 0.273  turn 0.753     len    5391
+OSM:VIR                                                 procr 0.274  turn 0.807     len    5263
+OSM:Lausitzring                                         procr 0.286  turn 0.867  M  len    4255
+SD:e-track-6                                            procr 0.287  turn 0.798  M  len    4441
+SD:ruudskogen                                           procr 0.288  turn 0.749  M  len    3339
+F1:Watkins Glen International                           procr 0.292  turn 0.902     len    5428
+OSM:WatkinsGlen                                         procr 0.292  turn 0.905     len    5431
+OSM:Silverstone                                         procr 0.295  turn 0.786     len    5891
+SD:g-track-1                                            procr 0.296  turn 0.689     len    2058
+OSM:Sandown                                             procr 0.297  turn 0.683     len    3141
+F1:Silverstone Circuit                                  procr 0.297  turn 0.739     len    5861
+TUM:Silverstone                                         procr 0.297  turn 0.741     len    5887
+OSM:PortlandIR                                          procr 0.299  turn 0.793  M  len    3155
+SD:street-1                                             procr 0.299  turn 0.838  M  len    3859
+SD:michigan                                             procr 0.304  turn 0.634     len    2312
+OSM:Mandalika                                           procr 0.309  turn 0.924  M  len    4302
+F1:Losail International Circuit                         procr 0.317  turn 0.837  M  len    5407
+OSM:Losail                                              procr 0.317  turn 0.846  M  len    5389
+OSM:Pukekohe                                            procr 0.317  turn 0.756     len    2910
+OSM:Yeongam                                             procr 0.319  turn 0.735     len    5589
+OSM:Knockhill                                           procr 0.322  turn 0.704     len    2035
+OSM:CTMP                                                procr 0.323  turn 0.799  M  len    3930
+OSM:LagunaSeca                                          procr 0.324  turn 0.743  M  len    3589
+SD:g-track-3                                            procr 0.325  turn 0.696  M  len    2843
+OSM:MontTremblant                                       procr 0.328  turn 0.787  M  len    4283
+OSM:HallettMotorRacing                                  procr 0.329  turn 0.714     len    2855
+SD:Corkscrew                                            procr 0.333  turn 0.742  M  len    3678
+OSM:Montreal                                            procr 0.338  turn 0.846  M  len    4342
+TUM:Montreal                                            procr 0.338  turn 0.846  M  len    4358
+F1:Circuit Gilles-Villeneuve                            procr 0.338  turn 0.849  M  len    4345
+TUM:Budapest                                            procr 0.339  turn 0.794     len    4377
+OSM:Hungaroring                                         procr 0.339  turn 0.794     len    4355
+OSM:Autopolis                                           procr 0.340  turn 0.820     len    4629
+F1:Hungaroring                                          procr 0.341  turn 0.800     len    4364
+OSM:Most                                                procr 0.346  turn 0.715     len    4204
+OSM:Mantorp                                             procr 0.347  turn 0.693     len    3095
+SD:ole-road-1                                           procr 0.350  turn 0.866     len    6283
+F1:Hockenheimring                                       procr 0.353  turn 0.980  M  len    4546
+TUM:Hockenheim                                          procr 0.354  turn 0.984  M  len    4569
+OSM:Zolder                                              procr 0.356  turn 0.704     len    3993
+OSM:PhillipIsland                                       procr 0.360  turn 0.928  M  len    4437
+TUM:IMS                                                 procr 0.360  turn 0.743     len    4022
+SD:e-track-2                                            procr 0.361  turn 0.914  M  len    3147
+OSM:Charade                                             procr 0.365  turn 1.019  M  len    3935
+OSM:LimeRock                                            procr 0.366  turn 0.849  M  len    2460
+SD:g-speedway                                           procr 0.368  turn 0.739     len    2978
+TUM:MoscowRaceway                                       procr 0.368  turn 0.964  M  len    4063
+OSM:Spielberg                                           procr 0.368  turn 0.610     len    4313
+SD:c-speedway                                           procr 0.369  turn 0.755     len    3294
+OSM:Fuji                                                procr 0.369  turn 0.949  M  len    4549
+F1:Red Bull Ring                                        procr 0.370  turn 0.606     len    4298
+TUM:Spielberg                                           procr 0.370  turn 0.607     len    4315
+F1:Marina Bay Street Circuit                            procr 0.374  turn 0.950     len    4930
+OSM:Thruxton                                            procr 0.375  turn 0.842     len    3760
+OSM:PacificRaceways                                     procr 0.375  turn 0.852     len    3622
+F1:Baku City Circuit                                    procr 0.379  turn 0.814     len    5932
+OSM:Aragon                                              procr 0.381  turn 0.924  M  len    5344
+F1:Nürburgring                                          procr 0.382  turn 0.977     len    5122
+SD:d-speedway                                           procr 0.383  turn 0.757     len    3427
+TUM:Nuerburgring                                        procr 0.383  turn 0.973     len    5144
+F1:Yas Marina Circuit                                   procr 0.383  turn 0.708     len    5278
+OSM:NurburgringGP                                       procr 0.385  turn 0.975     len    5148
+SD:eroad                                                procr 0.389  turn 0.892  M  len    3260
+OSM:NJMPThunderbolt                                     procr 0.391  turn 0.888  M  len    3500
+OSM:Assen                                               procr 0.395  turn 0.868  M  len    4535
+F1:Circuit de Monaco                                    procr 0.395  turn 0.814     len    3316
+TUM:YasMarina                                           procr 0.396  turn 0.755     len    5547
+SD:migrants                                             procr 0.400  turn 0.988     len    5224
+OSM:Buddh                                               procr 0.401  turn 1.005  M  len    5121
+OSM:GingermanRaceway                                    procr 0.402  turn 0.970  M  len    3514
+OSM:HiddenValley                                        procr 0.405  turn 0.949     len    2868
+OSM:Brno                                                procr 0.408  turn 1.102  M  len    5402
+SD:f-speedway                                           procr 0.409  turn 0.803  M  len    3704
+OSM:Navarra                                             procr 0.412  turn 0.808  M  len    3938
+OSM:Donington                                           procr 0.412  turn 1.012  M  len    3997
+OSM:Shanghai                                            procr 0.414  turn 0.997  M  len    5454
+OSM:Daytona                                             procr 0.416  turn 0.838  M  len    5728
+F1:Kyalami Grand Prix Circuit                           procr 0.416  turn 0.981     len    4510
+OSM:Kyalami                                             procr 0.417  turn 0.984     len    4514
+SD:aalborg                                              procr 0.419  turn 1.036     len    2588
+TUM:Austin                                              procr 0.426  turn 1.005     len    5508
+OSM:CastleCombe                                         procr 0.427  turn 0.787  M  len    2973
+OSM:COTA                                                procr 0.427  turn 1.007     len    5494
+F1:Circuit of the Americas                              procr 0.427  turn 1.007     len    5512
+F1:Jeddah Corniche Circuit                              procr 0.428  turn 0.819  M  len    6167
+OSM:LeMansBugatti                                       procr 0.428  turn 1.151     len    4186
+OSM:DijonPrenois                                        procr 0.429  turn 1.049  M  len    3725
+F1:Circuit Zandvoort                                    procr 0.432  turn 0.982  M  len    4246
+OSM:Zandvoort                                           procr 0.432  turn 0.989  M  len    4262
+F1:Intercity Istanbul Park                              procr 0.433  turn 0.988  M  len    5300
+OSM:Istanbul                                            procr 0.434  turn 0.993  M  len    5338
+TUM:Sochi                                               procr 0.435  turn 0.987  M  len    5841
+F1:Sochi Autodrom                                       procr 0.435  turn 0.986  M  len    5822
+F1:Circuit Paul Ricard                                  procr 0.436  turn 0.898     len    5810
+OSM:PaulRicard                                          procr 0.437  turn 0.941     len    5842
+TUM:Catalunya                                           procr 0.438  turn 1.304     len    4650
+TUM:Norisring                                           procr 0.439  turn 0.896     len    2296
+OSM:Buttonwillow                                        procr 0.440  turn 1.206  M  len    4199
+F1:Circuit de Barcelona-Catalunya                       procr 0.442  turn 1.336     len    4652
+OSM:Salzburgring                                        procr 0.445  turn 0.820  M  len    4221
+TUM:Zandvoort                                           procr 0.448  turn 0.997  M  len    4316
+OSM:BrandsHatch                                         procr 0.452  turn 0.869     len    3888
+TUM:BrandsHatch                                         procr 0.453  turn 0.868     len    3905
+OSM:Spa                                                 procr 0.455  turn 1.035     len    6970
+SD:e-speedway                                           procr 0.455  turn 0.865     len    4104
+F1:Circuit de Spa-Francorchamps                         procr 0.455  turn 1.031     len    6954
+TUM:Spa                                                 procr 0.456  turn 1.032     len    7000
+OSM:Okayama                                             procr 0.456  turn 1.031     len    3684
+OSM:Jerez                                               procr 0.459  turn 1.050  M  len    4418
+F1:Shanghai International Circuit                       procr 0.472  turn 1.079  M  len    5434
+TUM:Shanghai                                            procr 0.475  turn 1.083  M  len    5445
+OSM:Jarama                                              procr 0.478  turn 1.144  M  len    3894
+OSM:Nogaro                                              procr 0.481  turn 1.235     len    3542
+F1:Autódromo do Estoril                                 procr 0.481  turn 1.104  M  len    4151
+OSM:Estoril                                             procr 0.481  turn 1.117  M  len    4177
+SD:dirt-3                                               procr 0.482  turn 0.991  M  len    2261
+OSM:Vallelunga                                          procr 0.489  turn 1.001     len    4083
+SD:e-track-3                                            procr 0.493  turn 0.985     len    4799
+OSM:Croft                                               procr 0.499  turn 1.111  M  len    3496
+SD:b-speedway                                           procr 0.499  turn 0.890     len    3999
+OSM:Sugo                                                procr 0.505  turn 1.006     len    3577
+OSM:RoadAmerica                                         procr 0.506  turn 0.804  M  len    6473
+OSM:Thunderhill                                         procr 0.508  turn 0.814  M  len    4593
+OSM:Suzuka                                              procr 0.509  turn 2.464  M  len    5807
+F1:Suzuka International Racing Course                   procr 0.509  turn 2.821  M  len    5800
+TUM:Suzuka                                              procr 0.509  turn 2.668  M  len    5803
+TUM:SaoPaulo                                            procr 0.513  turn 0.879  M  len    4305
+F1:Autódromo José Carlos Pace - Interlagos              procr 0.514  turn 0.882  M  len    4284
+OSM:DubaiAutodrome                                      procr 0.517  turn 1.314     len    5402
+OSM:Sachsenring                                         procr 0.518  turn 1.069     len    3651
+OSM:Pannonia                                            procr 0.520  turn 1.161  M  len    4723
+TUM:Sakhir                                              procr 0.524  turn 1.103  M  len    5406
+SD:alpine-2                                             procr 0.526  turn 1.023     len    3774
+OSM:Sakhir                                              procr 0.528  turn 1.111  M  len    5407
+F1:Bahrain International Circuit                        procr 0.530  turn 1.112  M  len    5402
+OSM:Hockenheim                                          procr 0.535  turn 1.138  M  len    4576
+OSM:Anglesey                                            procr 0.542  turn 1.040     len    3325
+OSM:Sebring                                             procr 0.554  turn 0.888  M  len    5874
+OSM:Anderstorp                                          procr 0.555  turn 1.056  M  len    4005
+OSM:Sonoma                                              procr 0.558  turn 1.145  M  len    4061
+OSM:Poznan                                              procr 0.560  turn 0.852  M  len    4081
+F1:Miami International Autodrome                        procr 0.561  turn 0.764  M  len    5414
+OSM:Tsukuba                                             procr 0.562  turn 1.024     len    2088
+OSM:ShannonvilleMotorsport                              procr 0.564  turn 1.270     len    3864
+OSM:Rudskogen                                           procr 0.572  turn 1.166     len    3230
+TUM:Oschersleben                                        procr 0.575  turn 0.918     len    3692
+OSM:Misano                                              procr 0.576  turn 1.042     len    4240
+F1:Autódromo Oscar y Juan Gálvez                        procr 0.580  turn 1.182     len    4283
+OSM:Oschersleben                                        procr 0.584  turn 0.948     len    3684
+OSM:Valencia                                            procr 0.588  turn 1.200  M  len    4004
+F1:Sepang International Circuit                         procr 0.593  turn 0.930     len    5544
+OSM:Algarve                                             procr 0.594  turn 1.225  M  len    4646
+OSM:Sepang                                              procr 0.594  turn 0.932     len    5541
+TUM:Sepang                                              procr 0.597  turn 0.934     len    5537
+F1:Autódromo Internacional Nelson Piquet                procr 0.597  turn 1.144     len    4954
+F1:Autódromo Internacional do Algarve                   procr 0.599  turn 1.213  M  len    4634
+OSM:Calabogie                                           procr 0.601  turn 1.249  M  len    4980
+OSM:Motegi                                              procr 0.602  turn 1.128     len    4800
+OSM:Zhuhai                                              procr 0.608  turn 0.888     len    4304
+OSM:Snetterton                                          procr 0.615  turn 0.969     len    4783
+OSM:Mugello                                             procr 0.621  turn 0.991     len    5231
+F1:Autodromo Internazionale del Mugello                 procr 0.624  turn 0.989     len    5224
+OSM:Ledenon                                             procr 0.632  turn 1.362  M  len    3156
+SD:e-track-1                                            procr 0.642  turn 0.916     len    3244
+OSM:QueenslandRaceway                                   procr 0.660  turn 0.806  M  len    3144
+F1:Circuit de Nevers Magny-Cours                        procr 0.701  turn 0.977     len    4440
+OSM:MagnyCours                                          procr 0.705  turn 0.975     len    4406
+OSM:Barber                                              procr 0.730  turn 0.987  M  len    3712
+OSM:SlovakiaRing                                        procr 0.962  turn 1.687     len    5905

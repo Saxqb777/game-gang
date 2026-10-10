@@ -1,0 +1,3522 @@
+[
+ {
+  "min": 0.16505445535058336,
+  "brands": 0.16505445535058336,
+  "other": [
+   0.21487400731981202,
+   "TUM:MexicoCity"
+  ],
+  "length": 3385.5,
+  "sep": 125.9,
+  "ch": {
+   "sw": 75,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside": 18,
+   "the Ladder": 254
+  },
+  "arcdeg": 60,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1416442743688144,
+  "brands": 0.1416442743688144,
+  "other": [
+   0.2318749854828486,
+   "TUM:MexicoCity"
+  ],
+  "length": 3399.4,
+  "sep": 122.1,
+  "ch": {
+   "sw": 75,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "grid straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Brook run": 134,
+   "grid straight": 208
+  },
+  "arcdeg": 60,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.14050243490110548,
+  "brands": 0.14050243490110548,
+  "other": [
+   0.2257860868924854,
+   "TUM:MexicoCity"
+  ],
+  "length": 3399.4,
+  "sep": 122.1,
+  "ch": {
+   "sw": 75,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "grid straight",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "grid straight": 208,
+   "the Ladder": 264
+  },
+  "arcdeg": 60,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13659437847519254,
+  "brands": 0.13659437847519254,
+  "other": [
+   0.22397619300404012,
+   "OSM:Pembrey"
+  ],
+  "length": 3347.0,
+  "sep": 124.0,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "Kestrel approach"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside": 33,
+   "Kestrel approach": 91
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13659437847519254,
+  "brands": 0.13659437847519254,
+  "other": [
+   0.22397619300404012,
+   "OSM:Pembrey"
+  ],
+  "length": 3347.0,
+  "sep": 124.0,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "Kestrel approach"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside": 33,
+   "Kestrel approach": 91
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13659437847519254,
+  "brands": 0.13659437847519254,
+  "other": [
+   0.22397619300404012,
+   "OSM:Pembrey"
+  ],
+  "length": 3347.0,
+  "sep": 124.0,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "Kestrel approach"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside": 33,
+   "Kestrel approach": 91
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1344695350826377,
+  "brands": 0.1344695350826377,
+  "other": [
+   0.22727322221927998,
+   "OSM:Pembrey"
+  ],
+  "length": 3370.0,
+  "sep": 122.6,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside": 45,
+   "the Ladder": 198
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1344695350826377,
+  "brands": 0.1344695350826377,
+  "other": [
+   0.22727322221927998,
+   "OSM:Pembrey"
+  ],
+  "length": 3370.0,
+  "sep": 122.6,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "the Ladder"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside": 45,
+   "the Ladder": 198
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1344695350826377,
+  "brands": 0.1344695350826377,
+  "other": [
+   0.22727322221927998,
+   "OSM:Pembrey"
+  ],
+  "length": 3370.0,
+  "sep": 122.6,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "the Ladder"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside": 45,
+   "the Ladder": 198
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13403553987198522,
+  "brands": 0.13403553987198522,
+  "other": [
+   0.22744533250995802,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.6,
+  "sep": 122.7,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "Hollow straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside": 44,
+   "Hollow straight": 256
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    256,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13403553987198522,
+  "brands": 0.13403553987198522,
+  "other": [
+   0.22744533250995802,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.6,
+  "sep": 122.7,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "Hollow straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside": 44,
+   "Hollow straight": 256
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    256,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13403553987198522,
+  "brands": 0.13403553987198522,
+  "other": [
+   0.22744533250995802,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.6,
+  "sep": 122.7,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "Hollow straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside": 44,
+   "Hollow straight": 256
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    256,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.133862555336166,
+  "brands": 0.133862555336166,
+  "other": [
+   0.2279269309318653,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "Kestrel approach"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Brook run": 67,
+   "Kestrel approach": 108
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.133862555336166,
+  "brands": 0.133862555336166,
+  "other": [
+   0.2279269309318653,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "Kestrel approach"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Brook run": 67,
+   "Kestrel approach": 108
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.133862555336166,
+  "brands": 0.133862555336166,
+  "other": [
+   0.2279269309318653,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "Kestrel approach"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Brook run": 67,
+   "Kestrel approach": 108
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1338583485803433,
+  "brands": 0.1338583485803433,
+  "other": [
+   0.22828929120705843,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Ridge top": 38,
+   "the Ladder": 197
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1338583485803433,
+  "brands": 0.1338583485803433,
+  "other": [
+   0.22828929120705843,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "the Ladder"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Ridge top": 38,
+   "the Ladder": 197
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1338583485803433,
+  "brands": 0.1338583485803433,
+  "other": [
+   0.22828929120705843,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "the Ladder"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Ridge top": 38,
+   "the Ladder": 197
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1337816505975406,
+  "brands": 0.1337816505975406,
+  "other": [
+   0.22826386780818425,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Kestrel approach": 108,
+   "the Ladder": 197
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1337816505975406,
+  "brands": 0.1337816505975406,
+  "other": [
+   0.22826386780818425,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "the Ladder"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Kestrel approach": 108,
+   "the Ladder": 197
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1337816505975406,
+  "brands": 0.1337816505975406,
+  "other": [
+   0.22826386780818425,
+   "OSM:Pembrey"
+  ],
+  "length": 3377.5,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "the Ladder"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Kestrel approach": 108,
+   "the Ladder": 197
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13311829288948743,
+  "brands": 0.13311829288948743,
+  "other": [
+   0.2286941392978263,
+   "OSM:Pembrey"
+  ],
+  "length": 3384.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Hollow straight",
+   "Ridge top"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Hollow straight": 257,
+   "Ridge top": 39
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    257,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13311829288948743,
+  "brands": 0.13311829288948743,
+  "other": [
+   0.2286941392978263,
+   "OSM:Pembrey"
+  ],
+  "length": 3384.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Hollow straight",
+   "Ridge top"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Hollow straight": 257,
+   "Ridge top": 39
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    257,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13311829288948743,
+  "brands": 0.13311829288948743,
+  "other": [
+   0.2286941392978263,
+   "OSM:Pembrey"
+  ],
+  "length": 3384.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Hollow straight",
+   "Ridge top"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Hollow straight": 257,
+   "Ridge top": 39
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    257,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13306747527752882,
+  "brands": 0.13306747527752882,
+  "other": [
+   0.2286681136749468,
+   "OSM:Pembrey"
+  ],
+  "length": 3382.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "Kestrel approach"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside dive": 97,
+   "Kestrel approach": 108
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13306747527752882,
+  "brands": 0.13306747527752882,
+  "other": [
+   0.2286681136749468,
+   "OSM:Pembrey"
+  ],
+  "length": 3382.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "Kestrel approach"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside dive": 97,
+   "Kestrel approach": 108
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13306747527752882,
+  "brands": 0.13306747527752882,
+  "other": [
+   0.2286681136749468,
+   "OSM:Pembrey"
+  ],
+  "length": 3382.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "Kestrel approach"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside dive": 97,
+   "Kestrel approach": 108
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13302264854302065,
+  "brands": 0.13302264854302065,
+  "other": [
+   0.22866262094338974,
+   "OSM:Pembrey"
+  ],
+  "length": 3384.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Hollow straight",
+   "Kestrel approach"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Hollow straight": 257,
+   "Kestrel approach": 109
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    257,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13302264854302065,
+  "brands": 0.13302264854302065,
+  "other": [
+   0.22866262094338974,
+   "OSM:Pembrey"
+  ],
+  "length": 3384.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Hollow straight",
+   "Kestrel approach"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Hollow straight": 257,
+   "Kestrel approach": 109
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    257,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13302264854302065,
+  "brands": 0.13302264854302065,
+  "other": [
+   0.22866262094338974,
+   "OSM:Pembrey"
+  ],
+  "length": 3384.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Hollow straight",
+   "Kestrel approach"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Hollow straight": 257,
+   "Kestrel approach": 109
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    257,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13246420064543782,
+  "brands": 0.13246420064543782,
+  "other": [
+   0.22908300277834864,
+   "OSM:Pembrey"
+  ],
+  "length": 3378.0,
+  "sep": 122.2,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "back straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside": 48,
+   "back straight": 403
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.8
+ },
+ {
+  "min": 0.13246420064543782,
+  "brands": 0.13246420064543782,
+  "other": [
+   0.22908300277834864,
+   "OSM:Pembrey"
+  ],
+  "length": 3378.0,
+  "sep": 122.2,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "back straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside": 48,
+   "back straight": 403
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.8
+ },
+ {
+  "min": 0.13246420064543782,
+  "brands": 0.13246420064543782,
+  "other": [
+   0.22908300277834864,
+   "OSM:Pembrey"
+  ],
+  "length": 3378.0,
+  "sep": 122.2,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "back straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside": 48,
+   "back straight": 403
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.8
+ },
+ {
+  "min": 0.1323215876129982,
+  "brands": 0.1323215876129982,
+  "other": [
+   0.22927348334940606,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "back straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Ridge top": 34,
+   "back straight": 403
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.9
+ },
+ {
+  "min": 0.1323215876129982,
+  "brands": 0.1323215876129982,
+  "other": [
+   0.22927348334940606,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "back straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Ridge top": 34,
+   "back straight": 403
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.9
+ },
+ {
+  "min": 0.1323215876129982,
+  "brands": 0.1323215876129982,
+  "other": [
+   0.22927348334940606,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "back straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Ridge top": 34,
+   "back straight": 403
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.9
+ },
+ {
+  "min": 0.13231296087142855,
+  "brands": 0.13231296087142855,
+  "other": [
+   0.22927051671029006,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "back straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Kestrel approach": 104,
+   "back straight": 403
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.9
+ },
+ {
+  "min": 0.13231296087142855,
+  "brands": 0.13231296087142855,
+  "other": [
+   0.22927051671029006,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "back straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Kestrel approach": 104,
+   "back straight": 403
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.9
+ },
+ {
+  "min": 0.13231296087142855,
+  "brands": 0.13231296087142855,
+  "other": [
+   0.22927051671029006,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "back straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Kestrel approach": 104,
+   "back straight": 403
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 402.9
+ },
+ {
+  "min": 0.13223174209230262,
+  "brands": 0.13223174209230262,
+  "other": [
+   0.22932809414416777,
+   "OSM:Pembrey"
+  ],
+  "length": 3378.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "back straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside dive": 94,
+   "back straight": 403
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.13223174209230262,
+  "brands": 0.13223174209230262,
+  "other": [
+   0.22932809414416777,
+   "OSM:Pembrey"
+  ],
+  "length": 3378.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "back straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside dive": 94,
+   "back straight": 403
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.13223174209230262,
+  "brands": 0.13223174209230262,
+  "other": [
+   0.22932809414416777,
+   "OSM:Pembrey"
+  ],
+  "length": 3378.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "back straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside dive": 94,
+   "back straight": 403
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.132134429885731,
+  "brands": 0.132134429885731,
+  "other": [
+   0.22939331950926525,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "back straight",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "back straight": 403,
+   "the Ladder": 200
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.132134429885731,
+  "brands": 0.132134429885731,
+  "other": [
+   0.22939331950926525,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "back straight",
+   "the Ladder"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "back straight": 403,
+   "the Ladder": 200
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.132134429885731,
+  "brands": 0.132134429885731,
+  "other": [
+   0.22939331950926525,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "back straight",
+   "the Ladder"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "back straight": 403,
+   "the Ladder": 200
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.13212463206405603,
+  "brands": 0.13212463206405603,
+  "other": [
+   0.2294380053552942,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "back straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Brook run": 70,
+   "back straight": 403
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.13212463206405603,
+  "brands": 0.13212463206405603,
+  "other": [
+   0.2294380053552942,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "back straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Brook run": 70,
+   "back straight": 403
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.13212463206405603,
+  "brands": 0.13212463206405603,
+  "other": [
+   0.2294380053552942,
+   "OSM:Pembrey"
+  ],
+  "length": 3379.3,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "back straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Brook run": 70,
+   "back straight": 403
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    403,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 403.2
+ },
+ {
+  "min": 0.13168926200930317,
+  "brands": 0.13168926200930317,
+  "other": [
+   0.22973791618041506,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "main straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Brook run": 69,
+   "main straight": 272
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13168926200930317,
+  "brands": 0.13168926200930317,
+  "other": [
+   0.22973791618041506,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "main straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Brook run": 69,
+   "main straight": 272
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13168926200930317,
+  "brands": 0.13168926200930317,
+  "other": [
+   0.22973791618041506,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "main straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Brook run": 69,
+   "main straight": 272
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13167073338164256,
+  "brands": 0.13167073338164256,
+  "other": [
+   0.22982984707545154,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "main straight",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "main straight": 272,
+   "the Ladder": 199
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13167073338164256,
+  "brands": 0.13167073338164256,
+  "other": [
+   0.22982984707545154,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "main straight",
+   "the Ladder"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "main straight": 272,
+   "the Ladder": 199
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13167073338164256,
+  "brands": 0.13167073338164256,
+  "other": [
+   0.22982984707545154,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "main straight",
+   "the Ladder"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "main straight": 272,
+   "the Ladder": 199
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13159742697961885,
+  "brands": 0.13159742697961885,
+  "other": [
+   0.2265751733437711,
+   "OSM:Pembrey"
+  ],
+  "length": 3341.8,
+  "sep": 98.8,
+  "ch": {
+   "sw": 85,
+   "saw": 30,
+   "wood": 34
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "grid straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Brook run": 38,
+   "grid straight": 188
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13159742697961885,
+  "brands": 0.13159742697961885,
+  "other": [
+   0.2265751733437711,
+   "OSM:Pembrey"
+  ],
+  "length": 3341.8,
+  "sep": 98.8,
+  "ch": {
+   "sw": 85,
+   "saw": 30,
+   "wood": 34
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "grid straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Brook run": 38,
+   "grid straight": 188
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13159742697961885,
+  "brands": 0.13159742697961885,
+  "other": [
+   0.2265751733437711,
+   "OSM:Pembrey"
+  ],
+  "length": 3341.8,
+  "sep": 98.8,
+  "ch": {
+   "sw": 85,
+   "saw": 30,
+   "wood": 34
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "grid straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Brook run": 38,
+   "grid straight": 188
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13146865893671558,
+  "brands": 0.13146865893671558,
+  "other": [
+   0.22996921203680354,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "main straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside dive": 95,
+   "main straight": 272
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13146865893671558,
+  "brands": 0.13146865893671558,
+  "other": [
+   0.22996921203680354,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "main straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside dive": 95,
+   "main straight": 272
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13146865893671558,
+  "brands": 0.13146865893671558,
+  "other": [
+   0.22996921203680354,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "main straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside dive": 95,
+   "main straight": 272
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    272,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1311349939320023,
+  "brands": 0.1311349939320023,
+  "other": [
+   0.2296551904383673,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "grid straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Brook run": 69,
+   "grid straight": 232
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1311349939320023,
+  "brands": 0.1311349939320023,
+  "other": [
+   0.2296551904383673,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "grid straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Brook run": 69,
+   "grid straight": 232
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1311349939320023,
+  "brands": 0.1311349939320023,
+  "other": [
+   0.2296551904383673,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Brook run",
+   "grid straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Brook run": 69,
+   "grid straight": 232
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1311146332299946,
+  "brands": 0.1311146332299946,
+  "other": [
+   0.22974539022194196,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "grid straight",
+   "the Ladder"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "grid straight": 232,
+   "the Ladder": 199
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1311146332299946,
+  "brands": 0.1311146332299946,
+  "other": [
+   0.22974539022194196,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "grid straight",
+   "the Ladder"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "grid straight": 232,
+   "the Ladder": 199
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1311146332299946,
+  "brands": 0.1311146332299946,
+  "other": [
+   0.22974539022194196,
+   "OSM:Pembrey"
+  ],
+  "length": 3371.8,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "grid straight",
+   "the Ladder"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "grid straight": 232,
+   "the Ladder": 199
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1309478613220047,
+  "brands": 0.1309478613220047,
+  "other": [
+   0.23037919832863837,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "main straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Kestrel approach": 102,
+   "main straight": 270
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1309478613220047,
+  "brands": 0.1309478613220047,
+  "other": [
+   0.23037919832863837,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "main straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Kestrel approach": 102,
+   "main straight": 270
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1309478613220047,
+  "brands": 0.1309478613220047,
+  "other": [
+   0.23037919832863837,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "main straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Kestrel approach": 102,
+   "main straight": 270
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13091761033480478,
+  "brands": 0.13091761033480478,
+  "other": [
+   0.23036995813451694,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "main straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Ridge top": 32,
+   "main straight": 270
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13091761033480478,
+  "brands": 0.13091761033480478,
+  "other": [
+   0.23036995813451694,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "main straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Ridge top": 32,
+   "main straight": 270
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13091761033480478,
+  "brands": 0.13091761033480478,
+  "other": [
+   0.23036995813451694,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Ridge top",
+   "main straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Ridge top": 32,
+   "main straight": 270
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13091741625912373,
+  "brands": 0.13091741625912373,
+  "other": [
+   0.22986464318280256,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "grid straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside dive": 95,
+   "grid straight": 232
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13091741625912373,
+  "brands": 0.13091741625912373,
+  "other": [
+   0.22986464318280256,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "grid straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside dive": 95,
+   "grid straight": 232
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13091741625912373,
+  "brands": 0.13091741625912373,
+  "other": [
+   0.22986464318280256,
+   "OSM:Pembrey"
+  ],
+  "length": 3373.1,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside dive",
+   "grid straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside dive": 95,
+   "grid straight": 232
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13023735259269936,
+  "brands": 0.13023735259269936,
+  "other": [
+   0.2312121651140901,
+   "OSM:Pembrey"
+  ],
+  "length": 3372.7,
+  "sep": 121.8,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "main straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Fernside": 51,
+   "main straight": 270
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13023735259269936,
+  "brands": 0.13023735259269936,
+  "other": [
+   0.2312121651140901,
+   "OSM:Pembrey"
+  ],
+  "length": 3372.7,
+  "sep": 121.8,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "main straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Fernside": 51,
+   "main straight": 270
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.13023735259269936,
+  "brands": 0.13023735259269936,
+  "other": [
+   0.2312121651140901,
+   "OSM:Pembrey"
+  ],
+  "length": 3372.7,
+  "sep": 121.8,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Fernside",
+   "main straight"
+  ],
+  "arc": "the Drop apex",
+  "adjlen": {
+   "Fernside": 51,
+   "main straight": 270
+  },
+  "arcdeg": 27,
+  "brk": [
+   [
+    270,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1301884861597857,
+  "brands": 0.1301884861597857,
+  "other": [
+   0.23029902825866325,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "grid straight"
+  ],
+  "arc": "the Hollow apex",
+  "adjlen": {
+   "Kestrel approach": 102,
+   "grid straight": 230
+  },
+  "arcdeg": 70,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ },
+ {
+  "min": 0.1301884861597857,
+  "brands": 0.1301884861597857,
+  "other": [
+   0.23029902825866325,
+   "OSM:Pembrey"
+  ],
+  "length": 3369.7,
+  "sep": 122.1,
+  "ch": {
+   "sw": 85,
+   "saw": 20,
+   "wood": 24
+  },
+  "kink": 0,
+  "adj": [
+   "Kestrel approach",
+   "grid straight"
+  ],
+  "arc": "Kestrel hold",
+  "adjlen": {
+   "Kestrel approach": 102,
+   "grid straight": 230
+  },
+  "arcdeg": 84,
+  "brk": [
+   [
+    275,
+    "T1 Millrace entry",
+    40.0
+   ],
+   [
+    254,
+    "the Hollow entry",
+    48.0
+   ],
+   [
+    400,
+    "Switchback entry",
+    30.0
+   ]
+  ],
+  "longest": 400.0
+ }
+]

@@ -1,0 +1,1497 @@
+[
+{
+"minall": 0.2050684037223035,
+"nearest": "OSM:Pembrey",
+"second": [
+0.20587981170721176,
+"OSM:BrandsHatchIndy"
+],
+"brands": 0.20587981170721176,
+"sw": 65,
+"kink": 12,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 127,
+"ladder": 261,
+"hol": 38,
+"L": 3331.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20495307893123732,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20598019218080213,
+"OSM:Pembrey"
+],
+"brands": 0.20495307893123732,
+"sw": 65,
+"kink": 10,
+"frac": 0.37,
+"back": 400,
+"kr": 200,
+"hstr": 132,
+"ladder": 265,
+"hol": 40,
+"L": 3339.9,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20364472421891458,
+"nearest": "OSM:Pembrey",
+"second": [
+0.2060056803552959,
+"OSM:Mexico"
+],
+"brands": 0.20863026581023156,
+"sw": 65,
+"kink": 12,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 121,
+"ladder": 257,
+"hol": 38,
+"L": 3321.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20330032269651785,
+"nearest": "OSM:Pembrey",
+"second": [
+0.2056824876037281,
+"OSM:BrandsHatchIndy"
+],
+"brands": 0.2056824876037281,
+"sw": 65,
+"kink": 9,
+"frac": 0.3,
+"back": 400,
+"kr": 200,
+"hstr": 129,
+"ladder": 253,
+"hol": 41,
+"L": 3320.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.2032088660438065,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20620705519546978,
+"OSM:Mexico"
+],
+"brands": 0.2032088660438065,
+"sw": 65,
+"kink": 10,
+"frac": 0.34,
+"back": 400,
+"kr": 200,
+"hstr": 136,
+"ladder": 267,
+"hol": 40,
+"L": 3345.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.2025593744178794,
+"nearest": "SD:e-track-4",
+"second": [
+0.20335079335899425,
+"TUM:MexicoCity"
+],
+"brands": 0.21361134036365123,
+"sw": 62,
+"kink": 10,
+"frac": 0.3,
+"back": 390,
+"kr": 300,
+"hstr": 120,
+"ladder": 275,
+"hol": 37,
+"L": 3345.9,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20246928041749385,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20277058590285654,
+"OSM:Mexico"
+],
+"brands": 0.20722229033743653,
+"sw": 62,
+"kink": 9,
+"frac": 0.3,
+"back": 400,
+"kr": 300,
+"hstr": 138,
+"ladder": 291,
+"hol": 38,
+"L": 3382.9,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.2023191868283104,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20262424889178499,
+"OSM:Mexico"
+],
+"brands": 0.20581814683036975,
+"sw": 62,
+"kink": 9,
+"frac": 0.3,
+"back": 420,
+"kr": 200,
+"hstr": 142,
+"ladder": 295,
+"hol": 38,
+"L": 3390.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.2022955865397039,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20263016463703176,
+"OSM:Mexico"
+],
+"brands": 0.20938141926996254,
+"sw": 62,
+"kink": 9,
+"frac": 0.34,
+"back": 400,
+"kr": 300,
+"hstr": 133,
+"ladder": 288,
+"hol": 38,
+"L": 3375.0,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20222470327488337,
+"nearest": "OSM:Pembrey",
+"second": [
+0.20771921588311482,
+"OSM:BrandsHatchIndy"
+],
+"brands": 0.20771921588311482,
+"sw": 65,
+"kink": 9,
+"frac": 0.34,
+"back": 400,
+"kr": 200,
+"hstr": 124,
+"ladder": 251,
+"hol": 41,
+"L": 3313.3,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20219153908265844,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20251515508210424,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.2110505260469605,
+"sw": 62,
+"kink": 9,
+"frac": 0.37,
+"back": 400,
+"kr": 300,
+"hstr": 129,
+"ladder": 286,
+"hol": 38,
+"L": 3369.1,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20215742505267112,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.2024740180335254,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.2109093527874335,
+"sw": 62,
+"kink": 11,
+"frac": 0.3,
+"back": 410,
+"kr": 200,
+"hstr": 127,
+"ladder": 285,
+"hol": 36,
+"L": 3366.4,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20211624457967925,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20245624575649548,
+"OSM:Mexico"
+],
+"brands": 0.2080586548247166,
+"sw": 62,
+"kink": 9,
+"frac": 0.34,
+"back": 420,
+"kr": 200,
+"hstr": 136,
+"ladder": 292,
+"hol": 38,
+"L": 3382.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20201763198677047,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20212356115925703,
+"SD:e-track-4"
+],
+"brands": 0.21368970870435766,
+"sw": 62,
+"kink": 11,
+"frac": 0.34,
+"back": 410,
+"kr": 200,
+"hstr": 121,
+"ladder": 281,
+"hol": 36,
+"L": 3356.1,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20199196576473707,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.2023374816650557,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.20979399001894292,
+"sw": 62,
+"kink": 9,
+"frac": 0.37,
+"back": 420,
+"kr": 200,
+"hstr": 132,
+"ladder": 290,
+"hol": 38,
+"L": 3376.3,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20189428062612697,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20221490919823507,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.21157583022651663,
+"sw": 62,
+"kink": 9,
+"frac": 0.4,
+"back": 420,
+"kr": 200,
+"hstr": 128,
+"ladder": 287,
+"hol": 38,
+"L": 3370.1,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20166134521863668,
+"nearest": "SD:e-track-4",
+"second": [
+0.20328457611384337,
+"OSM:Pembrey"
+],
+"brands": 0.2148949950961985,
+"sw": 62,
+"kink": 10,
+"frac": 0.3,
+"back": 410,
+"kr": 200,
+"hstr": 116,
+"ladder": 270,
+"hol": 37,
+"L": 3335.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.2014155996632027,
+"nearest": "OSM:Pembrey",
+"second": [
+0.20802865380529212,
+"OSM:Mexico"
+],
+"brands": 0.20929823341514142,
+"sw": 65,
+"kink": 9,
+"frac": 0.37,
+"back": 400,
+"kr": 200,
+"hstr": 121,
+"ladder": 249,
+"hol": 41,
+"L": 3308.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20101545054009107,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.2014084824093988,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.20717285584144302,
+"sw": 62,
+"kink": 11,
+"frac": 0.3,
+"back": 390,
+"kr": 300,
+"hstr": 138,
+"ladder": 299,
+"hol": 36,
+"L": 3394.7,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20100189295731047,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.2042744012731294,
+"OSM:Mexico"
+],
+"brands": 0.20100189295731047,
+"sw": 65,
+"kink": 11,
+"frac": 0.37,
+"back": 400,
+"kr": 200,
+"hstr": 143,
+"ladder": 280,
+"hol": 39,
+"L": 3371.0,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20095995275136666,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.2064693968044254,
+"TUM:MexicoCity"
+],
+"brands": 0.20095995275136666,
+"sw": 65,
+"kink": 10,
+"frac": 0.3,
+"back": 400,
+"kr": 200,
+"hstr": 141,
+"ladder": 269,
+"hol": 40,
+"L": 3353.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20083337242505622,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20118818250327544,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.20978174855517492,
+"sw": 62,
+"kink": 11,
+"frac": 0.34,
+"back": 390,
+"kr": 300,
+"hstr": 132,
+"ladder": 295,
+"hol": 36,
+"L": 3384.9,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20063007402935476,
+"nearest": "SD:e-track-4",
+"second": [
+0.20325606437791385,
+"TUM:MexicoCity"
+],
+"brands": 0.2160409168774535,
+"sw": 62,
+"kink": 10,
+"frac": 0.34,
+"back": 390,
+"kr": 300,
+"hstr": 115,
+"ladder": 272,
+"hol": 37,
+"L": 3337.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20062010778112038,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.2010131892273171,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.20727539657516011,
+"sw": 62,
+"kink": 12,
+"frac": 0.3,
+"back": 410,
+"kr": 200,
+"hstr": 138,
+"ladder": 300,
+"hol": 35,
+"L": 3396.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20043538261518798,
+"nearest": "SD:e-track-4",
+"second": [
+0.20195169022421816,
+"TUM:MexicoCity"
+],
+"brands": 0.21584258403587728,
+"sw": 62,
+"kink": 11,
+"frac": 0.37,
+"back": 410,
+"kr": 200,
+"hstr": 116,
+"ladder": 279,
+"hol": 36,
+"L": 3348.4,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.2004204284491698,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20076916502376688,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.21027105135471644,
+"sw": 62,
+"kink": 12,
+"frac": 0.34,
+"back": 410,
+"kr": 200,
+"hstr": 130,
+"ladder": 296,
+"hol": 35,
+"L": 3385.1,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20041660583423823,
+"nearest": "OSM:Pembrey",
+"second": [
+0.2069505727969877,
+"SD:e-track-4"
+],
+"brands": 0.21056564479826276,
+"sw": 65,
+"kink": 11,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 116,
+"ladder": 245,
+"hol": 39,
+"L": 3298.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20032514843193144,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.20071494657544792,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.20850037805303429,
+"sw": 62,
+"kink": 10,
+"frac": 0.4,
+"back": 420,
+"kr": 200,
+"hstr": 138,
+"ladder": 302,
+"hol": 37,
+"L": 3398.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20031450262297218,
+"nearest": "TUM:MexicoCity",
+"second": [
+0.2006296819656818,
+"F1:Aut\u00f3dromo Hermanos Rodr\u00edguez"
+],
+"brands": 0.21259256708667196,
+"sw": 62,
+"kink": 12,
+"frac": 0.37,
+"back": 410,
+"kr": 200,
+"hstr": 125,
+"ladder": 293,
+"hol": 35,
+"L": 3376.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19963680426220437,
+"nearest": "SD:e-track-4",
+"second": [
+0.2020222001012639,
+"OSM:Pembrey"
+],
+"brands": 0.21745025470278223,
+"sw": 62,
+"kink": 10,
+"frac": 0.34,
+"back": 410,
+"kr": 200,
+"hstr": 111,
+"ladder": 267,
+"hol": 37,
+"L": 3326.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19916933660580385,
+"nearest": "OSM:Pembrey",
+"second": [
+0.20484718534549579,
+"SD:e-track-4"
+],
+"brands": 0.21310437927069478,
+"sw": 65,
+"kink": 11,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 110,
+"ladder": 242,
+"hol": 39,
+"L": 3290.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19909804322430658,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20450554950370944,
+"OSM:Mexico"
+],
+"brands": 0.19909804322430658,
+"sw": 65,
+"kink": 11,
+"frac": 0.34,
+"back": 400,
+"kr": 200,
+"hstr": 147,
+"ladder": 282,
+"hol": 39,
+"L": 3377.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1990056284641095,
+"nearest": "SD:e-track-4",
+"second": [
+0.1990154502098604,
+"OSM:Pembrey"
+],
+"brands": 0.2192482094186852,
+"sw": 62,
+"kink": 9,
+"frac": 0.3,
+"back": 410,
+"kr": 200,
+"hstr": 105,
+"ladder": 255,
+"hol": 38,
+"L": 3304.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19811406416969032,
+"nearest": "SD:e-track-4",
+"second": [
+0.20108288411088512,
+"OSM:Pembrey"
+],
+"brands": 0.21942745077173145,
+"sw": 62,
+"kink": 10,
+"frac": 0.37,
+"back": 410,
+"kr": 200,
+"hstr": 106,
+"ladder": 264,
+"hol": 37,
+"L": 3319.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19791767542971087,
+"nearest": "SD:e-track-4",
+"second": [
+0.19797424745302872,
+"OSM:Pembrey"
+],
+"brands": 0.22080582566913087,
+"sw": 62,
+"kink": 9,
+"frac": 0.3,
+"back": 390,
+"kr": 300,
+"hstr": 102,
+"ladder": 251,
+"hol": 38,
+"L": 3296.4,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19719884933076218,
+"nearest": "SD:e-track-4",
+"second": [
+0.1979317972589198,
+"OSM:Pembrey"
+],
+"brands": 0.2215695400590087,
+"sw": 62,
+"kink": 9,
+"frac": 0.34,
+"back": 410,
+"kr": 200,
+"hstr": 100,
+"ladder": 252,
+"hol": 38,
+"L": 3296.1,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1971697080375947,
+"nearest": "SD:e-track-4",
+"second": [
+0.20018585756266893,
+"OSM:Pembrey"
+],
+"brands": 0.22035393548371143,
+"sw": 62,
+"kink": 12,
+"frac": 0.3,
+"back": 400,
+"kr": 200,
+"hstr": 101,
+"ladder": 260,
+"hol": 35,
+"L": 3310.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1966444888434884,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20485800697091666,
+"OSM:Mexico"
+],
+"brands": 0.1966444888434884,
+"sw": 65,
+"kink": 11,
+"frac": 0.3,
+"back": 400,
+"kr": 200,
+"hstr": 153,
+"ladder": 285,
+"hol": 39,
+"L": 3386.4,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1962000597854861,
+"nearest": "SD:e-track-4",
+"second": [
+0.19695539070524717,
+"OSM:Pembrey"
+],
+"brands": 0.22303880793415992,
+"sw": 62,
+"kink": 9,
+"frac": 0.34,
+"back": 390,
+"kr": 300,
+"hstr": 97,
+"ladder": 248,
+"hol": 38,
+"L": 3288.7,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19590583309815998,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20631458499647704,
+"OSM:Pembrey"
+],
+"brands": 0.19590583309815998,
+"sw": 68,
+"kink": 9,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 142,
+"ladder": 244,
+"hol": 44,
+"L": 3318.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1958406937820901,
+"nearest": "SD:e-track-4",
+"second": [
+0.1971244506250682,
+"OSM:Pembrey"
+],
+"brands": 0.22336482657695556,
+"sw": 62,
+"kink": 9,
+"frac": 0.37,
+"back": 410,
+"kr": 200,
+"hstr": 96,
+"ladder": 250,
+"hol": 38,
+"L": 3290.1,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19576176135397455,
+"nearest": "OSM:Pembrey",
+"second": [
+0.2038781423711393,
+"OSM:Brainerd"
+],
+"brands": 0.21565814096494662,
+"sw": 65,
+"kink": 10,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 104,
+"ladder": 229,
+"hol": 40,
+"L": 3265.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1955712472154271,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.2047952788496957,
+"TUM:MexicoCity"
+],
+"brands": 0.1955712472154271,
+"sw": 65,
+"kink": 9,
+"frac": 0.37,
+"back": 410,
+"kr": 200,
+"hstr": 158,
+"ladder": 289,
+"hol": 41,
+"L": 3395.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19532959198407854,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.2051043382710372,
+"TUM:MexicoCity"
+],
+"brands": 0.19532959198407854,
+"sw": 65,
+"kink": 9,
+"frac": 0.34,
+"back": 390,
+"kr": 300,
+"hstr": 158,
+"ladder": 288,
+"hol": 41,
+"L": 3393.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19478643224594494,
+"nearest": "SD:e-track-4",
+"second": [
+0.19876777858174585,
+"OSM:Pembrey"
+],
+"brands": 0.22346392428480427,
+"sw": 62,
+"kink": 12,
+"frac": 0.34,
+"back": 400,
+"kr": 200,
+"hstr": 94,
+"ladder": 256,
+"hol": 35,
+"L": 3299.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19468730891699945,
+"nearest": "OSM:Pembrey",
+"second": [
+0.20247763618244705,
+"OSM:Brainerd"
+],
+"brands": 0.21797783129326906,
+"sw": 65,
+"kink": 10,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 99,
+"ladder": 226,
+"hol": 40,
+"L": 3258.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19467042742746682,
+"nearest": "SD:e-track-4",
+"second": [
+0.19614108695616966,
+"OSM:Pembrey"
+],
+"brands": 0.2246771332616639,
+"sw": 62,
+"kink": 11,
+"frac": 0.3,
+"back": 400,
+"kr": 200,
+"hstr": 91,
+"ladder": 245,
+"hol": 36,
+"L": 3280.3,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19395660254467742,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20743478882132374,
+"OSM:Pembrey"
+],
+"brands": 0.19395660254467742,
+"sw": 68,
+"kink": 9,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 146,
+"ladder": 245,
+"hol": 44,
+"L": 3324.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19299821891710445,
+"nearest": "SD:e-track-4",
+"second": [
+0.19772527198949896,
+"OSM:Pembrey"
+],
+"brands": 0.2258695558520028,
+"sw": 62,
+"kink": 12,
+"frac": 0.37,
+"back": 400,
+"kr": 200,
+"hstr": 89,
+"ladder": 253,
+"hol": 35,
+"L": 3291.1,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19250966624913507,
+"nearest": "SD:e-track-4",
+"second": [
+0.19491089388936858,
+"OSM:Pembrey"
+],
+"brands": 0.22755537172655615,
+"sw": 62,
+"kink": 11,
+"frac": 0.34,
+"back": 400,
+"kr": 200,
+"hstr": 85,
+"ladder": 242,
+"hol": 36,
+"L": 3270.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19212080982811813,
+"nearest": "OSM:Pembrey",
+"second": [
+0.19225113199843993,
+"SD:e-track-4"
+],
+"brands": 0.22936979080494826,
+"sw": 62,
+"kink": 10,
+"frac": 0.3,
+"back": 400,
+"kr": 200,
+"hstr": 80,
+"ladder": 230,
+"hol": 37,
+"L": 3249.3,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19117341716568362,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20946971665686692,
+"TUM:MexicoCity"
+],
+"brands": 0.19117341716568362,
+"sw": 68,
+"kink": 10,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 155,
+"ladder": 261,
+"hol": 43,
+"L": 3353.0,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19113790586761933,
+"nearest": "OSM:Pembrey",
+"second": [
+0.20027447417920413,
+"OSM:Brainerd"
+],
+"brands": 0.22117212735847436,
+"sw": 65,
+"kink": 9,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 91,
+"ladder": 212,
+"hol": 41,
+"L": 3232.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19088997152143353,
+"nearest": "SD:e-track-4",
+"second": [
+0.1940067319493861,
+"OSM:Pembrey"
+],
+"brands": 0.22978063091734668,
+"sw": 62,
+"kink": 11,
+"frac": 0.37,
+"back": 400,
+"kr": 200,
+"hstr": 80,
+"ladder": 239,
+"hol": 36,
+"L": 3262.7,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1903117932151276,
+"nearest": "SD:e-track-4",
+"second": [
+0.19107327891354006,
+"OSM:Pembrey"
+],
+"brands": 0.23200788941226652,
+"sw": 62,
+"kink": 10,
+"frac": 0.34,
+"back": 400,
+"kr": 200,
+"hstr": 74,
+"ladder": 227,
+"hol": 37,
+"L": 3240.3,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19023091961182634,
+"nearest": "OSM:Pembrey",
+"second": [
+0.1990581552642706,
+"OSM:Brainerd"
+],
+"brands": 0.22326652223781598,
+"sw": 65,
+"kink": 9,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 87,
+"ladder": 210,
+"hol": 41,
+"L": 3225.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18901290127855747,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20987534075611816,
+"TUM:MexicoCity"
+],
+"brands": 0.18901290127855747,
+"sw": 68,
+"kink": 10,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 160,
+"ladder": 263,
+"hol": 43,
+"L": 3359.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18885928100289304,
+"nearest": "SD:e-track-4",
+"second": [
+0.1903033664572939,
+"OSM:Pembrey"
+],
+"brands": 0.23404629672797606,
+"sw": 62,
+"kink": 10,
+"frac": 0.37,
+"back": 400,
+"kr": 200,
+"hstr": 70,
+"ladder": 224,
+"hol": 37,
+"L": 3233.6,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18810847116786275,
+"nearest": "OSM:Pembrey",
+"second": [
+0.1899400835397889,
+"SD:e-track-4"
+],
+"brands": 0.2344464767992231,
+"sw": 62,
+"kink": 9,
+"frac": 0.3,
+"back": 400,
+"kr": 200,
+"hstr": 69,
+"ladder": 214,
+"hol": 38,
+"L": 3217.7,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18797798803227025,
+"nearest": "SD:e-track-4",
+"second": [
+0.18949901606496664,
+"OSM:Pembrey"
+],
+"brands": 0.23516916935275056,
+"sw": 62,
+"kink": 12,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 65,
+"ladder": 220,
+"hol": 35,
+"L": 3224.7,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18728780835390227,
+"nearest": "OSM:Pembrey",
+"second": [
+0.18822044013995903,
+"SD:e-track-4"
+],
+"brands": 0.2368368189905001,
+"sw": 62,
+"kink": 9,
+"frac": 0.34,
+"back": 400,
+"kr": 200,
+"hstr": 64,
+"ladder": 212,
+"hol": 38,
+"L": 3209.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18689553465367878,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.20774056186886689,
+"TUM:MexicoCity"
+],
+"brands": 0.18689553465367878,
+"sw": 68,
+"kink": 11,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 167,
+"ladder": 277,
+"hol": 42,
+"L": 3386.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18664732972710313,
+"nearest": "OSM:Pembrey",
+"second": [
+0.18693377324298588,
+"SD:e-track-4"
+],
+"brands": 0.23868303183680858,
+"sw": 62,
+"kink": 9,
+"frac": 0.37,
+"back": 400,
+"kr": 200,
+"hstr": 60,
+"ladder": 210,
+"hol": 38,
+"L": 3203.9,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18571866329765985,
+"nearest": "SD:e-track-4",
+"second": [
+0.18836703789125248,
+"OSM:Pembrey"
+],
+"brands": 0.23837801227565159,
+"sw": 62,
+"kink": 12,
+"frac": 0.34,
+"back": 390,
+"kr": 200,
+"hstr": 58,
+"ladder": 216,
+"hol": 35,
+"L": 3213.8,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18453117910886802,
+"nearest": "OSM:BrandsHatchIndy",
+"second": [
+0.2082113453761143,
+"TUM:MexicoCity"
+],
+"brands": 0.18453117910886802,
+"sw": 68,
+"kink": 11,
+"frac": 0.3,
+"back": 390,
+"kr": 200,
+"hstr": 173,
+"ladder": 279,
+"hol": 42,
+"L": 3394.2,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+}
+]

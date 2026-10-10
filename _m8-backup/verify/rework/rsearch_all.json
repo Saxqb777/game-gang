@@ -1,0 +1,692 @@
+[
+{
+"minall": 0.17817943587334223,
+"nearest": "OSM:Brainerd",
+"brands": 0.2468698967754789,
+"sw": 60,
+"kink": 0,
+"frac": 0.5,
+"back": 400,
+"adj": [
+"Kestrel approach",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 126,
+"ladder": 200,
+"arcdeg": 45,
+"L": 3279.9,
+"sep": 122.1,
+"grade": 6.25,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1851663242882836,
+"nearest": "OSM:Pembrey",
+"brands": 0.24237281974469713,
+"sw": 60,
+"kink": 0,
+"frac": 0.5,
+"back": 430,
+"adj": [
+"Kestrel approach",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 79,
+"ladder": 200,
+"arcdeg": 45,
+"L": 3213.2,
+"sep": 122.1,
+"grade": 6.25,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20201960843836664,
+"nearest": "TUM:MexicoCity",
+"brands": 0.21099775564970147,
+"sw": 60,
+"kink": 8,
+"frac": 0.2,
+"back": 430,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 136,
+"ladder": 297,
+"arcdeg": 37,
+"L": 3390.4,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20080456086662044,
+"nearest": "SD:e-track-4",
+"brands": 0.21603121193831812,
+"sw": 60,
+"kink": 8,
+"frac": 0.3,
+"back": 430,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 123,
+"ladder": 290,
+"arcdeg": 37,
+"L": 3370.3,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19782388174249438,
+"nearest": "SD:e-track-4",
+"brands": 0.21984221779703,
+"sw": 60,
+"kink": 8,
+"frac": 0.37,
+"back": 430,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 114,
+"ladder": 285,
+"arcdeg": 37,
+"L": 3356.3,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1922144523993927,
+"nearest": "SD:e-track-4",
+"brands": 0.22718381431603987,
+"sw": 60,
+"kink": 8,
+"frac": 0.5,
+"back": 430,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 98,
+"ladder": 276,
+"arcdeg": 37,
+"L": 3330.3,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry"
+]
+},
+{
+"minall": 0.19552355985708308,
+"nearest": "SD:e-track-4",
+"brands": 0.22232090506331675,
+"sw": 60,
+"kink": 10,
+"frac": 0.5,
+"back": 430,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 111,
+"ladder": 301,
+"arcdeg": 35,
+"L": 3378.5,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry"
+]
+},
+{
+"minall": 0.188327572418866,
+"nearest": "SD:e-track-4",
+"brands": 0.23320452554031892,
+"sw": 60,
+"kink": 12,
+"frac": 0.2,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 76,
+"ladder": 241,
+"arcdeg": 33,
+"L": 3263.5,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1824844123717568,
+"nearest": "SD:e-track-4",
+"brands": 0.24113839296695722,
+"sw": 60,
+"kink": 12,
+"frac": 0.3,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 57,
+"ladder": 230,
+"arcdeg": 33,
+"L": 3233.4,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.17844313533763642,
+"nearest": "SD:e-track-4",
+"brands": 0.24687700364257362,
+"sw": 60,
+"kink": 12,
+"frac": 0.37,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 44,
+"ladder": 222,
+"arcdeg": 33,
+"L": 3212.4,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1969036649259315,
+"nearest": "SD:e-track-4",
+"brands": 0.21980844220831244,
+"sw": 60,
+"kink": 15,
+"frac": 0.2,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 109,
+"ladder": 287,
+"arcdeg": 30,
+"L": 3356.3,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18928540166435337,
+"nearest": "SD:e-track-4",
+"brands": 0.2289259172010421,
+"sw": 60,
+"kink": 15,
+"frac": 0.3,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 84,
+"ladder": 271,
+"arcdeg": 30,
+"L": 3316.7,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18397212774515131,
+"nearest": "SD:e-track-4",
+"brands": 0.2358871843177361,
+"sw": 60,
+"kink": 15,
+"frac": 0.37,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 67,
+"ladder": 261,
+"arcdeg": 30,
+"L": 3289.0,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.17406953775403408,
+"nearest": "SD:e-track-4",
+"brands": 0.2501056783155051,
+"sw": 60,
+"kink": 15,
+"frac": 0.5,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 36,
+"ladder": 241,
+"arcdeg": 30,
+"L": 3237.6,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry"
+]
+},
+{
+"minall": 0.19429029428048095,
+"nearest": "OSM:Brainerd",
+"brands": 0.22231754396988826,
+"sw": 65,
+"kink": 0,
+"frac": 0.5,
+"back": 400,
+"adj": [
+"Kestrel approach",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 142,
+"ladder": 200,
+"arcdeg": 50,
+"L": 3280.0,
+"sep": 122.1,
+"grade": 6.25,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19499779026953598,
+"nearest": "OSM:Pembrey",
+"brands": 0.20948392757855902,
+"sw": 65,
+"kink": 0,
+"frac": 0.5,
+"back": 430,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 120,
+"ladder": 218,
+"arcdeg": 50,
+"L": 3261.9,
+"sep": 122.1,
+"grade": 5.75,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.18864040077231953,
+"nearest": "OSM:Pembrey",
+"brands": 0.21596133440629892,
+"sw": 65,
+"kink": 0,
+"frac": 0.5,
+"back": 430,
+"adj": [
+"Kestrel approach",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 97,
+"ladder": 200,
+"arcdeg": 50,
+"L": 3214.4,
+"sep": 122.0,
+"grade": 6.25,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20068688509155003,
+"nearest": "OSM:Pembrey",
+"brands": 0.20644181514741922,
+"sw": 65,
+"kink": 8,
+"frac": 0.2,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 127,
+"ladder": 241,
+"arcdeg": 42,
+"L": 3301.1,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1984282169173943,
+"nearest": "OSM:Pembrey",
+"brands": 0.21082729302900027,
+"sw": 65,
+"kink": 8,
+"frac": 0.3,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 116,
+"ladder": 236,
+"arcdeg": 42,
+"L": 3286.2,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19682859268967015,
+"nearest": "OSM:Pembrey",
+"brands": 0.2140544173668656,
+"sw": 65,
+"kink": 8,
+"frac": 0.37,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 109,
+"ladder": 233,
+"arcdeg": 42,
+"L": 3275.8,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19381733180732497,
+"nearest": "OSM:Pembrey",
+"brands": 0.22059544403912051,
+"sw": 65,
+"kink": 8,
+"frac": 0.5,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 96,
+"ladder": 227,
+"arcdeg": 42,
+"L": 3256.4,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry"
+]
+},
+{
+"minall": 0.19572273271700855,
+"nearest": "OSM:BrandsHatchIndy",
+"brands": 0.19572273271700855,
+"sw": 65,
+"kink": 10,
+"frac": 0.2,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 154,
+"ladder": 276,
+"arcdeg": 40,
+"L": 3373.2,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20095995275136666,
+"nearest": "OSM:BrandsHatchIndy",
+"brands": 0.20095995275136666,
+"sw": 65,
+"kink": 10,
+"frac": 0.3,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 141,
+"ladder": 269,
+"arcdeg": 40,
+"L": 3353.6,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20495307893123732,
+"nearest": "OSM:BrandsHatchIndy",
+"brands": 0.20495307893123732,
+"sw": 65,
+"kink": 10,
+"frac": 0.37,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 132,
+"ladder": 265,
+"arcdeg": 40,
+"L": 3339.9,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.20192027627977083,
+"nearest": "OSM:Pembrey",
+"brands": 0.21306203548441513,
+"sw": 65,
+"kink": 10,
+"frac": 0.5,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 115,
+"ladder": 256,
+"arcdeg": 40,
+"L": 3314.5,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry"
+]
+},
+{
+"minall": 0.20173999100072507,
+"nearest": "TUM:MexicoCity",
+"brands": 0.20701494511111918,
+"sw": 65,
+"kink": 12,
+"frac": 0.5,
+"back": 400,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 132,
+"ladder": 284,
+"arcdeg": 38,
+"L": 3369.4,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry"
+]
+},
+{
+"minall": 0.1969449558846605,
+"nearest": "OSM:BrandsHatchIndy",
+"brands": 0.1969449558846605,
+"sw": 70,
+"kink": 0,
+"frac": 0.5,
+"back": 400,
+"adj": [
+"Kestrel approach",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 163,
+"ladder": 200,
+"arcdeg": 55,
+"L": 3290.5,
+"sep": 122.1,
+"grade": 6.25,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.16941434129583396,
+"nearest": "OSM:BrandsHatchIndy",
+"brands": 0.16941434129583396,
+"sw": 70,
+"kink": 0,
+"frac": 0.5,
+"back": 430,
+"adj": [
+"the Ladder",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 201,
+"ladder": 261,
+"arcdeg": 55,
+"L": 3393.4,
+"sep": 122.1,
+"grade": 5.74,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.1895454666726666,
+"nearest": "OSM:BrandsHatchIndy",
+"brands": 0.1895454666726666,
+"sw": 70,
+"kink": 0,
+"frac": 0.5,
+"back": 430,
+"adj": [
+"Kestrel approach",
+"Hollow straight"
+],
+"arc": "the Hollow apex",
+"hstr": 121,
+"ladder": 200,
+"arcdeg": 55,
+"L": 3226.7,
+"sep": 121.0,
+"grade": 6.25,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+}
+]

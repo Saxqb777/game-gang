@@ -1,0 +1,80 @@
+{
+ "root": "strix-r4",
+ "scale": 0.235,
+ "size": [
+  2.241,
+  1.338,
+  3.96
+ ],
+ "min": [
+  -1.12,
+  0,
+  -2.031
+ ],
+ "max": [
+  1.12,
+  1.338,
+  1.928
+ ],
+ "bodyLength": 3.96,
+ "wheelbase": 2.307,
+ "trackFront": 1.804,
+ "trackRear": 1.869,
+ "wheelRadius": 0.3492,
+ "pivots": {
+  "wheel_fl": [
+   0.902,
+   0.349,
+   1.153
+  ],
+  "wheel_fr": [
+   -0.902,
+   0.349,
+   1.153
+  ],
+  "wheel_rl": [
+   0.934,
+   0.349,
+   -1.153
+  ],
+  "wheel_rr": [
+   -0.934,
+   0.349,
+   -1.153
+  ]
+ },
+ "triangles": 279169,
+ "meshes": 39,
+ "perGroup": {
+  "body": 102973,
+  "interior": 82312,
+  "chassis": 57040,
+  "wheel_fl": 8802,
+  "wheel_fr": 8792,
+  "wheel_rl": 8802,
+  "wheel_rr": 8792,
+  "brake_fl": 412,
+  "brake_fr": 412,
+  "brake_rl": 416,
+  "brake_rr": 416
+ },
+ "materials": [
+  "metal",
+  "trim",
+  "accent_red",
+  "interior_panel",
+  "interior",
+  "screen",
+  "brake",
+  "caliper",
+  "fluid",
+  "filter",
+  "tyre",
+  "rim",
+  "paint",
+  "glass",
+  "mirror",
+  "headlight",
+  "taillight"
+ ]
+}

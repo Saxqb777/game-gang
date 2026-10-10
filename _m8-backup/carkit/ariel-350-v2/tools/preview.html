@@ -1,0 +1,66 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#888}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script></head>
+<body><script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1600, H = +q.get('h') || 900;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setPixelRatio(1);
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
+scene.background = new THREE.Color(0xc4c7cb);
+const key = new THREE.DirectionalLight(0xffffff, 1.3); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.radius = 5;
+scene.add(key); scene.add(key.target);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(1, 96).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xa4a7ab, roughness: 0.85 }));
+ground.receiveShadow = true; scene.add(ground);
+const gltf = await new GLTFLoader().loadAsync('/model.glb');
+const car = gltf.scene; scene.add(car);
+car.updateMatrixWorld(true);
+const full = new THREE.Box3().setFromObject(car);
+const R = full.getSize(new THREE.Vector3()).length() / 2;
+ground.scale.setScalar(R * 4); ground.position.y = +(q.get('groundY') ?? full.min.y);
+const sc = key.shadow.camera; Object.assign(sc, { left: -R * 1.2, right: R * 1.2, top: R * 1.2, bottom: -R * 1.2, near: 0.1 * R, far: 8 * R }); sc.updateProjectionMatrix();
+const fc = full.getCenter(new THREE.Vector3());
+key.target.position.copy(fc); key.position.copy(fc).add(new THREE.Vector3(0.6, 2.2, 0.9).multiplyScalar(R * 1.6));
+const orig = new Map();
+car.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; orig.set(o, o.material); } });
+const grey = new THREE.MeshStandardMaterial({ color: 0x9a9a9a, roughness: 0.6 });
+const hot = new THREE.MeshStandardMaterial({ color: 0xff00ff, roughness: 0.5, emissive: 0x550055 });
+const match = (o, list) => list.some((h) => orig.get(o).name === h || o.name.startsWith(h) || (o.parent && o.parent.name.startsWith(h)));
+window.info = () => { const r = []; car.traverse((o) => { if (o.isMesh) r.push([o.name, o.material.name]); }); return r; };
+window.shoot = (s) => {
+  car.traverse((o) => {
+    if (!o.isMesh) return;
+    const m = orig.get(o); o.visible = true;
+    if (s.highlight) o.material = match(o, s.highlight) ? hot : grey; else o.material = m;
+    if (s.hide && match(o, s.hide)) o.visible = false;
+    if (s.only && !match(o, s.only)) o.visible = false;
+    if (s.glow !== undefined && (m.name === 'headlight' || m.name === 'taillight')) m.emissiveIntensity = s.glow;
+  });
+  for (const c of ['fl', 'fr', 'rl', 'rr']) {
+    const w = car.getObjectByName('wheel_' + c); if (!w) continue;
+    const steer = c[0] === 'f' ? (s.steer || 0) : 0;
+    w.rotation.set(s.spin || 0, steer, 0, 'YXZ');
+  }
+  ground.visible = s.ground !== false;
+  const box = new THREE.Box3(); car.traverse((o) => { if (o.isMesh && o.visible) box.expandByObject(o); });
+  const ctr = box.getCenter(new THREE.Vector3()); const r = box.getSize(new THREE.Vector3()).length() / 2;
+  const fov = s.fov || 30;
+  const cam = new THREE.PerspectiveCamera(fov, W / H, r * 0.01, r * 50);
+  const V = { front34: [0.62, 0.22, 0.75], rear34: [-0.62, 0.24, -0.75], side: [1, 0.05, 0], sideR: [-1, 0.05, 0], front: [0, 0.1, 1], rear: [0, 0.12, -1], top: [0.0001, 1, 0.0001], under: [0.001, -1, 0.001] };
+  const dir = new THREE.Vector3(...(s.dir || V[s.view || 'front34'])).normalize();
+  const target = s.target ? new THREE.Vector3(...s.target) : new THREE.Vector3(ctr.x, box.min.y + (ctr.y - box.min.y) * 0.85, ctr.z);
+  const dist = s.dist || (r / Math.sin(THREE.MathUtils.degToRad(fov / 2)) * (s.zoom || 0.62));
+  cam.position.copy(target).addScaledVector(dir, dist); cam.lookAt(target);
+  renderer.render(scene, cam);
+  return renderer.domElement.toDataURL('image/png');
+};
+window.__ready = true;
+</script></body></html>

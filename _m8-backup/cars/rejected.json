@@ -1,0 +1,134 @@
+[
+  {
+    "name": "TYPE 4 - Concept Car",
+    "url": "https://blendswap.com/blend/33230",
+    "author": "Jorgeferrer",
+    "licence": "CC0 (BlendSwap)",
+    "carClass": "supercar / hypercar",
+    "quality": 7,
+    "triangles": null,
+    "reserveFor": "First reserve for supercar or prototype/hypercar. Swap in for #4 (Concept Car 039) if it checks out.",
+    "reason": "Close miss. The model itself is the best-looking in the pool and the licence is clean CC0. It was not picked because the supercar slot already has the Goblin, which has verified stats. Unknowns: the triangle count of a 56 MB Sub-D .blend; Blender-only node materials; the upload is only 13 days old, with 1 download and no track record; and it may contain third-party textures. The author's earlier uploads bundled Poliigon textures for personal use only. The tyre sidewall text was unreadable. Owner checks: list the images in the .blend, read the sidewall text, measure triangles after modifiers, replace the 'JF' badges."
+  },
+  {
+    "name": "Byakko GTR 2017",
+    "url": "https://blendswap.com/blend/20103",
+    "author": "RajChovhan",
+    "licence": "CC-BY (BlendSwap, version not stated)",
+    "carClass": "touring car / GT sports coupe (race kit)",
+    "quality": 6,
+    "triangles": null,
+    "reserveFor": "Reserve for touring/rally, or as a street coupe in the hot hatch tier",
+    "reason": "Lost the touring slot to Ariel_350-V2, which has a verified triangle count. Unknown triangle count. Blender 2.7x Cycles materials that the author says to replace. The livery and tyre textures carry real trademarks (NOS decal, Bridgestone POTENZA sidewall) and unclear sources, so both need a full replacement. The 'GTR' name must change. The author also uploads replicas, though this design is stated as his own."
+  },
+  {
+    "name": "Car Design / ASTREO TYPE3",
+    "url": "https://blendswap.com/blend/26079",
+    "author": "Jorgeferrer",
+    "licence": "CC-BY (BlendSwap); bundled tyre CC-BY by BlackSilver (BlendSwap 16718, flagged fan art of a real SSR wheel); paint CC0 by thefull9yards",
+    "carClass": "supercar / hypercar coupe",
+    "quality": 7,
+    "triangles": null,
+    "reserveFor": "Reserve supercar",
+    "reason": "Would duplicate the supercar class, which the Goblin already holds. The tyre sidewall texture reads GOODYEAR / EAGLE F1 and must be replaced. It bundles a CC-BY tyre that is fan art of a real wheel, so there are two credits to give. The author asks commercial users to contact him (a courtesy, not required by CC-BY). Unknown triangle count from a Sub-D .blend, and 2012-style Cycles paint needs rebuilding. TYPE 4 by the same author has a cleaner CC0 licence."
+  },
+  {
+    "name": "Retro coupe",
+    "url": "https://sketchfab.com/3d-models/retro-coupe-b356898aa8e246fd9c59f6b8abd36791",
+    "author": "zhe_kan",
+    "licence": "CC BY 4.0 (Sketchfab)",
+    "carClass": "classic sports roadster / retro GT",
+    "quality": 6,
+    "triangles": 157426,
+    "reserveFor": "First pick if a classic / 'sports classic' class is added",
+    "reason": "Good, verified asset: 157k triangles, hand-named PBR materials, Sketchfab isAiGenerated=false. But it is a 1950s roadster with wire wheels and whitewalls, which falls outside the modern classes requested. The texture budget is heavy (59 maps, 4K tyre maps). The oval grille is a generic AC Ace/Cobra cue. The author also uploads real-brand replicas."
+  },
+  {
+    "name": "OutPiston Muscle Car",
+    "url": "https://sketchfab.com/3d-models/outpiston-muscle-car-c60a80d185db40ebaf978e7d0e59a94b",
+    "author": "OUTPISTON (outpiston)",
+    "licence": "CC BY 4.0 (Sketchfab)",
+    "carClass": "muscle / retro restomod coupe",
+    "quality": 5,
+    "triangles": 325688,
+    "reserveFor": "Reserve muscle body",
+    "reason": "Beaten by ViktorKom's Muscle Car Concept on quality, PBR readiness and triangle count. 326k triangles and 94 non-PBR materials need merging and decimation. Soft, blobby panels and a windscreen shading artifact. Most of the author's other uploads are real-car replicas under NC-SA, some apparently ripped from games, though this one carries the author's own brand."
+  },
+  {
+    "name": "Riva Speedster",
+    "url": "https://sketchfab.com/3d-models/riva-speedster-2a69ee87b41f48b18d08fc6c1eb9055d",
+    "author": "leoferraro",
+    "licence": "CC BY 4.0 (Sketchfab)",
+    "carClass": "concept single-seat streamliner speedster",
+    "quality": 6,
+    "triangles": 69886,
+    "reserveFor": "Exotic/concept bonus car",
+    "reason": "A single-seat streamliner is too extreme a shape for a realistic line-up. Real trademarks are baked into the albedo and must be repainted: Riva, the Jon Olsson edition livery, an Italian flag, the designers' names, and PIRELLI / P3000 on the tyres. The display stand and environment sphere are part of the model. No interior. Low engagement (150 downloads)."
+  },
+  {
+    "name": "Gourami - Luxury Saloon",
+    "url": "https://sketchfab.com/3d-models/gourami-luxury-saloon-bf29aca039c447ab913608e3f6818875",
+    "author": "Fishboe (ministephen)",
+    "licence": "CC BY 4.0 (Sketchfab)",
+    "carClass": "luxury saloon / 4-door GT",
+    "quality": 6,
+    "triangles": 107768,
+    "reserveFor": "Premium sedan class or high-end traffic",
+    "reason": "Clean and in budget (108k), but a luxury saloon is not a racing class. Thick flat panel-gap lines. The author himself calls it 'kinda ugly now'. Interior probably missing. Rolls-Royce-style grille. Replace the GV20 GMI plate and fish emblem."
+  },
+  {
+    "name": "Airtsel Valor Proiettile",
+    "url": "https://sketchfab.com/3d-models/airtsel-valor-proiettile-25896d049f024196a9f75bed9955b565",
+    "author": "Yudha Mfr (yudhamfr)",
+    "licence": "CC BY 4.0 (Sketchfab)",
+    "carClass": "classic 1960s GT",
+    "quality": 6,
+    "triangles": 561523,
+    "reserveFor": "Second option for a classic class",
+    "reason": "At 562k triangles it is 2.8x the ceiling. Wavy hood reflections suggest topology that decimation could make worse. With only 3 materials and 4 textures, recolouring may need material splits. A vintage GT is outside the requested modern classes."
+  },
+  {
+    "name": "hypercar Agunta",
+    "url": "https://sketchfab.com/3d-models/hypercar-agunta-df4fec2a00c247eb9b3bd31b81f575d0",
+    "author": "George.Schelfaut",
+    "licence": "CC BY 4.0 (Sketchfab)",
+    "carClass": "supercar / hypercar",
+    "quality": 5,
+    "triangles": 52963,
+    "reserveFor": "Low-tier filler hypercar",
+    "reason": "Mid quality with amateur proportions. 'BBS' logos (a real wheel brand) are painted into the 4K albedo. The glass shares the single car material via an opacity map, so it must be split out for three.js. The turntable is baked in. One texture atlas means the wheels may be merged with the body."
+  },
+  {
+    "name": "FREE Concept Car 025 - public domain (CC0)",
+    "url": "https://sketchfab.com/3d-models/free-concept-car-025-public-domain-cc0-e3a65443d3e44c33b594cec591c01c05",
+    "author": "unityfan777",
+    "licence": "CC0 by the author's dedication (Sketchfab label Free Standard)",
+    "carClass": "concept supercar",
+    "quality": 5,
+    "triangles": 483726,
+    "reserveFor": "CC0 filler supercar",
+    "reason": "Reads as a clay-like design study: slit lamps, blank intake holes, opaque canopy. 484k triangles (2.4x the ceiling). No PBR maps. The Bridgestone POTENZA tyre texture is probably photo-sourced, so CC0 does not cover it."
+  },
+  {
+    "name": "Concept Sport Car",
+    "url": "https://sketchfab.com/3d-models/concept-sport-car-566075bdb499404b908895a5f4dc6aa0",
+    "author": "KTKR",
+    "licence": "CC BY 4.0 (Sketchfab)",
+    "carClass": "supercar",
+    "quality": 5,
+    "triangles": 511902,
+    "reserveFor": "Filler supercar",
+    "reason": "The author's first Blender model. No UV map and no textures. 512k triangles (2.5x the ceiling) needs heavy decimation plus new UVs or triplanar paint. The supercar class is already covered by stronger options."
+  },
+  {
+    "name": "FREE Concept Car 002 02 - public domain (CC0)",
+    "url": "https://sketchfab.com/3d-models/free-concept-car-002-02-public-domain-cc0-b7ce8d2d64394e959abe47b589eee633",
+    "author": "unityfan777",
+    "licence": "CC0 by the author's dedication (Sketchfab label Free Standard)",
+    "carClass": "futuristic grand tourer / show car",
+    "quality": 5,
+    "triangles": 506530,
+    "reserveFor": "Futuristic or concept tier only",
+    "reason": "A luxury show car with an open cabin and wipers, not a race car. 507k triangles. Classic non-PBR materials (32 of them). The front wheels sit in pods, so wheel visibility and rotation are uncertain. Made after the author's AI experiments; this one is not tagged AI, but its origin is slightly less certain."
+  }
+]

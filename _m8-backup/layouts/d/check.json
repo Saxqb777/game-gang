@@ -1,0 +1,37 @@
+{
+ "length_m": 3313.1,
+ "closure_gap_m": 0.0,
+ "heading_error_deg": 0.0,
+ "net_turns": 1.0,
+ "z_closure_m": 0.0,
+ "min_radius_m": 30.0,
+ "max_grade_pct": 6.12,
+ "elevation_range_m": 28.0,
+ "min_leg_separation_m": 125.3,
+ "closest_legs_at_s": [
+  575,
+  2599
+ ],
+ "straight_behind_start_m": 210.0,
+ "straight_after_start_m": 280.0,
+ "longest_straight_m": 470.6,
+ "heavy_braking_zones": [
+  [
+   280,
+   "T1 Millrace entry",
+   42.0
+  ],
+  [
+   471,
+   "Hollow entry",
+   50.0
+  ],
+  [
+   311,
+   "Switchback entry",
+   30.0
+  ]
+ ],
+ "corners": 25,
+ "FAILS": []
+}

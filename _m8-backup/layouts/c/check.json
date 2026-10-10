@@ -1,0 +1,27 @@
+{
+ "length_m": 3310.6,
+ "closure_gap_m": 0.0,
+ "heading_error_deg": -0.0,
+ "net_turns": 1.0,
+ "z_closure_m": 0.0,
+ "min_radius_m": 30.0,
+ "max_grade_pct": 7.27,
+ "elevation_range_m": 26.0,
+ "min_leg_separation_m": 113.7,
+ "closest_legs_at_s": [
+  1740,
+  2243
+ ],
+ "straight_behind_start_m": 250.0,
+ "straight_after_start_m": 170.0,
+ "longest_straight_m": 445.7,
+ "heavy_braking_zones": [
+  [
+   446,
+   "T7 the Kettle entry",
+   55.0
+  ]
+ ],
+ "corners": 33,
+ "FAILS": []
+}

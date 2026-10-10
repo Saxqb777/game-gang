@@ -1,0 +1,42 @@
+[
+{
+"minall": 0.19766685463295747,
+"nearest": "SD:e-track-4",
+"brands": 0.2199598097386491,
+"sw": 60,
+"kink": 9,
+"frac": 0.25,
+"back": 380,
+"kr": 400,
+"kin": 1200,
+"hstr": 112,
+"ladder": 279,
+"hol": 36,
+"L": 3345.7,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+},
+{
+"minall": 0.19555414406599553,
+"nearest": "SD:e-track-4",
+"brands": 0.2226601451191639,
+"sw": 60,
+"kink": 9,
+"frac": 0.3,
+"back": 380,
+"kr": 400,
+"kin": 1200,
+"hstr": 106,
+"ladder": 275,
+"hol": 36,
+"L": 3335.5,
+"sep": 122.1,
+"braking": [
+"T1 Millrace entry",
+"Switchback entry"
+]
+}
+]

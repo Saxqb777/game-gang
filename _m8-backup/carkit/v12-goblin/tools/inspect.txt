@@ -1,0 +1,32 @@
+THREE.FBXLoader: You are loading an asset with a Z-UP coordinate system. The loader just rotates the asset to transform it into Y-UP. The vertex data are not converted.
+Group "" p=0.00,0.00,0.00 r=-90,0,0 s=1.000,1.000,1.000
+  Group "bone_car" p=0.00,0.00,0.00 r=-180,0,-180 s=1.000,1.000,1.000
+    Group "bone_suspension_BR" p=-0.94,1.43,0.39 r=0,2,-0 s=1.000,1.000,1.000
+      Mesh "car_brake_BR" p=-0.00,-0.00,0.00 r=0,0,0 s=1.000,1.000,1.000 tris=465 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=0.8,-0.6,-1.3..0.9,-0.3,-1.2
+      Group "bone_rotation_BR" p=0.00,0.00,0.00 r=0,0,0 s=1.000,1.000,1.000
+        Mesh "car_wheel_BR" p=-0.00,-0.00,0.00 r=0,0,0 s=1.000,1.000,1.000 tris=4980 groups=3 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=0.7,-0.8,-1.8..1.1,-0.0,-1.1
+    Group "bone_suspension_BL" p=0.94,1.43,0.39 r=0,-2,-0 s=1.000,1.000,1.000
+      Mesh "car_brake_BL" p=0.01,-0.00,0.00 r=0,-0,-0 s=1.000,1.000,1.000 tris=465 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=-0.9,-0.6,-1.3..-0.8,-0.3,-1.2
+      Group "bone_rotation_BL" p=0.00,0.00,0.00 r=0,-0,-0 s=1.000,1.000,1.000
+        Mesh "car_wheel_BL" p=0.01,-0.00,0.00 r=0,0,-0 s=1.000,1.000,1.000 tris=4980 groups=2 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=-1.2,-0.8,-1.8..-0.7,-0.0,-1.1
+    Group "bone_suspension_FL" p=0.83,-1.31,0.37 r=0,-3,-0 s=1.000,1.000,1.000
+      Group "bone_rotation_FL" p=0.00,0.00,0.00 r=-0,-0,-0 s=1.000,1.000,1.000
+        Mesh "car_wheel_FL" p=0.01,0.00,-0.00 r=-0,-0,-0 s=1.000,1.000,1.000 tris=4958 groups=3 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=-1.0,-0.7,0.9..-0.6,-0.0,1.7
+      Mesh "car_brake_FL" p=0.01,0.00,-0.00 r=-0,-0,-0 s=1.000,1.000,1.000 tris=433 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=-0.8,-0.5,1.0..-0.7,-0.2,1.2
+    Mesh "car_body" p=0.00,0.00,0.73 r=-180,0,-180 s=1.000,1.000,1.000 tris=43181 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=-1.1,-1.2,-2.4..1.1,-0.1,2.4
+    Mesh "car_glass" p=-0.00,0.00,0.73 r=0,-0,-0 s=1.000,1.000,1.000 tris=820 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=-1.0,-1.1,-2.2..1.0,-0.5,2.3
+    Group "bone_suspension_FR" p=-0.83,-1.31,0.37 r=0,3,-0 s=1.000,1.000,1.000
+      Mesh "car_brake_FR" p=-0.00,0.00,-0.00 r=0,-0,0 s=1.000,1.000,1.000 tris=463 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=0.7,-0.5,1.0..0.8,-0.2,1.2
+      Group "bone_rotation_FR" p=0.00,-0.00,0.00 r=0,-0,0 s=1.000,1.000,1.000
+        Mesh "car_wheel_FR" p=-0.00,0.00,-0.00 r=-0,0,-0 s=1.000,1.000,1.000 tris=4958 groups=2 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=0.6,-0.7,0.9..1.0,-0.0,1.7
+    Mesh "clearcoat" p=0.00,0.00,0.73 r=-180,0,-180 s=1.000,1.000,1.000 tris=20888 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/color/normal/uv wbb=-1.1,-1.2,-2.3..1.1,-0.1,2.4
+  Mesh "car_shadow" p=0.00,0.00,0.00 r=0,0,0 s=1.000,1.000,1.000 tris=32 groups=1 mats=[car_body|car_glass|car_tire|car_glow|car_shadow|ground_road|clearcoat] attrs=position/normal/uv wbb=-5.0,-0.0,-5.0..5.0,0.0,5.0
+meshes 12 tris 86623
+mat car_body 12
+mat car_glass 12
+mat car_tire 12
+mat car_glow 12
+mat car_shadow 12
+mat ground_road 12
+mat clearcoat 12
+world bbox Vector3 { x: -5, y: -1.2237821993484048, z: -5 } Vector3 { x: 5, y: 1.1102230246251565e-15, z: 5 }

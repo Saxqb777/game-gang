@@ -1,0 +1,25 @@
+outlines compared: 196
+nearest by silhouette (Procrustes, lower = more alike):
+  TUM:MexicoCity                           procr 0.203  turn 0.716
+  OSM:Mexico                               procr 0.203  turn 0.720
+  F1:Autódromo Hermanos Rodríguez          procr 0.203  turn 0.718
+  SD:e-track-4                             procr 0.204  turn 0.598
+  OSM:Pembrey                              procr 0.206  turn 0.568  mirrored
+  F1:Circuito de Madring                   procr 0.208  turn 0.687  mirrored
+  OSM:Brainerd                             procr 0.209  turn 0.668
+  OSM:MalloryPark                          procr 0.211  turn 0.574  mirrored
+  OSM:BrandsHatchIndy                      procr 0.211  turn 0.478
+  F1:Indianapolis Motor Speedway           procr 0.212  turn 0.624  mirrored
+  TUM:Melbourne                            procr 0.216  turn 0.674
+  SD:g-track-2                             procr 0.217  turn 0.547  mirrored
+nearest real circuit: TUM:MexicoCity 0.203
+real circuits under 0.200: 0
+nearest by turning function: OSM:BrandsHatchIndy 0.478, SD:g-track-2 0.547, OSM:Pembrey 0.568, SD:dirt-1 0.573, OSM:MalloryPark 0.574
+  OSM:BrandsHatchIndy    procr 0.211 (rank 9 of 196)  turn 0.478
+  SD:g-track-2           procr 0.217 (rank 12 of 196)  turn 0.547
+  OSM:LagunaSeca         procr 0.324 (rank 50 of 196)  turn 0.743
+  SD:Corkscrew           procr 0.333 (rank 54 of 196)  turn 0.742
+  OSM:Bathurst           procr 0.260 (rank 23 of 196)  turn 0.713
+  OSM:Sonoma             procr 0.558 (rank 167 of 196)  turn 1.145
+  OSM:BrandsHatch        procr 0.452 (rank 129 of 196)  turn 0.869
+saved compare.png

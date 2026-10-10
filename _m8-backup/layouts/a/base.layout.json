@@ -1,0 +1,648 @@
+{
+ "format": "splitways-layout@1",
+ "name": "Timberfall Circuit",
+ "licence": "Proprietary - (C) 2026 Gamer Gang project. All rights reserved.",
+ "credits": [
+  "Original layout by the Gamer Gang project, 2026"
+ ],
+ "source": {
+  "package": "original",
+  "file": "",
+  "readme": "",
+  "readmeLicence": "",
+  "notes": "Original design, not derived from any existing track"
+ },
+ "startZ": 14.0,
+ "segments": [
+  {
+   "name": "main straight",
+   "type": "straight",
+   "length": 380,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 8.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.0,
+   "bankEnd": -0.02,
+   "roadWidth": 14,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 10,
+    "runoffEnd": 10,
+    "runoffSurface": "asphalt",
+    "barrier": "fence"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 10,
+    "runoffEnd": 10,
+    "runoffSurface": "asphalt",
+    "barrier": "wall"
+   }
+  },
+  {
+   "name": "T1 Sawmill",
+   "type": "right",
+   "length": 0,
+   "radiusStart": 42,
+   "radiusEnd": 42,
+   "arc": 1.7453293,
+   "zEnd": 7.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.02,
+   "bankEnd": -0.03,
+   "roadWidth": 14,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 14,
+    "runoffEnd": 26,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Sawmill exit",
+   "type": "straight",
+   "length": 70,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 8.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.03,
+   "bankEnd": 0.02,
+   "roadWidth": 13,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 22,
+    "runoffEnd": 10,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Resin esses left",
+   "type": "left",
+   "length": 0,
+   "radiusStart": 120,
+   "radiusEnd": 120,
+   "arc": 0.9599311,
+   "zEnd": 11.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.02,
+   "bankEnd": 0.0,
+   "roadWidth": 12,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 12,
+    "runoffEnd": 12,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Resin esses right",
+   "type": "right",
+   "length": 0,
+   "radiusStart": 120,
+   "radiusEnd": 120,
+   "arc": 0.9599311,
+   "zEnd": 14.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.0,
+   "bankEnd": -0.02,
+   "roadWidth": 12,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 12,
+    "runoffEnd": 12,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Lookout climb",
+   "type": "straight",
+   "length": 119.8075,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 19.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.02,
+   "bankEnd": 0.0,
+   "roadWidth": 12,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Lookout crest",
+   "type": "left",
+   "length": 0,
+   "radiusStart": 300,
+   "radiusEnd": 300,
+   "arc": 0.3490659,
+   "zEnd": 22.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.0,
+   "bankEnd": 0.0,
+   "roadWidth": 12,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 10,
+    "runoffEnd": 10,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "the Plunge",
+   "type": "straight",
+   "length": 60,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 18.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.0,
+   "bankEnd": -0.05,
+   "roadWidth": 12.5,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 12,
+    "runoffEnd": 12,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Cathedral entry",
+   "type": "right",
+   "length": 0,
+   "radiusStart": 170,
+   "radiusEnd": 95,
+   "arc": 1.0471976,
+   "zEnd": 14.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.05,
+   "bankEnd": -0.08,
+   "roadWidth": 13,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 16,
+    "runoffEnd": 20,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.05,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Cathedral exit",
+   "type": "right",
+   "length": 0,
+   "radiusStart": 95,
+   "radiusEnd": 65,
+   "arc": 0.9599311,
+   "zEnd": 10.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.08,
+   "bankEnd": -0.05,
+   "roadWidth": 13,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 20,
+    "runoffEnd": 26,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "back straight",
+   "type": "straight",
+   "length": 394.8779,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 1.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.05,
+   "bankEnd": 0.0,
+   "roadWidth": 13,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 14,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Creek rise",
+   "type": "straight",
+   "length": 266,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 4.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.0,
+   "bankEnd": -0.03,
+   "roadWidth": 13,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 10,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Creek hairpin",
+   "type": "right",
+   "length": 0,
+   "radiusStart": 30,
+   "radiusEnd": 30,
+   "arc": 2.7925268,
+   "zEnd": 4.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.03,
+   "bankEnd": -0.03,
+   "roadWidth": 14,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 22,
+    "runoffEnd": 28,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 5,
+    "runoffEnd": 5,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Kingfisher drag",
+   "type": "straight",
+   "length": 280,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 7.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.03,
+   "bankEnd": 0.03,
+   "roadWidth": 13,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 18,
+    "runoffEnd": 8,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Twin Pines one",
+   "type": "left",
+   "length": 0,
+   "radiusStart": 60,
+   "radiusEnd": 60,
+   "arc": 1.2217305,
+   "zEnd": 9.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.03,
+   "bankEnd": 0.03,
+   "roadWidth": 12.5,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 14,
+    "runoffEnd": 18,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   }
+  },
+  {
+   "name": "Twin Pines link",
+   "type": "straight",
+   "length": 90,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 10.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.03,
+   "bankEnd": 0.03,
+   "roadWidth": 12.5,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 10,
+    "runoffEnd": 10,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Twin Pines two",
+   "type": "left",
+   "length": 0,
+   "radiusStart": 50,
+   "radiusEnd": 50,
+   "arc": 1.3962634,
+   "zEnd": 12.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.03,
+   "bankEnd": 0.03,
+   "roadWidth": 12.5,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 16,
+    "runoffEnd": 20,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   }
+  },
+  {
+   "name": "Ridge road",
+   "type": "straight",
+   "length": 250,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 20.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.03,
+   "bankEnd": 0.0,
+   "roadWidth": 12,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 12,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Ridge brow",
+   "type": "straight",
+   "length": 130,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 19.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": 0.0,
+   "bankEnd": -0.04,
+   "roadWidth": 12,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 8,
+    "runoffEnd": 8,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "Lantern",
+   "type": "right",
+   "length": 0,
+   "radiusStart": 55,
+   "radiusEnd": 150,
+   "arc": 2.7052603,
+   "zEnd": 16.5,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.04,
+   "bankEnd": -0.02,
+   "roadWidth": 13,
+   "left": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.04,
+    "runoffStart": 18,
+    "runoffEnd": 12,
+    "runoffSurface": "gravel",
+    "barrier": "tyres"
+   },
+   "right": {
+    "kerbWidth": 1.2,
+    "kerbHeight": 0.06,
+    "runoffStart": 6,
+    "runoffEnd": 6,
+    "runoffSurface": "grass",
+    "barrier": "armco"
+   }
+  },
+  {
+   "name": "grid straight",
+   "type": "straight",
+   "length": 220,
+   "radiusStart": 0,
+   "radiusEnd": 0,
+   "arc": 0,
+   "zEnd": 14.0,
+   "tangentStart": null,
+   "tangentEnd": null,
+   "bankStart": -0.02,
+   "bankEnd": 0.0,
+   "roadWidth": 14,
+   "left": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 10,
+    "runoffEnd": 10,
+    "runoffSurface": "asphalt",
+    "barrier": "fence"
+   },
+   "right": {
+    "kerbWidth": 0,
+    "kerbHeight": 0.0,
+    "runoffStart": 10,
+    "runoffEnd": 10,
+    "runoffSurface": "asphalt",
+    "barrier": "wall"
+   }
+  }
+ ]
+}

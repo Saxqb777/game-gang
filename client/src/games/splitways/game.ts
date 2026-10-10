@@ -139,8 +139,6 @@ const LAST_LAP_SECONDS = 4;
 const TAG_HIDE_DISTANCE = 10;
 /** The soak race: the protocol's lap maximum, about 2.6 h, far longer than the soak. */
 const SOAK_LAPS = 99;
-/** Without a GPU timer the loading benchmark drops a preset when more frames than this missed. */
-const LOADING_MISSED_SHARE = 0.1;
 
 export class SplitWaysGame {
   private readonly scene = new Scene();
@@ -478,7 +476,8 @@ export class SplitWaysGame {
     const slow =
       gpuMedian !== undefined
         ? gpuMedian > RESOLUTION.loadingDropFactor * target
-        : window.frames > 0 && window.missedFrames / window.frames > LOADING_MISSED_SHARE;
+        : window.frames > 0 &&
+          window.missedFrames / window.frames > RESOLUTION.loadingDropMissedShare;
     if (slow && measured.id !== 'low') {
       noteLoadingDrop(this.playerCount);
       this.loop.stop();

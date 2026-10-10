@@ -269,8 +269,12 @@ export const RESOLUTION = {
   /** Loading benchmark: frames measured at scale 1 before the race, capped at `loadingBenchMaxMs`. */
   loadingBenchFrames: 90,
   loadingBenchMaxMs: 4000,
-  /** Drop a preset on the loading screen when the GPU median is above this many times the target. */
+  /**
+   * Drop a preset on the loading screen when the GPU median is above this many times the target,
+   * or (without a GPU timer) when more than this share of its frames missed.
+   */
   loadingDropFactor: 1.5,
+  loadingDropMissedShare: 0.1,
   /** Start the next race one preset lower when the last one spent this share at the floor scale... */
   dropIfFloorShare: 0.2,
   /** ...or missed this share of frames. */

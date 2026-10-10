@@ -1,6 +1,6 @@
 /**
- * Soft puffs: sand dust off the wheels on the shoulders, tyre smoke from slides, rocket trails
- * and explosion smoke. One particle pool, one draw call.
+ * Soft puffs: dust off the wheels on the shoulders and tyre smoke from slides. One particle pool,
+ * one draw call.
  */
 import { Vector3 } from 'three';
 import type { Car } from '../sim/car';
@@ -51,51 +51,6 @@ export class Dust {
         pending -= 1;
       }
       owed[i] = pending;
-    }
-  }
-
-  /** A small grey puff left behind something fast (rocket trails). */
-  trail(position: Vector3): void {
-    this.particles.emit(
-      position.x,
-      position.y,
-      position.z,
-      (Math.random() - 0.5) * 0.6,
-      0.4,
-      (Math.random() - 0.5) * 0.6,
-      0.7,
-      0.7,
-      0.72,
-      0.35,
-      0.7 + Math.random() * 0.4,
-      0.35,
-      1.4,
-      -0.4,
-      1.5,
-    );
-  }
-
-  /** A cloud of dark smoke (explosions). */
-  burst(position: Vector3, count: number, scale: number): void {
-    for (let k = 0; k < count; k++) {
-      const shade = 0.25 + Math.random() * 0.25;
-      this.particles.emit(
-        position.x,
-        position.y,
-        position.z,
-        (Math.random() - 0.5) * 9 * scale,
-        Math.random() * 5 * scale,
-        (Math.random() - 0.5) * 9 * scale,
-        shade,
-        shade,
-        shade,
-        0.55,
-        1 + Math.random() * 0.8,
-        1 * scale,
-        3.5 * scale,
-        -0.8,
-        2.6,
-      );
     }
   }
 

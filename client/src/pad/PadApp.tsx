@@ -2,14 +2,7 @@ import './pad.css';
 import { colourHex } from '@gamergang/shared';
 import { Suspense, useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { PAD_CONTROLLERS } from './controllers';
-import {
-  enterFullscreen,
-  keepScreenAwake,
-  probeTiltSensor,
-  requestTiltPermission,
-  tiltNeedsPrompt,
-  type TiltPermission,
-} from './device';
+import { enterFullscreen, keepScreenAwake } from './device';
 import { getPadStore } from './padStore';
 import { loadProfile, saveProfile, type Profile, type SteeringMode } from './profile';
 import { JoinScreen } from './screens/JoinScreen';
@@ -22,19 +15,10 @@ function roomFromUrl(): string | null {
   return /^[A-Z]{4}$/.test(code) ? code : null;
 }
 
-function tiltFallbackNote(permission: TiltPermission): string {
-  if (permission === 'denied') {
-    return 'Motion access was not allowed, so you are on buttons. Switch back any time in settings.';
-  }
-  if (!window.isSecureContext) return 'Tilt needs a secure (https) page, so you are on buttons.';
-  return 'No tilt sensor found on this device, so you are on buttons.';
-}
-
 export default function PadApp() {
   const store = getPadStore();
   const state = useSyncExternalStore(store.subscribe, store.getState);
   const [profile, setProfile] = useState<Profile>(loadProfile);
-  const [note, setNote] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -49,37 +33,17 @@ export default function PadApp() {
     saveProfile(next);
   }, []);
 
-  /** Checks tilt really works after a permission request; falls back to buttons with a note if not. */
-  const verifyTilt = useCallback(
-    async (permission: Promise<TiltPermission>, base: Profile) => {
-      const result = await permission;
-      if (result === 'granted' && (await probeTiltSensor())) {
-        setNote(null);
-        return;
-      }
-      commitProfile({ ...base, mode: 'buttons' });
-      setNote(tiltFallbackNote(result));
-    },
-    [commitProfile],
-  );
-
-  // Both handlers below run synchronously inside a tap: iOS only prompts for motion access there,
-  // and fullscreen needs the same user gesture.
+  // Runs synchronously inside the Join tap: fullscreen needs that user gesture.
   const submitJoin = (next: Profile) => {
-    const permission = next.mode === 'tilt' ? requestTiltPermission() : null;
-    if (!tiltNeedsPrompt()) enterFullscreen();
+    enterFullscreen();
     keepScreenAwake();
     commitProfile(next);
     store.join(next.name, next.colour);
     setEditing(false);
-    if (permission) void verifyTilt(permission, next);
   };
 
   const changeMode = (mode: SteeringMode) => {
-    const next = { ...profile, mode };
-    commitProfile(next);
-    setNote(null);
-    if (mode === 'tilt') void verifyTilt(requestTiltPermission(), next);
+    commitProfile({ ...profile, mode });
   };
 
   const { room, status, lobby, me, kicked } = state;
@@ -125,7 +89,6 @@ export default function PadApp() {
         lobby={lobby}
         myId={me?.playerId ?? null}
         profile={profile}
-        note={note}
         submitLabel={me ? 'Save' : 'Join'}
         onSubmit={submitJoin}
       />
@@ -137,7 +100,6 @@ export default function PadApp() {
         myId={me.playerId}
         room={room}
         onReady={(ready) => store.setReady(ready)}
-        onMode={(mode) => store.setMode(mode)}
         onSettings={() => setSettingsOpen(true)}
       />
     );
@@ -150,7 +112,6 @@ export default function PadApp() {
           mode={profile.mode}
           colourHex={colourHex(myPlayer.colour)}
           onSettings={() => setSettingsOpen(true)}
-          onEnableTilt={() => changeMode('tilt')}
         />
       </Suspense>
     );
@@ -179,7 +140,6 @@ export default function PadApp() {
       {settingsOpen ? (
         <SettingsSheet
           mode={profile.mode}
-          note={note}
           onMode={changeMode}
           onEditProfile={
             lobby.state === 'lobby'

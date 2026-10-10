@@ -80,8 +80,12 @@ export const pollSignalResponseSchema = z.object({
 });
 
 // POST /api/laps -> TV stores the best laps of a finished race
-export const TRACK_IDS = ['corniche-run'] as const;
+export const TRACK_IDS = ['kestrel-pines'] as const;
 export const trackIdSchema = z.enum(TRACK_IDS);
+export type TrackId = z.infer<typeof trackIdSchema>;
+/** A lap under 45 s or over 10 min is not a real Kestrel Pines lap. */
+export const MIN_LAP_MS = 45_000;
+export const MAX_LAP_MS = 600_000;
 export const postLapsRequestSchema = z.object({
   room: roomCodeSchema,
   key: hostKeySchema,
@@ -90,8 +94,7 @@ export const postLapsRequestSchema = z.object({
     .array(
       z.object({
         name: playerNameSchema,
-        // A lap under 20 s or over 10 min is not a real Corniche Run lap.
-        bestLapMs: z.number().int().min(20_000).max(600_000),
+        bestLapMs: z.number().int().min(MIN_LAP_MS).max(MAX_LAP_MS),
       }),
     )
     .min(1)
@@ -99,7 +102,7 @@ export const postLapsRequestSchema = z.object({
 });
 export type PostLapsRequest = z.infer<typeof postLapsRequestSchema>;
 
-// GET /api/laps?track=corniche-run -> all-time top 10
+// GET /api/laps?track=kestrel-pines -> all-time top 10
 export const leaderboardEntrySchema = z.object({
   name: z.string().max(NAME_MAX_LENGTH * 4),
   bestLapMs: z.number().int(),

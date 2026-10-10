@@ -86,9 +86,10 @@ export const STEERING = {
   maxAngleHighSpeed: 0.17,
   lowSpeed: 6,
   highSpeed: 44,
-  /** How fast the wheels turn towards the requested angle and back to centre (radians per second). */
-  turnRate: 3.4,
-  returnRate: 5.5,
+  /** How fast the road wheels turn towards the requested angle (deg/s; real cars sit at 120-180). */
+  turnRateDegPerS: 150,
+  /** How fast they return towards centre (deg/s). Faster than turning, so letting go settles quickly. */
+  returnRateDegPerS: 240,
 } as const;
 
 export const DRIFT = {
@@ -135,8 +136,15 @@ export const RACE = {
 export const RESPAWN = {
   /** Upside down (or on its side) for this long = respawn at the last checkpoint. */
   flippedSeconds: 3,
-  /** Pressing gas or brake but going nowhere (wedged against a wall) for this long = respawn. */
-  stuckSeconds: 3,
+  /**
+   * Pressing gas or brake but going nowhere (wedged against a wall) for this long = respawn. Long
+   * enough for the reverse hint to work first, since a manual Reset exists now.
+   */
+  stuckSeconds: 6,
+  /** Stuck on gas this long shows "Hold BRAKE to reverse". */
+  stuckHintSeconds: 2,
+  /** A manual Reset can't be pressed again for this long (s). */
+  resetCooldownSeconds: 3,
   /** Counts as flipped when the car's up axis points less than this much upwards. */
   flippedUpDot: 0.35,
 } as const;
@@ -241,70 +249,11 @@ export const AUDIO = {
   gearTops: [13, 21, 29, 37, 45, 54],
 } as const;
 
-export const BOOSTS = {
-  /** Extra forward push while boosting (N), and how far the top speed rises (0.25 = +25%). */
-  force: 9000,
-  topSpeedGain: 0.25,
-  /** Drift boost: slide at least this angle (rad) above this speed (m/s) to charge it. */
-  driftMinSlip: 0.17,
-  driftMinSpeed: 12,
-  /** Seconds of sliding for blue, orange and purple sparks, and the boost each pays out (s). */
-  driftLevels: [0.4, 0.9, 1.5],
-  driftBoosts: [0.5, 0.9, 1.4],
-  /** A slide may dip below the angle for this long (s) without losing its charge. */
-  driftGrace: 0.15,
-  /** Boost pads on corner exits (tightest corners first): how many, and the boost each gives (s). */
-  padCount: 4,
-  padBoost: 1.1,
-  /** Slipstream: within this distance behind a car (m), this far off its line, above this speed. */
-  slipstreamRange: 16,
-  slipstreamWidth: 1.8,
-  slipstreamMinSpeed: 20,
-  /** At full slipstream: share of air drag removed, and an extra forward push (N). */
-  slipstreamDragCut: 0.55,
-  slipstreamPush: 1600,
-} as const;
-
-export const ITEMS = {
-  /** Rows of item boxes per lap, boxes per row, seconds until a taken box returns. */
-  boxRows: 4,
-  boxesPerRow: 4,
-  boxRespawnSeconds: 3,
-  /** The item slot spins this long before the item can be used. */
-  rollSeconds: 1,
-  nitroSeconds: 1.8,
-  shieldSeconds: 10,
-  oilSeconds: 25,
-  oilRadius: 2.3,
-  /** Rockets chase the car ahead; the drone chases the leader. Speeds in m/s, lives in s. */
-  rocketSpeed: 66,
-  rocketLife: 7,
-  bountySpeed: 80,
-  bountyLife: 12,
-  /** Shockwave: cars within this radius (m) are shoved this hard (m/s) and wobble. */
-  shockwaveRadius: 13,
-  shockwavePush: 9,
-  /** Per hit: spin-out seconds, full turns (the car ends up facing forward), share of speed kept. */
-  hits: {
-    oil: { seconds: 1, turns: 1, speedKept: 0.55 },
-    rocket: { seconds: 1.2, turns: 1, speedKept: 0.35 },
-    bounty: { seconds: 1.6, turns: 2, speedKept: 0.25 },
-    shockwave: { seconds: 0.5, turns: 0, speedKept: 0.8 },
-  },
-  /** No new hit for this long after one (s). */
-  hitImmunity: 1.4,
-  /**
-   * Catch-up odds: weight of each item for the [leader, middle, last] of the pack. Positions in
-   * between blend. The bounty drone only rolls with 3+ cars.
-   */
-  odds: {
-    nitro: [12, 30, 40],
-    oil: [38, 18, 6],
-    shield: [30, 14, 6],
-    rocket: [14, 26, 24],
-    shockwave: [6, 12, 10],
-    bounty: [0, 0, 14],
-  },
-  /** Chance that a nitro comes as three, for [leader, middle, last]. */
-  tripleNitro: [0, 0.3, 0.6],
+export const SLIPSTREAM = {
+  /** Within this distance behind a car (m), this far off its line (m), above this speed (m/s). */
+  range: 16,
+  width: 1.8,
+  minSpeed: 20,
+  /** At full slipstream: share of air drag removed. Aero only, no extra push. */
+  dragCut: 0.55,
 } as const;

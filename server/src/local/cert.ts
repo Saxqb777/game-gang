@@ -8,7 +8,7 @@ export interface DevCert {
 }
 
 /**
- * Phones only expose the gyroscope (and wake lock) to secure pages, so the LAN server needs HTTPS.
+ * Phones only allow the screen wake lock on secure pages, so the LAN server needs HTTPS.
  * A self-signed certificate is cached per LAN IP so the phone's "proceed anyway" choice keeps working.
  */
 export async function loadDevCert(cacheDir: string, lanIp: string): Promise<DevCert> {

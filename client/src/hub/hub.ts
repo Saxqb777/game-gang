@@ -4,13 +4,11 @@
  * receive inputs, and tells the hub when it has finished.
  */
 import {
-  GAME_MODES,
   MAX_PLAYERS,
   PLAYER_COLOURS,
   type ColourId,
   type GameAction,
   type GameId,
-  type GameMode,
   type HubPhase,
   type InputMessage,
   type JoinMessage,
@@ -37,15 +35,13 @@ export interface HubPlayer {
 export interface HubState {
   room: RoomInfo | null;
   phase: HubPhase;
-  /** The game's mode for the next round (e.g. Split Ways: items or classic). */
-  mode: GameMode;
   players: readonly HubPlayer[];
   votes: readonly string[];
 }
 
 export interface GameSessionHandlers {
   onInput(playerId: string, input: InputMessage): void;
-  /** A button press sent reliably (e.g. use item). */
+  /** A button press sent reliably, e.g. reset. */
   onAction(playerId: string, action: GameAction): void;
   onPlayerConnection(playerId: string, connected: boolean): void;
 }
@@ -77,7 +73,7 @@ export class Hub {
     readonly game: GameId,
     createTransport: (events: HostTransportEvents) => HostTransportPort,
   ) {
-    this.state = { room: null, phase: 'lobby', mode: GAME_MODES[game][0], players: [], votes: [] };
+    this.state = { room: null, phase: 'lobby', players: [], votes: [] };
     this.transport = createTransport({
       onRoom: (room) => this.update({ room }),
       onPeerOpen: (peerId) => this.handlePeerOpen(peerId),
@@ -160,13 +156,6 @@ export class Hub {
     this.onEnd?.();
   }
 
-  /** Lobby only: pick the mode for the next round. */
-  setMode(mode: GameMode): void {
-    if (this.state.phase !== 'lobby' || this.state.mode === mode) return;
-    if (!(GAME_MODES[this.game] as readonly GameMode[]).includes(mode)) return;
-    this.update({ mode });
-  }
-
   // ---- Local (keyboard) players --------------------------------------------
 
   addLocalPlayer(id: string, name: string): void {
@@ -214,9 +203,6 @@ export class Hub {
         return;
       case 'vote':
         this.handleVote(peerId);
-        return;
-      case 'mode':
-        if (this.player(peerId)) this.setMode(message.mode);
         return;
       case 'action':
         if (this.player(peerId)?.inGame && this.state.phase === 'playing')
@@ -359,7 +345,6 @@ export class Hub {
       type: 'lobby',
       room: this.state.room?.code ?? 'XXXX',
       game: this.game,
-      mode: this.state.mode,
       state: this.state.phase,
       players: this.state.players.map(({ id, name, colour, ready, connected, inGame, slot }) => ({
         id,

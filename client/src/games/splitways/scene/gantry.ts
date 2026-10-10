@@ -57,7 +57,8 @@ export class Gantry {
       ctx.font = '700 72px "Chakra Petch", system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('SPLIT WAYS  ·  CORNICHE RUN', 512, 60);
+      // maxWidth squeezes a long track name instead of clipping it.
+      ctx.fillText(`SPLIT WAYS  ·  ${track.definition.name.toUpperCase()}`, 512, 60, 980);
     });
     const signMaterial = this.material(
       new MeshStandardMaterial({

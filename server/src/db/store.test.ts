@@ -110,20 +110,20 @@ describe('store', () => {
       { name: 'Sara', bestLapMs: 61_000 },
       { name: 'Omar', bestLapMs: 58_500 },
     ];
-    expect(await store.postLaps({ room: code, key: hostKey, track: 'corniche-run', laps })).toBe(
+    expect(await store.postLaps({ room: code, key: hostKey, track: 'kestrel-pines', laps })).toBe(
       'ok',
     );
     await store.postLaps({
       room: code,
       key: hostKey,
-      track: 'corniche-run',
+      track: 'kestrel-pines',
       laps: [{ name: 'sara', bestLapMs: 57_000 }],
     });
     expect(
-      await store.postLaps({ room: code, key: '1'.repeat(32), track: 'corniche-run', laps }),
+      await store.postLaps({ room: code, key: '1'.repeat(32), track: 'kestrel-pines', laps }),
     ).toBe('forbidden');
 
-    const board = await store.leaderboard('corniche-run');
+    const board = await store.leaderboard('kestrel-pines');
     expect(board.map((e) => [e.name, e.bestLapMs])).toEqual([
       ['sara', 57_000],
       ['Omar', 58_500],

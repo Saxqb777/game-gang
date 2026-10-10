@@ -75,9 +75,9 @@ describe('api router', () => {
   });
 
   it('serves the leaderboard', async () => {
-    const response = await fetch(`${base}/api/laps?track=corniche-run`);
+    const response = await fetch(`${base}/api/laps?track=kestrel-pines`);
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ track: 'corniche-run', entries: [] });
+    expect(await response.json()).toEqual({ track: 'kestrel-pines', entries: [] });
     expect((await fetch(`${base}/api/laps?track=moon`)).status).toBe(400);
   });
 });

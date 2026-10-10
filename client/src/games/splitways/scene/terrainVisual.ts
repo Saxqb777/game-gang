@@ -1,21 +1,25 @@
 /**
  * The land: one height grid sampled from Terrain, cut into chunks so the camera only draws what it
- * can see. Normals come from the shared grid, so chunk edges are seamless.
+ * can see. Normals come from the shared grid, so chunk edges are seamless. Untextured for now:
+ * vertex colours blend forest grass and pine-needle litter in large noisy patches.
  */
 import {
   BufferAttribute,
   BufferGeometry,
+  Color,
   Group,
   MathUtils,
   Mesh,
   MeshStandardMaterial,
 } from 'three';
-import { SEA_LEVEL, type Terrain } from '../track/terrain';
-import type { PbrSet } from './textures';
+import { fbm } from '../track/noise';
+import type { Terrain } from '../track/terrain';
 
 const SPACING = 5;
 const CHUNK_CELLS = 24;
-const SAND_TILE = 6;
+/** Forest floor colours (sRGB hex; Color converts them to linear for the vertex colours). */
+const GRASS = new Color('#3f5f2a');
+const NEEDLES = new Color('#5a4a32');
 
 export interface TerrainBounds {
   minX: number;
@@ -24,7 +28,7 @@ export interface TerrainBounds {
   maxZ: number;
 }
 
-export function createTerrainVisual(terrain: Terrain, sand: PbrSet, bounds: TerrainBounds): Group {
+export function createTerrainVisual(terrain: Terrain, bounds: TerrainBounds): Group {
   const cols = Math.ceil((bounds.maxX - bounds.minX) / SPACING) + 1;
   const rows = Math.ceil((bounds.maxZ - bounds.minZ) / SPACING) + 1;
   const heights = new Float32Array(cols * rows);
@@ -39,18 +43,8 @@ export function createTerrainVisual(terrain: Terrain, sand: PbrSet, bounds: Terr
   const h = (c: number, r: number) =>
     heights[MathUtils.clamp(r, 0, rows - 1) * cols + MathUtils.clamp(c, 0, cols - 1)] as number;
 
-  for (const texture of [sand.map, sand.normalMap, sand.arm]) texture.repeat.set(1, 1);
-  const material = new MeshStandardMaterial({
-    color: 0xf0d9b0,
-    map: sand.map,
-    normalMap: sand.normalMap,
-    aoMap: sand.arm,
-    roughnessMap: sand.arm,
-    metalnessMap: sand.arm,
-    metalness: 1,
-    roughness: 1,
-    vertexColors: true,
-  });
+  const material = new MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
+  const colour = new Color();
 
   const group = new Group();
   group.name = 'terrain';
@@ -58,17 +52,10 @@ export function createTerrainVisual(terrain: Terrain, sand: PbrSet, bounds: Terr
     for (let c0 = 0; c0 < cols - 1; c0 += CHUNK_CELLS) {
       const r1 = Math.min(rows - 1, r0 + CHUNK_CELLS);
       const c1 = Math.min(cols - 1, c0 + CHUNK_CELLS);
-      let highest = -Infinity;
-      for (let r = r0; r <= r1; r++)
-        for (let c = c0; c <= c1; c++) highest = Math.max(highest, h(c, r));
-      // Fully under the sea: nobody will ever see it.
-      if (highest < SEA_LEVEL - 0.6) continue;
-
       const w = c1 - c0 + 1;
       const d = r1 - r0 + 1;
       const positions = new Float32Array(w * d * 3);
       const normals = new Float32Array(w * d * 3);
-      const uvs = new Float32Array(w * d * 2);
       const colours = new Float32Array(w * d * 3);
       for (let r = r0; r <= r1; r++) {
         for (let c = c0; c <= c1; c++) {
@@ -83,16 +70,11 @@ export function createTerrainVisual(terrain: Terrain, sand: PbrSet, bounds: Terr
           const ny = 2 * SPACING;
           const length = Math.hypot(nx, ny, nz);
           normals.set([nx / length, ny / length, nz / length], i * 3);
-          uvs.set([x / SAND_TILE, z / SAND_TILE], i * 2);
-          // Wet, darker sand at the waterline; dune tops a touch lighter; large-scale variation.
-          const wet = MathUtils.smoothstep(y, SEA_LEVEL - 0.2, SEA_LEVEL + 0.9);
-          const crest = 1 + MathUtils.clamp(y / 25, 0, 1) * 0.07;
-          const patch = 0.93 + 0.1 * (0.5 + 0.5 * Math.sin(x * 0.013 + Math.sin(z * 0.009) * 2));
-          const shade = MathUtils.lerp(0.66, 1, wet) * crest * patch;
-          colours.set(
-            [shade, shade * MathUtils.lerp(0.93, 1, wet), shade * MathUtils.lerp(0.85, 1, wet)],
-            i * 3,
-          );
+          // Big patches of grass and needle litter, with a finer mottle so it never looks flat.
+          const litter = MathUtils.smoothstep(fbm(x * 0.012, z * 0.012, 3), 0.38, 0.62);
+          const mottle = 0.88 + 0.24 * fbm(x * 0.09 + 17, z * 0.09 - 5, 2);
+          colour.lerpColors(GRASS, NEEDLES, litter).multiplyScalar(mottle);
+          colours.set([colour.r, colour.g, colour.b], i * 3);
         }
       }
       const indices: number[] = [];
@@ -108,7 +90,6 @@ export function createTerrainVisual(terrain: Terrain, sand: PbrSet, bounds: Terr
       const geometry = new BufferGeometry();
       geometry.setAttribute('position', new BufferAttribute(positions, 3));
       geometry.setAttribute('normal', new BufferAttribute(normals, 3));
-      geometry.setAttribute('uv', new BufferAttribute(uvs, 2));
       geometry.setAttribute('color', new BufferAttribute(colours, 3));
       geometry.setIndex(indices);
       geometry.computeBoundingSphere();

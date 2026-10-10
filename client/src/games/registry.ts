@@ -1,10 +1,4 @@
-import type { GameId, GameMode } from '@gamergang/shared';
-
-export interface GameModeInfo {
-  id: GameMode;
-  label: string;
-  hint: string;
-}
+import type { GameId } from '@gamergang/shared';
 
 /** Everything the hub UI needs to show a game card. Game code itself lives in games/<id>/. */
 export interface GameDescriptor {
@@ -14,21 +8,15 @@ export interface GameDescriptor {
   details: string;
   /** Card artwork gradient. */
   art: string;
-  /** Picked in the lobby, first is the default (same order as GAME_MODES). */
-  modes: readonly GameModeInfo[];
 }
 
 export const GAMES: Readonly<Record<GameId, GameDescriptor>> = {
   splitways: {
     id: 'splitways',
     title: 'Split Ways',
-    subtitle: 'Corniche Run',
-    details: '3 laps · 1-4 players · tilt to steer',
-    art: 'linear-gradient(135deg, #ff8a1f 0%, #ff3b6b 45%, #3a1c71 100%)',
-    modes: [
-      { id: 'items', label: 'Items', hint: 'Mystery boxes: rockets, oil, shields, nitro' },
-      { id: 'classic', label: 'Classic', hint: 'Pure racing, lap records count' },
-    ],
+    subtitle: 'Kestrel Pines',
+    details: '3 laps · 1-4 players · touch controls',
+    art: 'linear-gradient(135deg, #2f6b3a 0%, #1d4a3a 45%, #0e2233 100%)',
   },
 };
 

@@ -41,17 +41,6 @@ export function colourHex(id: ColourId): string {
 export const GAME_IDS = ['splitways'] as const;
 export type GameId = (typeof GAME_IDS)[number];
 
-/** Each game's modes, picked in the lobby. The first is the default. */
-export const GAME_MODES = {
-  splitways: ['items', 'classic'],
-} as const satisfies Record<GameId, readonly string[]>;
-export type GameMode = (typeof GAME_MODES)[GameId][number];
-const MODE_IDS = [...new Set(Object.values(GAME_MODES).flat())] as [GameMode, ...GameMode[]];
-
-/** Split Ways items. A triple nitro is a nitro with three charges. */
-export const ITEM_KINDS = ['nitro', 'oil', 'rocket', 'shield', 'shockwave', 'bounty'] as const;
-export type ItemKind = (typeof ITEM_KINDS)[number];
-
 /** Hub phases. Games map their own state machines onto these. */
 export const HUB_PHASES = ['lobby', 'playing', 'results'] as const;
 export type HubPhase = (typeof HUB_PHASES)[number];
@@ -70,9 +59,6 @@ export const playerNameSchema = z
   .min(1)
   .max(NAME_MAX_LENGTH)
   .regex(/^[^\p{C}]+$/u);
-
-export const gameModeSchema = z.enum(MODE_IDS);
-export const itemKindSchema = z.enum(ITEM_KINDS);
 
 const unit = z.number().min(0).max(1);
 const signedUnit = z.number().min(-1).max(1);
@@ -111,16 +97,10 @@ export const voteSchema = z.object({
   choice: z.literal('again'),
 });
 
-/** Lobby: switch the game mode (any player can). */
-export const modeSchema = z.object({
-  type: z.literal('mode'),
-  mode: gameModeSchema,
-});
-
-/** A one-shot button press that must not get lost (reliable channel), e.g. "use item". */
+/** A one-shot button press that must not get lost (reliable channel), e.g. reset a stuck car. */
 export const actionSchema = z.object({
   type: z.literal('action'),
-  action: z.enum(['item']),
+  action: z.enum(['reset']),
 });
 
 /** Reply to a TV ping, echoing its timestamp so the TV can measure round trip time. */
@@ -134,7 +114,6 @@ export const padMessageSchema = z.discriminatedUnion('type', [
   inputSchema,
   readySchema,
   voteSchema,
-  modeSchema,
   actionSchema,
   pongSchema,
 ]);
@@ -180,7 +159,6 @@ export const lobbySchema = z.object({
   type: z.literal('lobby'),
   room: roomCodeSchema,
   game: z.enum(GAME_IDS),
-  mode: gameModeSchema,
   state: z.enum(HUB_PHASES),
   players: z.array(lobbyPlayerSchema).max(MAX_PLAYERS),
   /** Player ids that voted to play again (results phase only). */
@@ -200,10 +178,6 @@ export const raceSchema = z.object({
   lap: z.number().int().min(0).max(99),
   totalLaps: z.number().int().min(1).max(99),
   speedKph: z.number().min(0).max(999),
-  /** Held item (null: none), its charges, and whether the slot is still spinning. */
-  item: itemKindSchema.nullable(),
-  charges: z.number().int().min(0).max(3),
-  rolling: z.boolean(),
 });
 
 export const standingSchema = z.object({
@@ -223,7 +197,7 @@ export const resultsSchema = z.object({
 
 export const hapticSchema = z.object({
   type: z.literal('haptic'),
-  pattern: z.enum(['collision', 'start', 'finish', 'pickup', 'hit']),
+  pattern: z.enum(['collision', 'start', 'finish']),
 });
 
 export const kickedSchema = z.object({

@@ -7,10 +7,14 @@ interface KeyMap {
   brake: string[];
   handbrake: string[];
   horn: string[];
-  item: string[];
+  /** Reset a stuck car (not KeyR: that is the debug resolution toggle). */
+  reset: string[];
 }
 
-/** Two drivers can share the TV keyboard: WASD + Space and the arrow keys + right Shift. */
+/**
+ * Two drivers can share the TV keyboard: WASD + Space (Q resets) and the arrow keys + right Shift
+ * (Enter resets).
+ */
 const KEY_MAPS: readonly KeyMap[] = [
   {
     left: ['KeyA'],
@@ -19,7 +23,7 @@ const KEY_MAPS: readonly KeyMap[] = [
     brake: ['KeyS'],
     handbrake: ['Space'],
     horn: ['KeyE'],
-    item: ['KeyQ'],
+    reset: ['KeyQ'],
   },
   {
     left: ['ArrowLeft'],
@@ -28,7 +32,7 @@ const KEY_MAPS: readonly KeyMap[] = [
     brake: ['ArrowDown'],
     handbrake: ['ShiftRight'],
     horn: ['Slash'],
-    item: ['Enter', 'NumpadEnter'],
+    reset: ['Enter', 'NumpadEnter'],
   },
 ];
 
@@ -40,7 +44,7 @@ const DRIVING_KEYS = new Set(
     ...m.brake,
     ...m.handbrake,
     ...m.horn,
-    ...m.item,
+    ...m.reset,
   ]),
 );
 
@@ -50,8 +54,8 @@ export class KeyboardDriver {
     copyInput({ ...NEUTRAL_INPUT }, NEUTRAL_INPUT),
   );
   private readonly down = new Set<string>();
-  /** Item key presses not yet handed to the game, per key set. */
-  private readonly itemPresses = KEY_MAPS.map(() => 0);
+  /** Reset key presses not yet handed to the game, per key set. */
+  private readonly resetPresses = KEY_MAPS.map(() => 0);
 
   constructor() {
     window.addEventListener('keydown', this.onKeyDown);
@@ -72,11 +76,11 @@ export class KeyboardDriver {
     }
   }
 
-  /** True once per press of key set `set`'s item key. */
-  takeItemPress(set: number): boolean {
-    const presses = this.itemPresses[set] ?? 0;
+  /** True once per press of key set `set`'s reset key. */
+  takeResetPress(set: number): boolean {
+    const presses = this.resetPresses[set] ?? 0;
     if (presses === 0) return false;
-    this.itemPresses[set] = presses - 1;
+    this.resetPresses[set] = presses - 1;
     return true;
   }
 
@@ -97,7 +101,8 @@ export class KeyboardDriver {
     this.down.add(event.code);
     if (event.repeat) return;
     KEY_MAPS.forEach((map, set) => {
-      if (map.item.includes(event.code)) this.itemPresses[set] = (this.itemPresses[set] ?? 0) + 1;
+      if (map.reset.includes(event.code))
+        this.resetPresses[set] = (this.resetPresses[set] ?? 0) + 1;
     });
   };
 

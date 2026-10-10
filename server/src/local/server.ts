@@ -36,7 +36,7 @@ export async function createLocalContext(): Promise<LocalContext> {
   const api = createApiHandler({
     store: createStore(runner),
     env,
-    // Phones always get the HTTPS LAN address: tilt steering needs a secure page.
+    // Phones always get the HTTPS LAN address: the Wake Lock API needs a secure page.
     padOrigin: () => `https://${lanIp}:${httpsPort}`,
     onRoomCreated: (code, padUrl) => {
       void terminalQr(padUrl).then((qr) => {

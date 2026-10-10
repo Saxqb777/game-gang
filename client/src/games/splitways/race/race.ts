@@ -28,7 +28,12 @@ export interface Racer {
   readonly projection: Projection;
   /** Seconds driving the wrong way (HUD warning). */
   wrongWayTime: number;
+  /** Seconds pressing gas or brake while going nowhere (auto respawn after RESPAWN.stuckSeconds). */
   stuckTime: number;
+  /** Seconds holding gas while going nowhere (the reverse hint shows after RESPAWN.stuckHintSeconds). */
+  stuckOnGasTime: number;
+  /** Race clock (s) from which a manual reset is allowed again. */
+  resetReadyAt: number;
   /** 0..1 screen fade while respawning: fade out, teleport, fade in. */
   fade: number;
   respawn: 'none' | 'out' | 'in';
@@ -59,8 +64,9 @@ export class Race {
   constructor(
     readonly track: Track,
     cars: readonly Car[],
+    laps: number = track.definition.laps,
   ) {
-    this.totalLaps = track.definition.laps;
+    this.totalLaps = laps;
     this.clock = -RACE.countdownSeconds;
     this.racers = cars.map((car, slot) => ({
       car,
@@ -76,6 +82,8 @@ export class Race {
       projection: track.project(car.position, -1, { index: 0, distance: 0, lateral: 0 }),
       wrongWayTime: 0,
       stuckTime: 0,
+      stuckOnGasTime: 0,
+      resetReadyAt: -Infinity,
       fade: 0,
       respawn: 'none',
       respawnTimer: 0,
@@ -108,6 +116,28 @@ export class Race {
         if (racer.finishedMs !== null) input.brake = racer.car.forwardSpeed > 1 ? 0.35 : 0;
       }
     }
+  }
+
+  /**
+   * A manual reset (pad button or keyboard key): fade out, back to the last gate, fade in. The same
+   * soft respawn as a stuck or flipped car, so it can never gain distance. Refused during the
+   * countdown, after the finish, mid-respawn and within the cooldown; returns whether it started.
+   */
+  requestRespawn(racer: Racer): boolean {
+    if (
+      this.phase !== 'racing' ||
+      racer.finishedMs !== null ||
+      racer.respawn !== 'none' ||
+      this.clock < racer.resetReadyAt
+    ) {
+      return false;
+    }
+    racer.respawn = 'out';
+    racer.respawnTimer = 0;
+    racer.stuckTime = 0;
+    racer.stuckOnGasTime = 0;
+    racer.resetReadyAt = this.clock + RESPAWN.resetCooldownSeconds;
+    return true;
   }
 
   /** Advance the rules by one physics step (after the step). */
@@ -194,6 +224,10 @@ export class Race {
   }
 
   private updateRespawn(racer: Racer, dt: number): void {
+    // Only counts while the car is the player's to drive.
+    if (racer.respawn !== 'none' || this.phase !== 'racing' || racer.finishedMs !== null) {
+      racer.stuckOnGasTime = 0;
+    }
     if (racer.respawn === 'out') {
       racer.respawnTimer += dt;
       racer.fade = Math.min(1, racer.respawnTimer / RESPAWN_FADE_OUT);
@@ -212,8 +246,10 @@ export class Race {
     }
     if (this.phase !== 'racing' || racer.finishedMs !== null) return;
     const { car } = racer;
+    const stopped = car.velocity.lengthSq() < 1;
     const tryingToMove = car.input.throttle > 0.3 || car.input.brake > 0.3;
-    racer.stuckTime = tryingToMove && car.velocity.lengthSq() < 1 ? racer.stuckTime + dt : 0;
+    racer.stuckTime = tryingToMove && stopped ? racer.stuckTime + dt : 0;
+    racer.stuckOnGasTime = car.input.throttle > 0.3 && stopped ? racer.stuckOnGasTime + dt : 0;
     const offTrack =
       Math.abs(racer.projection.lateral) > this.track.halfDrivable + 3 ||
       car.position.y < this.track.sample(racer.projection.index).position.y - 4;
@@ -225,6 +261,7 @@ export class Race {
       racer.respawn = 'out';
       racer.respawnTimer = 0;
       racer.stuckTime = 0;
+      racer.stuckOnGasTime = 0;
     }
   }
 

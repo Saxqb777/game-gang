@@ -124,6 +124,59 @@ export const ASSISTS = {
   airDamping: 900,
 } as const;
 
+export const SURFACES = {
+  /** Grip multiplier on tyre friction, extra rolling resistance (N, whole car on it), rumble 0..1 (audio, camera). */
+  asphalt: { grip: 1, rolling: 0, rumble: 0 },
+  kerb: { grip: 0.95, rolling: 60, rumble: 0.7 },
+  grass: { grip: 0.55, rolling: 1500, rumble: 0.3 },
+  gravel: { grip: 0.45, rolling: 6000, rumble: 0.6 },
+} as const;
+
+export const TRACKGEN = {
+  /** Station spacing along the lap (m). Many constants count stations as metres, so keep it at 1. */
+  spacing: 1,
+  /** Corridor mesh chunk length (m): one chunk is the unit the renderer culls. */
+  chunkLength: 150,
+  /** Smallest crest and sag radii (m): v^2 / (0.5 g) and v^2 / g at 52 m/s, so crests never launch cars. */
+  crestRadius: 416,
+  sagRadius: 208,
+  /** Run-off: steepest cross slope it inherits from the bank, and the extra fall away from the road (rise/run). */
+  runoffMaxSlope: 0.035,
+  runoffFall: 0.01,
+  /** Invisible collision wall: height above the wall foot and thickness outwards (m). */
+  wallHeight: 2.6,
+  wallThickness: 1,
+  /** A speed drop bigger than this (m/s) into a corner turns its outside barrier into a tyre wall. */
+  tyreDropSpeed: 12,
+  /** Terrain heightfield: margin around the track and grid spacing (m). */
+  terrainMargin: 380,
+  terrainSpacing: 5,
+  /** Shoulder where the corridor blends into the natural ground (m beyond wall + 2 m, noise picks within). */
+  shoulderMin: 12,
+  shoulderMax: 28,
+  /** Lap-validation gates: half their length along the road (m). Long enough that no car skips one. */
+  checkpointHalfLength: 3,
+  /** Moving-average window (m) for bank, road width and the barrier line, so none of them ever steps. */
+  smoothWindow: 20,
+  /** Default kerb for an `extraKerbs` override span without its own width (m), and its raise (m). */
+  extraKerbWidth: 1.2,
+  extraKerbHeight: 0.05,
+} as const;
+
+export const RACING_LINE = {
+  /** Elastic-band relaxation: neighbours this many stations away pull each point straight, this many times. */
+  span: 8,
+  iterations: 600,
+  /** The line keeps this far inside the asphalt edge (m). */
+  edgeMargin: 1.3,
+  /** Speed profile: top speed (m/s), cornering grip (m/s^2) and braking (m/s^2) it plans with. */
+  vMax: 51,
+  lateralAccel: 15,
+  brakeDecel: 11,
+  /** Acceleration cap of the forward pass (m/s^2); the engine curve takes over above it. */
+  accelCap: 5,
+} as const;
+
 export const RACE = {
   /** Red lights: 3, 2, 1, then green. */
   countdownSeconds: 3,

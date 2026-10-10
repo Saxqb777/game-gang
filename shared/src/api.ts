@@ -3,7 +3,13 @@
  * The API only brokers WebRTC handshakes and stores lap times. Gameplay never touches it.
  */
 import { z } from 'zod';
-import { NAME_MAX_LENGTH, TV_PEER_ID, playerNameSchema, roomCodeSchema } from './protocol';
+import {
+  MAX_PLAYERS,
+  NAME_MAX_LENGTH,
+  TV_PEER_ID,
+  playerNameSchema,
+  roomCodeSchema,
+} from './protocol';
 
 /** Consonants only, so random codes never spell words. */
 export const ROOM_CODE_ALPHABET = 'BCDFGHJKLMNPQRSTVWXZ';
@@ -116,3 +122,72 @@ export const leaderboardResponseSchema = z.object({
 export type LeaderboardResponse = z.infer<typeof leaderboardResponseSchema>;
 
 export const apiErrorSchema = z.object({ error: z.string() });
+
+// POST /api/telemetry -> TV-only performance samples (host key required); no GET exists.
+export const RENDER_PRESETS = ['high', 'medium', 'low'] as const;
+export const renderPresetSchema = z.enum(RENDER_PRESETS);
+export type RenderPreset = z.infer<typeof renderPresetSchema>;
+export const TELEMETRY_KINDS = ['loading-benchmark', 'flythrough', 'race', 'soak'] as const;
+/** Per request; the client splits bigger batches (the matrix benchmark sends 9). */
+export const TELEMETRY_MAX_SAMPLES = 8;
+export const TELEMETRY_MAX_BODY_BYTES = 16 * 1024;
+const telemetryMs = z.number().min(0).max(10_000);
+const telemetryPx = z.number().int().min(1).max(16_384);
+export const telemetryDeviceSchema = z.object({
+  userAgent: z.string().max(512),
+  gpu: z.string().max(256).nullable(),
+  cores: z.number().int().min(1).max(256).nullable(),
+  memoryGb: z.number().min(0).max(1024).nullable(),
+  screenWidth: telemetryPx,
+  screenHeight: telemetryPx,
+  devicePixelRatio: z.number().min(0.25).max(8),
+  refreshHz: z.number().min(1).max(500).nullable(),
+  timerQuery: z.boolean(),
+});
+export const telemetrySampleSchema = z.object({
+  kind: z.enum(TELEMETRY_KINDS),
+  /** For example fly-4-low, race, soak-07, soak-total, loading. */
+  scenario: z.string().regex(/^[a-z0-9-]{1,32}$/),
+  track: trackIdSchema.nullable(),
+  viewports: z.number().int().min(1).max(MAX_PLAYERS),
+  preset: renderPresetSchema,
+  durationMs: z
+    .number()
+    .int()
+    .min(0)
+    .max(4 * 3_600_000),
+  frames: z.number().int().min(0).max(10_000_000),
+  fpsAvg: z.number().min(0).max(1000),
+  frameMsP50: telemetryMs,
+  frameMsP95: telemetryMs,
+  frameMsP99: telemetryMs,
+  frameMsMax: telemetryMs,
+  cpuMsP99: telemetryMs,
+  gpuMsAvg: telemetryMs.nullable(),
+  gpuMsP95: telemetryMs.nullable(),
+  gpuMsP99: telemetryMs.nullable(),
+  missedFrames: z.number().int().min(0).max(10_000_000),
+  internalWidth: telemetryPx,
+  internalHeight: telemetryPx,
+  outputWidth: telemetryPx,
+  outputHeight: telemetryPx,
+  scaleAvg: z.number().min(0).max(2),
+  scaleMin: z.number().min(0).max(2),
+  drawCallsAvg: z.number().min(0).max(100_000),
+  trianglesAvg: z.number().min(0).max(100_000_000),
+  presetDrops: z.number().int().min(0).max(10),
+});
+export type TelemetrySample = z.infer<typeof telemetrySampleSchema>;
+export type TelemetryDevice = z.infer<typeof telemetryDeviceSchema>;
+export const postTelemetryRequestSchema = z.object({
+  room: roomCodeSchema,
+  key: hostKeySchema,
+  session: z.string().regex(/^[a-z0-9]{8,32}$/),
+  build: z
+    .string()
+    .regex(/^[A-Za-z0-9._-]{1,40}$/)
+    .nullable(),
+  device: telemetryDeviceSchema,
+  samples: z.array(telemetrySampleSchema).min(1).max(TELEMETRY_MAX_SAMPLES),
+});
+export type PostTelemetryRequest = z.infer<typeof postTelemetryRequestSchema>;

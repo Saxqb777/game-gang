@@ -10,7 +10,7 @@ import { cp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 
 const OUT = '.vercel/output';
-const API_ROUTES = ['room', 'signal', 'laps'];
+const API_ROUTES = ['room', 'signal', 'laps', 'telemetry'];
 const [mainRoute, ...aliasRoutes] = API_ROUTES;
 
 await rm(OUT, { recursive: true, force: true });

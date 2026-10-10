@@ -1,11 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { z } from 'zod';
 import {
+  TELEMETRY_MAX_BODY_BYTES,
   TV_PEER_ID,
   hostKeySchema,
   peerIdSchema,
   postLapsRequestSchema,
   postSignalRequestSchema,
+  postTelemetryRequestSchema,
   roomCodeSchema,
   trackIdSchema,
   type CreateRoomResponse,
@@ -116,6 +118,19 @@ export function createApiHandler(options: ApiOptions): ApiHandler {
           const { track } = parse(lapsQuerySchema, query);
           const body: LeaderboardResponse = { track, entries: await store.leaderboard(track) };
           sendJson(res, 200, body);
+          return;
+        }
+
+        case 'POST /api/telemetry': {
+          // TV performance samples. Host key only; there is deliberately no GET.
+          const request = parse(
+            postTelemetryRequestSchema,
+            await readJsonBody(req, TELEMETRY_MAX_BODY_BYTES),
+          );
+          const status = await store.postTelemetry(request);
+          if (status === 'rate-limited') throw new HttpError(429, 'Too many telemetry samples');
+          assertRoomOk(status);
+          sendJson(res, 200, { ok: true });
           return;
         }
 

@@ -172,22 +172,124 @@ export const CAMERA = {
 } as const;
 
 export const RENDER = {
-  /** Render at most this many pixels per CSS pixel. 1.25 is crisp on a TV without melting the GPU. */
-  maxPixelRatio: 1.25,
-  /** Anti-aliasing samples for the 3D view. 0 turns it off (faster, jaggier). */
-  msaaSamples: 4,
   /**
-   * Dynamic resolution: when fps drops below `lowFps` the 3D view renders at a lower scale (in
-   * `step`s, never below `minScale`), and creeps back up after `recoverSeconds` of smooth 60 fps.
+   * Canvas pixels per CSS pixel. Always 1: the 3D views render at their own internal resolution and
+   * the final pass upscales and sharpens them, so a 4K TV at devicePixelRatio 2 costs no more than 1080p.
    */
-  dynamicResolution: { minScale: 0.6, step: 0.1, lowFps: 55, recoverSeconds: 5 },
-  /**
-   * Shadow map resolution and the size of the area around each car that gets shadows (metres).
-   * The map is re-rendered for every viewport, so with 3-4 players a smaller map keeps 60 fps.
-   */
-  shadowMapSize: 2048,
-  shadowMapSizeManyPlayers: 1024,
-  shadowExtent: 34,
+  canvasPixelRatio: 1,
+  /** Above this devicePixelRatio the browser upscales the canvas, so the final pass sharpens. */
+  sharpenWhenDprAbove: 1.25,
+  /** Black border around each view's tile in the shared HDR atlas (px), so bloom never bleeds across. */
+  tilePadding: 16,
+  /** Full frames rendered on the loading screen after the shader compile, so nothing compiles mid-race. */
+  warmupFrames: 3,
+  /** The dark seams between viewports. */
+  seamColour: 0x050608,
+} as const;
+
+/**
+ * Quality presets, picked by player count (1 high, 2 medium, 3-4 low). Starting values; the owner
+ * tunes them from telemetry. `maxInternalPixels` caps the summed pixels of all views at scale 1,
+ * `minScale` is how far dynamic resolution may drop, `sharpness` is the upscale sharpening in stops
+ * (0 = strongest, each +1 halves it), `vegetationDensity` the share of pines drawn and `cameraFar`
+ * the view distance (m). Changing shadow kind or MSAA rebuilds shaders, so presets only change on
+ * the loading screen or in a benchmark.
+ */
+export const PRESETS = {
+  high: {
+    maxInternalPixels: 2560 * 1440,
+    minScale: 0.6,
+    msaa: 4,
+    bloomLevels: 4,
+    shadow: { kind: 'sun', mapSize: 2048, far: 160 },
+    shadowRadius: 2.5,
+    anisotropy: 8,
+    sharpness: 0.3,
+    vegetationDensity: 1,
+    pineShadows: true,
+    cameraFar: 2400,
+  },
+  medium: {
+    maxInternalPixels: 1920 * 1080,
+    minScale: 0.6,
+    msaa: 4,
+    bloomLevels: 4,
+    shadow: { kind: 'sun', mapSize: 1024, far: 120 },
+    shadowRadius: 2.5,
+    anisotropy: 8,
+    sharpness: 0.35,
+    vegetationDensity: 0.75,
+    pineShadows: true,
+    cameraFar: 1800,
+  },
+  low: {
+    maxInternalPixels: 1920 * 1080,
+    minScale: 0.7,
+    msaa: 2,
+    bloomLevels: 3,
+    /** One shadow pass per view, aimed at the car being drawn (two cascades per view cost too much at 4 views). */
+    shadow: { kind: 'focus', mapSize: 1024, extent: 34 },
+    shadowRadius: 2,
+    anisotropy: 4,
+    sharpness: 0.4,
+    vegetationDensity: 0.5,
+    pineShadows: false,
+    cameraFar: 1400,
+  },
+} as const;
+
+/**
+ * Dynamic resolution, driven by GPU time (or by missed frames when the browser has no GPU timer).
+ * Budgets are shares of the frame interval, which is never shorter than 1/60 s.
+ */
+export const RESOLUTION = {
+  /** After a drop, aim the GPU time at this share of the frame interval. */
+  targetShare: 0.78,
+  /** Drop when the median GPU time is above this share... */
+  dropAboveShare: 0.88,
+  /** ...and raise one step after `raiseAfterMs` below this share. Lower = less flip-flopping. */
+  raiseBelowShare: 0.65,
+  /** Scale moves in steps of this size (linear, per axis). */
+  step: 0.05,
+  /** At most one GPU-mode change this often (ms). */
+  minChangeMs: 250,
+  raiseAfterMs: 2000,
+  /** GPU samples in the median. */
+  sampleWindow: 8,
+  /** A frame is missed when the time since the last one is above this many frame intervals. */
+  missedFactor: 1.5,
+  /** Without a GPU timer: drop a step when this many of the last 60 frames missed... */
+  fallbackMissedPer60: 3,
+  /** ...at most this often (ms)... */
+  fallbackMinChangeMs: 500,
+  /** ...and raise a step after this long without a missed frame (ms). */
+  fallbackRaiseAfterMs: 4000,
+  /** A gap this long between frames is a tab switch or a load, not the game struggling (ms). */
+  hiccupMs: 250,
+  /** Loading benchmark: frames measured at scale 1 before the race, capped at `loadingBenchMaxMs`. */
+  loadingBenchFrames: 90,
+  loadingBenchMaxMs: 4000,
+  /** Drop a preset on the loading screen when the GPU median is above this many times the target. */
+  loadingDropFactor: 1.5,
+  /** Start the next race one preset lower when the last one spent this share at the floor scale... */
+  dropIfFloorShare: 0.2,
+  /** ...or missed this share of frames. */
+  dropIfMissedShare: 0.01,
+} as const;
+
+/** Scripted benchmarks: `?bench=auto|matrix` (camera fly-through) and `?bench=soak`. */
+export const BENCH = {
+  /** Each fly-through run warms up, then measures (s). */
+  warmupSeconds: 3,
+  measureSeconds: 20,
+  /** Fly-through cameras: speed along the track (m/s), height above it and look-ahead distance (m). */
+  cameraSpeed: 45,
+  cameraHeight: 2.3,
+  lookAhead: 25,
+  /** Soak: total length (min), one telemetry sample per window (s), a POST every few minutes. */
+  soakMinutes: 30,
+  soakWindowSeconds: 60,
+  soakPostEveryMinutes: 5,
 } as const;
 
 export const LIGHTING = {

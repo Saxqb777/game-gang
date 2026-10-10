@@ -470,3 +470,27 @@
 .sw-results-vote b {
   color: var(--accent);
 }
+
+/* Benchmark results and the soak summary (debug/benchmark.ts). */
+.sw-bench {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  z-index: 6;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 14px 18px;
+  overflow-x: auto;
+  border: 1px solid rgba(201, 255, 211, 0.25);
+  border-radius: 10px;
+  background: rgba(3, 5, 8, 0.9);
+  color: #c9ffd3;
+  font:
+    13px/1.45 ui-monospace,
+    'SF Mono',
+    Menlo,
+    monospace;
+  white-space: pre;
+  pointer-events: none;
+}

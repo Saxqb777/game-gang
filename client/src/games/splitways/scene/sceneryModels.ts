@@ -1,15 +1,15 @@
 /**
- * Low-poly models and textures for the scenery: an interim pine, blocks, the grandstand crowd and
- * trackside banners.
+ * Low-poly models and textures for the scenery: a flat-shaded geometry builder, blocks, the
+ * grandstand crowd and trackside banners.
  */
 import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
-  Color,
   RepeatWrapping,
-  Vector3,
+  type Color,
   type Texture,
+  type Vector3,
 } from 'three';
 import { canvasTexture } from './textures';
 
@@ -38,62 +38,6 @@ export class FacetBuilder {
     geometry.computeVertexNormals();
     return geometry;
   }
-}
-
-const linear = (r: number, g: number, b: number) => new Color().setRGB(r, g, b);
-
-/** Height of an interim pine at scale 1 (m). */
-const PINE_HEIGHT = 14;
-
-/**
- * Interim low-poly pine (about 80 flat-shaded triangles): a six-sided trunk and four stacked
- * eight-sided cones, darker at the bottom. Origin at the foot of the trunk.
- */
-export function pineGeometry(): BufferGeometry {
-  const b = new FacetBuilder();
-  const a = new Vector3();
-  const c = new Vector3();
-  const d = new Vector3();
-  const e = new Vector3();
-  const around = (k: number, sides: number, radius: number, y: number, out: Vector3) => {
-    const angle = (k / sides) * Math.PI * 2;
-    return out.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
-  };
-
-  const bark = linear(0.09, 0.06, 0.04);
-  for (let k = 0; k < 6; k++) {
-    around(k, 6, 0.3, 0, a);
-    around(k + 1, 6, 0.3, 0, c);
-    around(k + 1, 6, 0.18, 4, d);
-    around(k, 6, 0.18, 4, e);
-    b.quad(a, e, d, c, bark);
-  }
-
-  // [base height, base radius, apex height] per cone, bottom to top.
-  const cones: [number, number, number][] = [
-    [2.8, 3.3, 8.2],
-    [5.6, 2.7, 10.6],
-    [8.2, 2.05, 12.6],
-    [10.6, 1.35, PINE_HEIGHT],
-  ];
-  const sides = 8;
-  cones.forEach(([base, radius, apex], level) => {
-    const t = level / (cones.length - 1);
-    const needles = linear(0.025 + 0.02 * t, 0.06 + 0.035 * t, 0.03 + 0.012 * t);
-    const shade = linear(0.012, 0.03, 0.016);
-    const tip = new Vector3(0, apex, 0);
-    const hub = new Vector3(0, base + 0.25, 0);
-    for (let k = 0; k < sides; k++) {
-      // A slightly ragged hem so the silhouette isn't a perfect cone.
-      const r0 = radius * (k % 2 === 0 ? 1 : 0.86);
-      const r1 = radius * ((k + 1) % 2 === 0 ? 1 : 0.86);
-      around(k, sides, r0, base, a);
-      around(k + 1, sides, r1, base, c);
-      b.triangle(a, tip, c, needles);
-      b.triangle(a, c, hub, shade);
-    }
-  });
-  return b.build();
 }
 
 /** Unit box standing on y = 0. */

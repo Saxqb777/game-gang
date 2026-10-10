@@ -1,12 +1,9 @@
 /**
- * Everything beside the track: an interim pine forest (until the Track 1 dressing replaces it), a
- * grandstand at the start and trackside banners. Each kind is one instanced or merged mesh, so the
- * scenery costs a handful of draw calls per viewport. Placement is seeded, so every race looks the
- * same.
+ * Everything beside the track: a grandstand at the start and trackside banners. Each kind is one
+ * instanced or merged mesh, a few draw calls per viewport in total.
  */
 import {
   BoxGeometry,
-  Color,
   Group,
   InstancedMesh,
   Mesh,
@@ -14,25 +11,17 @@ import {
   Object3D,
   PlaneGeometry,
   type BufferGeometry,
+  type Color,
   type Material,
   type Texture,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { fbm } from '../track/noise';
 import type { Terrain } from '../track/terrain';
 import type { Track } from '../track/track';
-import { bannerTexture, crowdTexture, pineGeometry } from './sceneryModels';
-
-/** Interim forest: candidate spacing (m), how far out it reaches, and the tile size for culling. */
-const PINE_SPACING = 15;
-const PINE_REACH = 230;
-const PINE_TILE = 200;
-/** Pines keep this far back from the barriers (m), and from the grandstand. */
-const PINE_ROAD_GAP = 7;
-const GRANDSTAND_CENTRE_AHEAD = 55;
+import { bannerTexture, crowdTexture } from './sceneryModels';
 
 /** mulberry32: small, fast, seeded. */
-function seeded(seed: number): () => number {
+export function seeded(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
     state = (state + 0x6d2b79f5) >>> 0;
@@ -58,17 +47,14 @@ const dummy = new Object3D();
 
 export class Scenery {
   readonly group = new Group();
-  // Sets: several instanced meshes may share one geometry and material.
-  private readonly geometries = new Set<BufferGeometry>();
-  private readonly materials = new Set<Material>();
+  private readonly geometries: BufferGeometry[] = [];
+  private readonly materials: Material[] = [];
   private readonly textures: Texture[] = [];
-  private readonly random = seeded(20251009);
 
   constructor(
     private readonly track: Track,
     private readonly terrain: Terrain,
   ) {
-    this.addPines();
     this.addGrandstand();
     this.addBanners();
   }
@@ -105,8 +91,8 @@ export class Scenery {
     placements: readonly Placement[],
     shadows: boolean,
   ): InstancedMesh {
-    this.geometries.add(geometry);
-    this.materials.add(material);
+    this.geometries.push(geometry);
+    this.materials.push(material);
     const mesh = new InstancedMesh(geometry, material, placements.length);
     placements.forEach((p, i) => {
       dummy.position.set(p.x, p.y, p.z);
@@ -123,91 +109,14 @@ export class Scenery {
     return mesh;
   }
 
-  /**
-   * Pines scattered on a jittered grid around the circuit, in clumps with clearings between them,
-   * thinning out into the hills. One instanced mesh per tile so off-screen tiles are culled.
-   */
-  private addPines(): void {
-    const { track, terrain, random } = this;
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minZ = Infinity;
-    let maxZ = -Infinity;
-    for (const s of track.samples) {
-      minX = Math.min(minX, s.position.x);
-      maxX = Math.max(maxX, s.position.x);
-      minZ = Math.min(minZ, s.position.z);
-      maxZ = Math.max(maxZ, s.position.z);
-    }
-    const stand = this.grandstandFrame();
-    const tiles = new Map<string, Placement[]>();
-    for (let gx = minX - PINE_REACH; gx <= maxX + PINE_REACH; gx += PINE_SPACING) {
-      for (let gz = minZ - PINE_REACH; gz <= maxZ + PINE_REACH; gz += PINE_SPACING) {
-        const x = gx + (random() - 0.5) * PINE_SPACING * 0.9;
-        const z = gz + (random() - 0.5) * PINE_SPACING * 0.9;
-        const scale = 0.75 + random() * 0.55;
-        const yaw = random() * Math.PI * 2;
-        const shade = 0.8 + random() * 0.4;
-        const keep = random();
-        const { distance } = terrain.nearRoad(x, z, PINE_REACH);
-        const gap = distance - track.halfDrivable;
-        if (gap < PINE_ROAD_GAP || gap >= PINE_REACH - 2) continue;
-        // Clumps and clearings, and fewer trees the further out you look.
-        const clump = fbm(x * 0.011 + 40, z * 0.011 - 12, 3);
-        const thinning = 1 - 0.55 * Math.min(1, gap / PINE_REACH);
-        if (clump < 0.4 || keep > thinning) continue;
-        if (stand.covers(x, z)) continue;
-        const key = `${Math.floor(x / PINE_TILE)},${Math.floor(z / PINE_TILE)}`;
-        let tile = tiles.get(key);
-        if (!tile) tiles.set(key, (tile = []));
-        tile.push({
-          x,
-          y: terrain.heightAt(x, z) - 0.3,
-          z,
-          yaw,
-          sx: scale,
-          sy: scale * (0.9 + keep * 0.2),
-          sz: scale,
-          tint: new Color(shade, shade, shade),
-        });
-      }
-    }
-    const geometry = pineGeometry();
-    const material = new MeshStandardMaterial({ vertexColors: true, roughness: 0.9 });
-    for (const placements of tiles.values()) this.instanced(geometry, material, placements, true);
-  }
-
-  /** Where the grandstand stands: the start straight's infield side, ahead of the line. */
-  private grandstandFrame(): {
-    index: number;
-    offset: number;
-    covers(x: number, z: number): boolean;
-  } {
-    const { track } = this;
-    const centre = track.startLine.distance + GRANDSTAND_CENTRE_AHEAD;
-    const index = Math.round(((centre % track.length) + track.length) % track.length);
-    const offset = track.halfDrivable + 9;
-    const s = track.sample(index);
-    return {
-      index,
-      offset,
-      covers: (x, z) => {
-        const dx = x - s.position.x;
-        const dz = z - s.position.z;
-        const ahead = dx * s.tangent.x + dz * s.tangent.z;
-        const lateral = dx * s.right.x + dz * s.right.z;
-        // The stand (64 m long, ~14 m deep with its roof) plus room for the crowns.
-        return Math.abs(ahead) < 40 && lateral < -offset + 8 && lateral > -offset - 22;
-      },
-    };
-  }
-
   /** Covered stand on the infield side of the start straight, facing the grid. */
   private addGrandstand(): void {
     const { track } = this;
     const length = 64;
-    const { index, offset } = this.grandstandFrame();
+    const centre = track.startLine.distance + 55;
+    const index = Math.round(((centre % track.length) + track.length) % track.length);
     const s = track.sample(index);
+    const offset = track.halfDrivable + 9;
     const group = new Group();
     const x = s.position.x - s.right.x * offset;
     const z = s.position.z - s.right.z * offset;
@@ -256,8 +165,8 @@ export class Scenery {
     ];
     for (const g of [...concrete, ...crowd]) g.dispose();
     for (const [geometry, material] of parts) {
-      this.geometries.add(geometry);
-      this.materials.add(material);
+      this.geometries.push(geometry);
+      this.materials.push(material);
       const mesh = new Mesh(geometry, material);
       mesh.castShadow = mesh.receiveShadow = true;
       group.add(mesh);

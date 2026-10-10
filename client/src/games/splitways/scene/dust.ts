@@ -1,16 +1,15 @@
 /**
- * Soft puffs: dirt thrown up by wheels on the shoulders, and tyre smoke from slides. One particle
- * pool, one draw call.
+ * Soft puffs: dust off the wheels on the shoulders and tyre smoke from slides. One particle pool,
+ * one draw call.
  */
 import { Vector3 } from 'three';
 import type { Car } from '../sim/car';
 import { Particles } from './particles';
 
-/** Puffs per second per wheel: dirt at speed, smoke per metre/second of sideways slide. */
-const DIRT_RATE = 0.9;
+/** Puffs per second per wheel: sand at speed, smoke per metre/second of sideways slide. */
+const SAND_RATE = 0.9;
 const SMOKE_RATE = 2.2;
-/** Dry earth off the grass verges. */
-const DIRT_COLOUR = [0.46, 0.4, 0.29] as const;
+const SAND_COLOUR = [0.62, 0.5, 0.36] as const;
 const SMOKE_COLOUR = [0.78, 0.78, 0.78] as const;
 
 const velocity = new Vector3();
@@ -43,9 +42,9 @@ export class Dust {
       const slide = car.wheelSlide[i] ?? 0;
       const sand = onSand && speed > 4;
       const smoke = !onSand && car.wheelSkidding[i] === 1 && slide > 3;
-      // Front wheels only throw dirt; smoke comes from the rear.
+      // Front wheels only throw sand; smoke comes from the rear.
       if (!sand && !(smoke && i >= 2)) continue;
-      const rate = sand ? DIRT_RATE * speed * (i >= 2 ? 1 : 0.4) : SMOKE_RATE * slide;
+      const rate = sand ? SAND_RATE * speed * (i >= 2 ? 1 : 0.4) : SMOKE_RATE * slide;
       let pending = (owed[i] ?? 0) + rate * dt;
       while (pending >= 1) {
         this.wheelPuff(car, i, sand);
@@ -68,7 +67,7 @@ export class Dust {
     const contact = car.wheelContact[wheel] as Vector3;
     // Thrown up and back, carrying some of the car's speed.
     velocity.copy(car.velocity).multiplyScalar(sand ? 0.25 : 0.12);
-    const colour = sand ? DIRT_COLOUR : SMOKE_COLOUR;
+    const colour = sand ? SAND_COLOUR : SMOKE_COLOUR;
     this.particles.emit(
       contact.x + (Math.random() - 0.5) * 0.3,
       contact.y + 0.15,

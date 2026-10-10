@@ -55,6 +55,7 @@ export function LobbyScreen({
           <small>Up next</small>
           <strong>{game.title}</strong>
           <span>{game.subtitle}</span>
+          <p>{game.details}</p>
         </div>
         <ul className="pad-players">
           {lobby.players.map((p) => (

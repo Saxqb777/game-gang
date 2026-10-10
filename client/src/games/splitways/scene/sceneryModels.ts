@@ -43,7 +43,7 @@ export class FacetBuilder {
 const linear = (r: number, g: number, b: number) => new Color().setRGB(r, g, b);
 
 /** Height of an interim pine at scale 1 (m). */
-export const PINE_HEIGHT = 14;
+const PINE_HEIGHT = 14;
 
 /**
  * Interim low-poly pine (about 80 flat-shaded triangles): a six-sided trunk and four stacked

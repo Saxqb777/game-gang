@@ -1,7 +1,7 @@
 import { PLAYER_COLOURS, playerNameSchema, type ColourId } from '@gamergang/shared';
 import { randomId } from '../net/rtc';
 
-/** Pad steering layouts, the first being the default. P4 adds drag steering. */
+/** Pad steering layouts, the first being the default. Drag steering joins this list next. */
 export const STEERING_MODES = ['buttons'] as const;
 export type SteeringMode = (typeof STEERING_MODES)[number];
 

@@ -76,8 +76,6 @@ export const BRAKES = {
   impulse: 62,
   /** Share of braking on the front wheels. */
   frontBias: 0.62,
-  /** Below this forward speed, holding brake (without gas) engages reverse instead. */
-  reverseBelowSpeed: 0.8,
 } as const;
 
 export const STEERING = {
@@ -152,6 +150,29 @@ export const RESPAWN = {
 export const INPUT = {
   /** If a pad has sent nothing for this long, its car coasts (no gas, no brake, wheel centred). */
   staleAfterMs: 600,
+} as const;
+
+/** Shared steering processing on the TV for every input mode (pad drag, pad buttons, keyboard). */
+export const STEER_INPUT = {
+  /** Inputs this close to centre count as centre (thumb wobble, a resting finger). */
+  deadZone: 0.05,
+  /** Response curve exponent. Above 1 = finer control near the centre, same full lock. */
+  gamma: 1.5,
+  /** Low-pass time constant (s): smooths wifi jitter and digital keys; settles in about 5x this. */
+  lowPassSeconds: 0.04,
+} as const;
+
+export const REVERSE = {
+  /** Hold brake (no gas) at a standstill this long to engage reverse; the pad ring fills meanwhile. */
+  armSeconds: 0.35,
+  /** "Standstill": forward speed below this (m/s). Rolling backwards counts too. */
+  standstillSpeed: 0.5,
+  /** Throttle at or above this counts as gas (lower is feathering residue and is ignored). */
+  gasThreshold: 0.05,
+  /** Brake above this arms reverse. */
+  brakeThreshold: 0.5,
+  /** In reverse, letting the brake fall to this or below leaves reverse. */
+  releaseBrake: 0.05,
 } as const;
 
 export const CAMERA = {

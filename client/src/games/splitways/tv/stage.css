@@ -150,6 +150,54 @@
   text-shadow: none;
 }
 
+/* Reverse gear: a white chip with a bold R beside the speed. */
+.sw-hud-gear {
+  align-self: center;
+  display: grid;
+  place-items: center;
+  min-width: calc(44px * var(--hud-scale));
+  height: calc(44px * var(--hud-scale));
+  margin-right: calc(4px * var(--hud-scale));
+  border-radius: calc(11px * var(--hud-scale));
+  background: #fff;
+  color: #0a0c11;
+  font-size: calc(30px * var(--hud-scale));
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+  text-shadow: none;
+  box-shadow:
+    0 0 0 calc(2px * var(--hud-scale)) rgba(0, 0, 0, 0.35),
+    0 0 calc(22px * var(--hud-scale)) rgba(255, 255, 255, 0.5);
+}
+
+/* Help line (stuck on gas): lower middle, calm, below the WRONG WAY / FINISHED banner in priority. */
+.sw-hud-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  max-width: 86%;
+  padding: calc(8px * var(--hud-scale)) calc(20px * var(--hud-scale));
+  border-radius: 999px;
+  border: calc(2px * var(--hud-scale)) solid rgba(255, 255, 255, 0.85);
+  background: rgba(6, 8, 12, 0.72);
+  font-size: calc(26px * var(--hud-scale));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: sw-hint-in 0.25s ease-out both;
+}
+
+@keyframes sw-hint-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(10px * var(--hud-scale)));
+  }
+}
+
 .sw-minimap {
   position: absolute;
   right: calc(18px * var(--hud-scale));

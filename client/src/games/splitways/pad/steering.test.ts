@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { BUTTON_RAMP_S, rampSteer } from './steering';
+import { BUTTON_RAMP_S, BUTTON_RETURN_S, rampSteer } from './steering';
 
 describe('button steering', () => {
-  it('ramps to full lock in ~150 ms and back to centre on release', () => {
+  it('ramps to full lock in ~200 ms and back to centre in ~100 ms on release', () => {
+    expect(BUTTON_RAMP_S).toBe(0.2);
     let steer = 0;
     const dt = 1 / 60;
     let frames = 0;
@@ -11,8 +12,13 @@ describe('button steering', () => {
       frames++;
     }
     expect(frames * dt).toBeCloseTo(BUTTON_RAMP_S, 1);
-    for (let i = 0; i < 10; i++) steer = rampSteer(steer, false, false, dt);
+    let back = 0;
+    while (steer > 0 && back < 100) {
+      steer = rampSteer(steer, false, false, dt);
+      back++;
+    }
     expect(steer).toBe(0);
+    expect(back * dt).toBeCloseTo(BUTTON_RETURN_S, 1);
   });
 
   it('switches straight through centre when changing direction', () => {

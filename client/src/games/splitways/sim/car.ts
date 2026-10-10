@@ -19,6 +19,7 @@ import {
   ENGINE,
   PHYSICS,
   RESPAWN,
+  REVERSE,
   SLIPSTREAM,
   STEERING,
   TYRES,
@@ -96,6 +97,10 @@ export class Car {
   flippedTime = 0;
   /** Slipstream strength this step, 0..1. Set by Slipstream. */
   draft = 0;
+  /** Seconds brake has been held at a standstill towards engaging reverse (0 when not arming). */
+  reverseArm = 0;
+  /** In reverse gear: brake drives the car backwards until gas or a brake release. */
+  inReverse = false;
 
   // Per-wheel state for visuals, skid marks and sound.
   readonly wheelSpin = new Float32Array(WHEEL_COUNT);
@@ -179,6 +184,12 @@ export class Car {
     this.prevQuaternion.copy(this.quaternion);
   }
 
+  /** Reverse gear for the HUD and the pad: arming while brake is held at a standstill, then on. */
+  get reverseState(): 'off' | 'arming' | 'on' {
+    if (this.inReverse) return 'on';
+    return this.reverseArm > 0 ? 'arming' : 'off';
+  }
+
   /** Speed in km/h for HUDs. */
   get speedKph(): number {
     return Math.abs(this.forwardSpeed) * 3.6;
@@ -202,7 +213,7 @@ export class Car {
     const speed = velocity.length();
 
     this.applySteering(dt, Math.abs(forwardSpeed));
-    const reversing = this.applyDrive(forwardSpeed);
+    const reversing = this.applyDrive(forwardSpeed, dt);
     this.applyGrip(Math.abs(forwardSpeed), reversing);
 
     vehicle.updateVehicle(dt);
@@ -282,6 +293,8 @@ export class Car {
     this.steerAngle = 0;
     this.flippedTime = 0;
     this.draft = 0;
+    this.reverseArm = 0;
+    this.inReverse = false;
     this.readPose();
     this.prevPosition.copy(this.position);
     this.prevQuaternion.copy(this.quaternion);
@@ -314,25 +327,41 @@ export class Car {
     for (const i of FRONT_WHEELS) this.vehicle.setWheelSteering(i, this.steerAngle);
   }
 
-  /** Engine, brakes and reverse. Returns true while reversing. */
-  private applyDrive(forwardSpeed: number): boolean {
+  /**
+   * Engine, brakes and reverse. Reverse is an explicit gear: hold brake (no gas) at a standstill for
+   * `REVERSE.armSeconds` to engage it, then brake drives backwards until gas or a brake release.
+   * Thresholds rather than `=== 0`, because pad throttle is analog. Returns true while in reverse.
+   */
+  private applyDrive(forwardSpeed: number, dt: number): boolean {
     const { input, vehicle } = this;
+    const gas = input.throttle >= REVERSE.gasThreshold;
+    if (this.inReverse) {
+      if (gas || input.brake <= REVERSE.releaseBrake) this.inReverse = false;
+    } else if (
+      input.brake > REVERSE.brakeThreshold &&
+      !gas &&
+      forwardSpeed < REVERSE.standstillSpeed
+    ) {
+      this.reverseArm += dt;
+      if (this.reverseArm >= REVERSE.armSeconds) this.inReverse = true;
+    } else {
+      this.reverseArm = 0;
+    }
+    if (this.inReverse) this.reverseArm = 0;
+
     let engine = 0;
     let brake = 0;
-    let reversing = false;
-    if (input.throttle > 0) {
-      const falloff = forwardSpeed > 0 ? Math.max(0, 1 - (forwardSpeed / ENGINE.topSpeed) ** 2) : 1;
-      engine = input.throttle * ENGINE.force * falloff;
-    }
-    if (input.brake > 0) {
-      if (input.throttle === 0 && forwardSpeed < BRAKES.reverseBelowSpeed) {
-        reversing = true;
+    if (this.inReverse) {
+      const falloff =
+        forwardSpeed < 0 ? Math.max(0, 1 - (-forwardSpeed / ENGINE.reverseTopSpeed) ** 2) : 1;
+      engine = -input.brake * ENGINE.reverseForce * falloff;
+    } else {
+      if (input.throttle > 0) {
         const falloff =
-          forwardSpeed < 0 ? Math.max(0, 1 - (-forwardSpeed / ENGINE.reverseTopSpeed) ** 2) : 1;
-        engine = -input.brake * ENGINE.reverseForce * falloff;
-      } else {
-        brake = input.brake * BRAKES.impulse;
+          forwardSpeed > 0 ? Math.max(0, 1 - (forwardSpeed / ENGINE.topSpeed) ** 2) : 1;
+        engine = input.throttle * ENGINE.force * falloff;
       }
+      if (input.brake > 0) brake = input.brake * BRAKES.impulse;
     }
     const frontEngine = (engine * ENGINE.frontShare) / 2;
     const rearEngine = (engine * (1 - ENGINE.frontShare)) / 2;
@@ -347,7 +376,7 @@ export class Car {
       vehicle.setWheelEngineForce(i, input.handbrake ? 0 : rearEngine);
       vehicle.setWheelBrake(i, rearBrake);
     }
-    return reversing;
+    return this.inReverse;
   }
 
   private applyGrip(absForwardSpeed: number, reversing: boolean): void {

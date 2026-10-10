@@ -20,6 +20,12 @@ export const NAME_MAX_LENGTH = 12;
 /** Peer id the TV uses in signaling. Pads use random client ids. */
 export const TV_PEER_ID = 'tv';
 
+/**
+ * Split Ways: how long brake is held at a standstill before reverse engages (ms). The pad's arming
+ * ring is timed from it. Must equal the TV's `REVERSE.armSeconds * 1000` (a test checks).
+ */
+export const REVERSE_ARM_MS = 350;
+
 export const PLAYER_COLOURS = [
   { id: 'red', label: 'Inferno', hex: '#ff3b3b' },
   { id: 'orange', label: 'Blaze', hex: '#ff8a1f' },
@@ -76,7 +82,12 @@ export const joinSchema = z.object({
   colour: colourSchema,
 });
 
-/** Split Ways driving input. Sent on the unreliable channel, newest `t` wins. */
+/**
+ * Split Ways driving input. Sent on the unreliable channel, newest `t` wins.
+ * `steer` is raw and linear (-1 left .. +1 right): the TV applies the dead zone, curve and
+ * low-pass, and the car applies the speed-sensitive lock and rate limit, so pads never shape it.
+ * `throttle` is analog in 0.05 steps (GAS feathering); `brake` is 0..1.
+ */
 export const inputSchema = z.object({
   type: z.literal('input'),
   steer: signedUnit,
@@ -167,7 +178,10 @@ export const lobbySchema = z.object({
   votesNeeded: z.number().int().min(1).max(MAX_PLAYERS),
 });
 
-/** Split Ways per-player race status, sent at 5 Hz while playing. */
+/**
+ * Split Ways per-player race status, sent at 5 Hz while playing, and pushed straight away when
+ * `reverse`, `hint` or `resetReady` change (at most every 50 ms).
+ */
 export const raceSchema = z.object({
   type: z.literal('race'),
   phase: z.enum(['countdown', 'racing', 'finished']),
@@ -178,6 +192,12 @@ export const raceSchema = z.object({
   lap: z.number().int().min(0).max(99),
   totalLaps: z.number().int().min(1).max(99),
   speedKph: z.number().min(0).max(999),
+  /** Reverse gear: brake held at a standstill arms it (the pad ring fills), then it is on. */
+  reverse: z.enum(['off', 'arming', 'on']),
+  /** Stuck-on-gas help, worded per device on each side; null when not stuck. */
+  hint: z.enum(['reverse', 'release-gas']).nullable(),
+  /** A manual reset would be accepted now: racing, not finished, not respawning, cooldown over. */
+  resetReady: z.boolean(),
 });
 
 export const standingSchema = z.object({

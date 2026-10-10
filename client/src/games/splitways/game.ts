@@ -17,6 +17,10 @@ import { autopilot } from './debug/autopilot';
 import { DebugOverlay } from './debug/debugOverlay';
 import { ViewportHud, formatTime } from './hud/viewportHud';
 import { KeyboardDriver } from './input/keyboard';
+import type { RaceMessage } from '@gamergang/shared';
+import { REVERSE, RESPAWN } from './config';
+import { STUCK_HINTS, type StuckHint } from './input/controls';
+import { SteerProcessor } from './input/steerProcessor';
 import { FixedStepLoop } from './loop';
 import { Race, type Racer } from './race/race';
 import { Slipstream } from './race/slipstream';
@@ -84,6 +88,14 @@ interface Driver {
   connected: boolean;
   /** Which keyboard key set drives this car, if any. */
   keyboardSet: number | null;
+  /** TV-side steering processing for every input device (dead zone, curve, low-pass). */
+  steerFilter: SteerProcessor;
+  /** Reverse gear, stuck hint and reset availability last sent to the pad, to push changes. */
+  sentReverse: RaceMessage['reverse'];
+  sentHint: StuckHint | null;
+  sentResetReady: boolean;
+  /** When this pad last got a race status (performance.now()), for the push throttle. */
+  statusPushedAt: number;
   lastHapticAt: number;
   /** What the player is pressing, even while the race holds the car (engines rev on the grid). */
   wantThrottle: number;
@@ -250,6 +262,11 @@ export class SplitWaysGame {
         padInputAt: 0,
         connected: true,
         keyboardSet,
+        steerFilter: new SteerProcessor(),
+        sentReverse: 'off',
+        sentHint: null,
+        sentResetReady: false,
+        statusPushedAt: -Infinity,
         lastHapticAt: 0,
         wantThrottle: 0,
         wantHorn: false,
@@ -415,6 +432,11 @@ export class SplitWaysGame {
           ? NEUTRAL_INPUT
           : (this.keyboard.inputs[driver.keyboardSet] ?? NEUTRAL_INPUT);
       mergeInputs(driver.car.input, pad, keys);
+      // A respawn teleports the car: the wheel starts centred rather than easing back.
+      if (driver.racer.respawn === 'in' && driver.racer.respawnTimer < 0.05) {
+        driver.steerFilter.reset();
+      }
+      driver.car.input.steer = driver.steerFilter.process(driver.car.input.steer, this.sim.dt);
       driver.wantThrottle = driver.car.input.throttle;
       driver.wantHorn = driver.car.input.horn;
     }
@@ -424,6 +446,7 @@ export class SplitWaysGame {
     this.stepTime = now;
     this.sim.drainImpacts(this.onImpact);
     this.race.update(this.sim.dt);
+    this.pushStatusOnChange(now);
     this.slipstream.update(this.sim.dt, this.race.phase === 'racing');
     for (const driver of this.drivers) {
       const { car, racer } = driver;
@@ -601,6 +624,8 @@ export class SplitWaysGame {
     hud.setFade(racer.fade);
     hud.setStatus(driver.connected || driver.player.local ? '' : 'Reconnecting...');
     hud.setTag(car.draft > 0.4 ? 'SLIPSTREAM' : '');
+    hud.setGear(car.reverseState === 'on');
+    hud.setHint(this.stuckHintText(driver));
   }
 
   private trackFps(now: number): void {
@@ -647,12 +672,16 @@ export class SplitWaysGame {
     for (let i = 0; i < this.drivers.length; i++) this.sendRaceStatusTo(i);
   }
 
-  /** Phase, position, lap and speed for one pad. */
+  /** Phase, position, lap, speed, reverse gear, stuck hint and reset availability for one pad. */
   private sendRaceStatusTo(index: number): void {
     const driver = this.drivers[index];
     if (!driver || driver.player.local) return;
-    const { racer } = driver;
+    const { racer, car } = driver;
     const race = this.race;
+    driver.sentReverse = car.reverseState;
+    driver.sentHint = this.stuckHint(driver);
+    driver.sentResetReady = this.resetReady(driver);
+    driver.statusPushedAt = performance.now();
     this.hooks.send(driver.player.id, {
       type: 'race',
       phase:
@@ -666,8 +695,66 @@ export class SplitWaysGame {
       playerCount: this.drivers.length,
       lap: Math.min(Math.max(racer.lap, 1), race.totalLaps),
       totalLaps: race.totalLaps,
-      speedKph: Math.min(999, driver.car.speedKph),
+      speedKph: Math.min(999, car.speedKph),
+      reverse: driver.sentReverse,
+      hint: driver.sentHint,
+      resetReady: driver.sentResetReady,
     });
+  }
+
+  /** A changed reverse gear, hint or reset availability reaches the pad at most this late (ms). */
+  private static readonly STATUS_PUSH_MIN_MS = 50;
+
+  /**
+   * Pushes a pad's status as soon as its reverse gear, stuck hint or reset availability changes,
+   * so the arming ring, the banner and RESET react without waiting for the 5 Hz status tick.
+   * Throttled per pad; a change inside the window goes out when the window ends.
+   */
+  private pushStatusOnChange(now: number): void {
+    if (this.mode === 'podium') return;
+    for (let i = 0; i < this.drivers.length; i++) {
+      const driver = this.drivers[i] as Driver;
+      if (driver.player.local || now - driver.statusPushedAt < SplitWaysGame.STATUS_PUSH_MIN_MS) {
+        continue;
+      }
+      if (
+        driver.car.reverseState !== driver.sentReverse ||
+        this.stuckHint(driver) !== driver.sentHint ||
+        this.resetReady(driver) !== driver.sentResetReady
+      ) {
+        this.sendRaceStatusTo(i);
+      }
+    }
+  }
+
+  /**
+   * Stuck-on-gas help, for the pad banner and the TV HUD alike. Wedged on gas for a while with
+   * reverse off: tell them to hold brake, or, when they already hold brake (gas still blocks
+   * arming, since gas and brake merge independently), to let go of gas first.
+   */
+  private stuckHint(driver: Driver): StuckHint | null {
+    const { racer, car } = driver;
+    if (racer.stuckOnGasTime < RESPAWN.stuckHintSeconds || car.reverseState !== 'off') return null;
+    return car.input.brake > REVERSE.brakeThreshold ? 'release-gas' : 'reverse';
+  }
+
+  /** The hint as text for this driver's device: phone pedals, or their TV key set. */
+  private stuckHintText(driver: Driver): string {
+    const hint = this.stuckHint(driver);
+    if (hint === null) return '';
+    const text = STUCK_HINTS[hint];
+    return driver.player.local ? (text.keys[driver.keyboardSet ?? 0] ?? text.pad) : text.pad;
+  }
+
+  /** Whether a manual reset would be accepted right now (mirrors `Race.requestRespawn`). */
+  private resetReady(driver: Driver): boolean {
+    const { racer } = driver;
+    return (
+      this.race.phase === 'racing' &&
+      racer.finishedMs === null &&
+      racer.respawn === 'none' &&
+      this.race.clock >= racer.resetReadyAt
+    );
   }
 }
 

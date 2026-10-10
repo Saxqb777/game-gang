@@ -37,6 +37,8 @@ export class ViewportHud {
   private readonly speedValue: HTMLElement;
   private readonly speedBar: HTMLElement;
   private readonly tag: HTMLElement;
+  private readonly gear: HTMLElement;
+  private readonly hint: HTMLElement;
   private readonly minimap: Minimap;
   private readonly countdown: HTMLElement;
   private readonly banner: HTMLElement;
@@ -67,6 +69,9 @@ export class ViewportHud {
     this.tag = element('sw-hud-tag', speed);
     this.tag.hidden = true;
     const readout = element('sw-hud-readout', speed);
+    this.gear = element('sw-hud-gear', readout, 'span');
+    this.gear.textContent = 'R';
+    this.gear.hidden = true;
     this.speedValue = element('', readout, 'b');
     element('', readout, 'small').textContent = 'km/h';
     const bar = element('sw-hud-speedbar', speed);
@@ -75,6 +80,9 @@ export class ViewportHud {
     this.minimap = new Minimap(track);
     this.element.appendChild(this.minimap.canvas);
 
+    // Before the countdown and banner, so those draw over it: the hint is the quieter message.
+    this.hint = element('sw-hud-hint', this.element);
+    this.hint.hidden = true;
     this.countdown = element('sw-hud-countdown', this.element);
     this.banner = element('sw-hud-banner', this.element);
     this.status = element('sw-hud-status', this.element);
@@ -108,6 +116,19 @@ export class ViewportHud {
     if (!this.changed('tag', text)) return;
     this.tag.textContent = text;
     this.tag.hidden = text === '';
+  }
+
+  /** The "R" chip next to the speed while the car is in reverse gear. */
+  setGear(reverse: boolean): void {
+    if (!this.changed('gear', reverse ? 1 : 0)) return;
+    this.gear.hidden = !reverse;
+  }
+
+  /** Lower-middle help line (e.g. "Hold BRAKE to reverse"), quieter than the banner; empty hides it. */
+  setHint(text: string): void {
+    if (!this.changed('hint', text)) return;
+    this.hint.textContent = text;
+    this.hint.hidden = text === '';
   }
 
   /** "LAST 0:41.23" under the lap clock for a few seconds after a lap; empty hides it. */

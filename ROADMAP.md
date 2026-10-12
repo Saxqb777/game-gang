@@ -2,6 +2,23 @@
 
 Out of scope for v1. Written down so the v1 code leaves room for them, not built.
 
+## Milestones
+
+- **M8:** Track 1 Kestrel Pines, the performance foundation (render path, presets, profiling,
+  telemetry) and the minimum touch controller. Built; done once the owner's M1 run passes. See
+  PROGRESS.md.
+- **M9:** Track 1 polish: visuals (impostor forests, baked light, KTX2 textures, grade), car
+  feel and sound on Kestrel Pines, each pushed live when green, then the owner's playtest.
+- **M10:** Dropped for now (owner, 2026-10-10: one track only). More tracks come later through
+  the generator.
+- **M11:** Feel: tyre model and assists ladder, controller v2 (60 Hz input, 250 ms failsafe,
+  handbrake slide), HUD v2, engine audio v1.
+- **M12:** Cars and cameras: new car models with fictional brands, paint, chase-cam rewrite. Needs
+  the car sourcing task (an owner/art task that started in M8) finished first.
+- **M13:** Premium TV and site UI.
+- **M14:** On hold until the owner says it is ready.
+- **M15 and after:** new tracks and car packs through the generator; the WebGPU gate.
+
 ## Platform (Gamer Gang)
 
 - **Accounts, profiles, matchmaking.** v1 rooms are anonymous and joined by QR or code.
@@ -16,8 +33,7 @@ Out of scope for v1. Written down so the v1 code leaves room for them, not built
 ## Split Ways
 
 - AI opponents.
-- More tracks (the track builder takes a list of spline control points, so this is mostly content),
-  more cars, unlockables.
-- Rubber band assist as an option (Classic is pure skill; Items only weights the item odds).
-- Drift scoring, more items, battle mode.
+- More tracks and cars (trackgen builds a track from a layout file plus a small override file, so a
+  track is mostly content), unlockables.
+- Rubber band assist as an option (races are pure skill today).
 - Spectator mode, replays, ghost laps.

@@ -10,6 +10,18 @@ import { STEERING_MODES, type Profile, type SteeringMode } from '../profile';
 import { Brand } from './Simple';
 
 const MODE_INFO: Record<SteeringMode, { label: string; hint: string; icon: ReactNode }> = {
+  drag: {
+    label: 'Drag steer',
+    hint: 'Slide your left thumb',
+    // A thumb pad on an arc, with arrows either way.
+    icon: (
+      <>
+        <path d="M8 22 Q24 10 40 22" />
+        <path d="M14 21.8 8 22l1.9-5.7M34 21.8l6 .2-1.9-5.7" />
+        <circle cx="24" cy="16" r="4.5" />
+      </>
+    ),
+  },
   buttons: {
     label: 'Buttons',
     hint: 'Hold left / right arrows',
@@ -24,13 +36,11 @@ export function ModePicker({
   mode: SteeringMode;
   onChange: (mode: SteeringMode) => void;
 }) {
-  // A plain string: while there is a single mode its literal type makes `===` look constant.
-  const selected: string = mode;
   return (
     <div className="pad-modes" role="radiogroup" aria-label="Steering">
       {STEERING_MODES.map((id) => {
         const info = MODE_INFO[id];
-        const on = selected === id;
+        const on = mode === id;
         return (
           <button
             key={id}

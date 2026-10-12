@@ -22,7 +22,7 @@ import {
   Vector3,
   type Texture,
 } from 'three';
-import { SHADOW_PROXY_LAYER, type CarModelLibrary, type CarVisual } from './carVisual';
+import type { CarModelLibrary, CarVisual } from './carVisual';
 import { canvasTexture } from './textures';
 
 export interface PodiumEntry {
@@ -72,7 +72,6 @@ export class Podium {
     key.shadow.camera.top = 10;
     key.shadow.camera.bottom = -6;
     key.shadow.radius = 3;
-    key.shadow.camera.layers.enable(SHADOW_PROXY_LAYER);
     scene.add(key);
 
     const floorMaterial = this.track(

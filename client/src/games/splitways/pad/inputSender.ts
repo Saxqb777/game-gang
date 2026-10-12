@@ -1,4 +1,5 @@
 import type { InputMessage } from '@gamergang/shared';
+import { quantiseThrottle } from '../input/controls';
 
 export type PadInput = Omit<InputMessage, 'type' | 't'>;
 
@@ -20,10 +21,12 @@ export class InputSender {
 
   update(input: PadInput, now: number): void {
     const last = this.last;
+    // Throttle travels on the 0.05 grid: comparing quantised values means a change is a full step.
+    const throttle = quantiseThrottle(input.throttle);
     const changed =
       !last ||
       Math.abs(input.steer - last.steer) > STEER_DEAD_ZONE ||
-      input.throttle !== last.throttle ||
+      throttle !== last.throttle ||
       input.brake !== last.brake ||
       input.handbrake !== last.handbrake ||
       input.horn !== last.horn;
@@ -31,7 +34,7 @@ export class InputSender {
     if (elapsed < (changed ? MIN_INTERVAL_MS : HEARTBEAT_MS)) return;
     const message = {
       steer: Math.round(input.steer * 1000) / 1000,
-      throttle: input.throttle,
+      throttle,
       brake: input.brake,
       handbrake: input.handbrake,
       horn: input.horn,

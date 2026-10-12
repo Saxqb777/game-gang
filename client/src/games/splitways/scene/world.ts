@@ -3,6 +3,7 @@
  * start gantry. Loads the asphalt textures once for the track.
  */
 import { Group, Mesh, type BufferGeometry, type MeshStandardMaterial } from 'three';
+import type { QualityPreset } from '../render/quality';
 import type { Terrain } from '../track/terrain';
 import type { Track } from '../track/track';
 import { Gantry } from './gantry';
@@ -58,6 +59,12 @@ export class WorldVisual {
     const asphalt = await loadPbrSet('/textures/asphalt/asphalt_02', anisotropy);
     return new WorldVisual(track, terrain, { asphalt }, anisotropy);
   }
+
+  /**
+   * Applies a quality preset's world settings (pine density and pine shadows). A no-op stub: the
+   * forest arrives with Track 1's dressing, and until then there is nothing to thin.
+   */
+  readonly setQuality: (preset: QualityPreset) => void = () => undefined;
 
   dispose(): void {
     this.trackVisual.dispose();

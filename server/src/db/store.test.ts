@@ -1,20 +1,28 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { ROOM_CODE_ALPHABET, TV_PEER_ID, type SignalPayload } from '@gamergang/shared';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import {
+  ROOM_CODE_ALPHABET,
+  TV_PEER_ID,
+  type PostTelemetryRequest,
+  type SignalPayload,
+  type TelemetrySample,
+} from '@gamergang/shared';
 import { createPgliteRunner } from './pglite';
 import { q, type SqlRunner } from './sql';
 import { createStore, type Store } from './store';
 
 const PAD = 'pad0000000000001';
+const PGLITE_START_MS = 60_000;
 const offer: SignalPayload = { kind: 'offer', session: 'sess01', sdp: 'v=0' };
 
 describe('store', () => {
   let runner: SqlRunner;
   let store: Store;
 
+  // PGlite (Postgres in WASM) can take well over the default 10 s to start on a busy machine.
   beforeEach(async () => {
     runner = await createPgliteRunner();
     store = createStore(runner);
-  });
+  }, PGLITE_START_MS);
 
   it('creates rooms with consonant-only codes and checks the host key', async () => {
     const { code, hostKey } = await store.createRoom();
@@ -128,5 +136,133 @@ describe('store', () => {
       ['sara', 57_000],
       ['Omar', 58_500],
     ]);
+  });
+});
+
+const sample: TelemetrySample = {
+  kind: 'flythrough',
+  scenario: 'fly-4-low',
+  track: 'kestrel-pines',
+  viewports: 4,
+  preset: 'low',
+  durationMs: 20_000,
+  frames: 1200,
+  fpsAvg: 60,
+  frameMsP50: 16.7,
+  frameMsP95: 16.8,
+  frameMsP99: 17.1,
+  frameMsMax: 18.3,
+  cpuMsP99: 6.2,
+  gpuMsAvg: null,
+  gpuMsP95: null,
+  gpuMsP99: null,
+  missedFrames: 0,
+  internalWidth: 816,
+  internalHeight: 459,
+  outputWidth: 958,
+  outputHeight: 538,
+  scaleAvg: 0.85,
+  scaleMin: 0.8,
+  drawCallsAvg: 612,
+  trianglesAvg: 1_900_000,
+  presetDrops: 0,
+};
+
+function telemetry(room: string, key: string, count = 1): PostTelemetryRequest {
+  return {
+    room,
+    key,
+    session: 'session0000000001',
+    build: 'abc123',
+    device: {
+      userAgent: 'test',
+      gpu: 'SwiftShader',
+      cores: 4,
+      memoryGb: null,
+      screenWidth: 1920,
+      screenHeight: 1080,
+      devicePixelRatio: 1,
+      refreshHz: 60,
+      timerQuery: false,
+    },
+    samples: Array.from({ length: count }, () => sample),
+  };
+}
+
+describe('store telemetry', () => {
+  let runner: SqlRunner;
+
+  // One database for these tests (PGlite takes a while to start); each starts with no samples.
+  beforeAll(async () => {
+    runner = await createPgliteRunner();
+    await createStore(runner).createRoom();
+  }, PGLITE_START_MS);
+  beforeEach(async () => {
+    await runner.batch([q(`DELETE FROM telemetry`)]);
+  });
+
+  async function rows(): Promise<number> {
+    const [result] = await runner.batch([q(`SELECT count(*)::int AS n FROM telemetry`)]);
+    return Number(result?.[0]?.n);
+  }
+
+  it('stores a batch for the room host, one row per sample', async () => {
+    const store = createStore(runner);
+    const { code, hostKey } = await store.createRoom();
+    expect(await store.postTelemetry(telemetry(code, hostKey, 3))).toBe('ok');
+    expect(await rows()).toBe(3);
+    const [stored] = await runner.batch([
+      q(
+        `SELECT room, kind, scenario, preset, viewports, fps_avg, gpu_ms_avg, device, sample FROM telemetry LIMIT 1`,
+      ),
+    ]);
+    const row = stored?.[0];
+    expect(row?.room).toBe(code);
+    expect(row?.kind).toBe('flythrough');
+    expect(row?.scenario).toBe('fly-4-low');
+    expect(row?.viewports).toBe(4);
+    expect(row?.fps_avg).toBe(60);
+    expect(row?.gpu_ms_avg).toBeNull();
+    expect((row?.device as { gpu: string }).gpu).toBe('SwiftShader');
+    expect((row?.sample as TelemetrySample).frameMsP99).toBe(17.1);
+  });
+
+  it('refuses a wrong key and an unknown room', async () => {
+    const store = createStore(runner);
+    const { code } = await store.createRoom();
+    expect(await store.postTelemetry(telemetry(code, 'f'.repeat(32)))).toBe('forbidden');
+    expect(await store.postTelemetry(telemetry('ZZZZ', 'f'.repeat(32)))).toBe('not-found');
+    expect(await rows()).toBe(0);
+  });
+
+  it('caps rows per room (all of a batch or none) and per hour overall', async () => {
+    const store = createStore(runner, { telemetry: { roomMaxRows: 3, globalMaxRowsPerHour: 5 } });
+    const a = await store.createRoom();
+    expect(await store.postTelemetry(telemetry(a.code, a.hostKey, 2))).toBe('ok');
+    expect(await store.postTelemetry(telemetry(a.code, a.hostKey, 2))).toBe('rate-limited');
+    expect(await store.postTelemetry(telemetry(a.code, a.hostKey, 1))).toBe('ok');
+    expect(await rows()).toBe(3);
+    const b = await store.createRoom();
+    expect(await store.postTelemetry(telemetry(b.code, b.hostKey, 2))).toBe('ok');
+    // 5 rows this hour: the global cap stops everyone.
+    expect(await store.postTelemetry(telemetry(b.code, b.hostKey, 1))).toBe('rate-limited');
+    expect(await rows()).toBe(5);
+  });
+
+  it('deletes rows older than 90 days on the next post', async () => {
+    const store = createStore(runner);
+    const { code, hostKey } = await store.createRoom();
+    await store.postTelemetry(telemetry(code, hostKey, 2));
+    await runner.batch([
+      q(
+        `UPDATE telemetry SET created_at = now() - interval '91 days' WHERE id = (SELECT min(id) FROM telemetry)`,
+      ),
+    ]);
+    expect(await store.postTelemetry(telemetry(code, hostKey, 1))).toBe('ok');
+    expect(await rows()).toBe(2);
+    const [old] = await runner.batch([
+      q(`SELECT count(*)::int AS n FROM telemetry WHERE created_at < now() - interval '90 days'`),
+    ]);
+    expect(Number(old?.[0]?.n)).toBe(0);
   });
 });

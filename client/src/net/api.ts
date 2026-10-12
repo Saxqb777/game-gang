@@ -8,6 +8,7 @@ import {
   type LeaderboardResponse,
   type PostLapsRequest,
   type PostSignalRequest,
+  type PostTelemetryRequest,
   type RoomInfoResponse,
   type SignalMessage,
 } from '@gamergang/shared';
@@ -78,5 +79,17 @@ export const api = {
   },
   leaderboard(track: string): Promise<LeaderboardResponse> {
     return request(leaderboardResponseSchema, `/api/laps?${query({ track })}`);
+  },
+  /** Performance samples from the TV. `keepalive` lets a post finish while the page closes. */
+  async postTelemetry(body: PostTelemetryRequest): Promise<void> {
+    await request(okSchema, '/api/telemetry', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      keepalive: true,
+    });
+  },
+  /** On pagehide only: a plain-text beacon (no preflight, no response). False if the browser refused it. */
+  beaconTelemetry(body: PostTelemetryRequest): boolean {
+    return navigator.sendBeacon('/api/telemetry', JSON.stringify(body));
   },
 };

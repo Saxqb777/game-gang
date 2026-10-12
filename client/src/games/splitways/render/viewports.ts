@@ -42,3 +42,18 @@ export function overviewCell(width: number, height: number, gap: number): Rect {
     height: height / 2 - half,
   };
 }
+
+/**
+ * Integer canvas pixels (the canvas runs at devicePixelRatio 1, so CSS px are canvas px). Edges are
+ * rounded, not sizes, so neighbouring views keep exact seams between them.
+ */
+export function roundRect(rect: Rect): Rect {
+  const x = Math.round(rect.x);
+  const y = Math.round(rect.y);
+  return {
+    x,
+    y,
+    width: Math.max(1, Math.round(rect.x + rect.width) - x),
+    height: Math.max(1, Math.round(rect.y + rect.height) - y),
+  };
+}

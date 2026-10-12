@@ -1,7 +1,10 @@
 /** Phone button steering: hold left / right arrows for steer in -1 (left) .. +1 (right). */
 
-/** Buttons: time to go from centre to full lock, and back to centre on release (seconds). */
-export const BUTTON_RAMP_S = 0.15;
+/**
+ * Buttons: time to go from centre to full lock (150-250 ms reads as smooth but not sluggish), and
+ * back to centre on release (80-120 ms) (seconds).
+ */
+export const BUTTON_RAMP_S = 0.2;
 export const BUTTON_RETURN_S = 0.1;
 
 /** Hold-to-steer buttons: ramps to full over BUTTON_RAMP_S, back to centre over BUTTON_RETURN_S. */

@@ -1,242 +1,85 @@
-/* Split Ways pad: a phone held sideways. Thumbs rest on the big zones. */
+/*
+ * Split Ways pad: a phone held sideways, laid out like a console controller.
+ * Left thumb: steer zone (drag, or two arrows). Right thumb: GAS, BRAKE·R, HANDBRAKE above GAS.
+ * Top strip: settings, race status, HORN, the R chip and HOLD · RESET.
+ * Geometry is in % of the controller box (the screen inside its safe areas).
+ */
 
 .ctl {
   --accent: #ff8a1f;
-  --surface: #11141c;
-  --surface-hi: #1a1e29;
-  --edge: rgba(255, 255, 255, 0.07);
+  /* Traffic-light pedals, the same for every player: green go, red stop, amber handbrake. */
+  --gas: #2fe08a;
+  --brake: #ff4d5e;
+  --amber: #ffb020;
+  --surface: #10131a;
+  --surface-hi: #1b1f2a;
+  --edge: rgba(255, 255, 255, 0.08);
+  --gap: 10px;
+  --radius: 22px;
+  --steer-left: max(env(safe-area-inset-left), 24px);
   position: fixed;
   inset: 0;
   height: 100dvh;
-  display: grid;
-  gap: 10px;
-  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
-    max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  overflow: hidden;
   background:
     radial-gradient(
-      60% 90% at 50% 0%,
-      color-mix(in srgb, var(--accent) 16%, transparent),
+      60% 70% at 88% 100%,
+      color-mix(in srgb, var(--accent) 13%, transparent),
       transparent 70%
     ),
-    linear-gradient(180deg, #0b0d13, #06070a);
+    radial-gradient(
+      55% 55% at 50% -12%,
+      color-mix(in srgb, var(--accent) 15%, transparent),
+      transparent 70%
+    ),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.014) 0 2px, transparent 2px 6px),
+    linear-gradient(180deg, #0b0d13, #050608);
   color: var(--text);
   touch-action: none;
+  overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
-  overflow: hidden;
 }
 
-.ctl--buttons {
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr;
+/* Class rules set display, which would otherwise beat the hidden attribute. */
+.ctl [hidden] {
+  display: none !important;
 }
 
-/* ---- Pedals and buttons ------------------------------------------------------ */
-
-.ctl-pedal,
-.ctl-btn,
-.ctl-arrow {
-  position: relative;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  border-radius: 22px;
-  background: linear-gradient(180deg, var(--surface-hi), var(--surface));
-  border: 1px solid var(--edge);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 18px rgba(0, 0, 0, 0.45);
-  transition:
-    transform 0.06s ease,
-    box-shadow 0.06s ease,
-    background 0.06s ease;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.ctl-pedal strong {
-  position: relative;
-  font-size: clamp(22px, 5.4vh, 38px);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.ctl-pedal small {
-  position: relative;
-  margin-top: 4px;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-/* Pedal grip ridges. */
-.ctl-pedal-ridges {
+.ctl-box {
   position: absolute;
-  inset: 14px 18px;
-  background: repeating-linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.045) 0 10px,
-    transparent 10px 22px
-  );
-  border-radius: 14px;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  left: 0;
 }
 
-.ctl-pedal--gas {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-}
+/* ---- Top strip ----------------------------------------------------------------- */
 
-.ctl-pedal--gas strong {
-  color: var(--accent);
-}
-
-.ctl-pedal--brake strong {
-  color: #ff5a64;
-}
-
-.ctl-btn {
-  font-size: clamp(13px, 3.2vh, 18px);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.ctl-btn--handbrake {
-  color: #ffd27a;
-}
-
-.is-pressed {
-  transform: scale(0.97);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent) 30%, var(--surface-hi)),
-    var(--surface)
-  );
-  box-shadow:
-    inset 0 0 0 2px var(--accent),
-    0 0 28px color-mix(in srgb, var(--accent) 40%, transparent);
-}
-
-.ctl-pedal--brake.is-pressed,
-.ctl-btn--handbrake.is-pressed {
-  background: linear-gradient(180deg, rgba(255, 90, 100, 0.32), var(--surface));
-  box-shadow:
-    inset 0 0 0 2px #ff5a64,
-    0 0 28px rgba(255, 90, 100, 0.35);
-}
-
-/* ---- HUD ------------------------------------------------------------------------ */
-
-.ctl-hud {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 14px;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-.ctl-hud-pos b {
-  font-size: clamp(26px, 7.5vh, 44px);
-  line-height: 1;
-  color: var(--accent);
-}
-
-.ctl-hud-pos small {
-  font-size: 16px;
-  color: var(--muted);
-}
-
-.ctl-hud-lap {
-  font-size: 15px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.ctl-hud-speed {
-  font-size: 12px;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-
-.ctl-hud-speed b {
-  font-size: 18px;
-  color: var(--text);
-}
-
-/* ---- Buttons mode -------------------------------------------------------------- */
-
-.ctl-topbar {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  padding: 0 52px;
-  pointer-events: none;
-}
-
-.ctl-steer,
-.ctl-drive {
-  grid-row: 2;
+.ctl-top {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 14%;
+  min-height: 44px;
   display: grid;
-  gap: 10px;
-  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding-left: max(12px, env(safe-area-inset-left));
 }
-
-.ctl-steer {
-  grid-template-columns: 1fr 1fr;
-}
-
-.ctl-arrow svg {
-  width: clamp(48px, 18vh, 96px);
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.85);
-  stroke-width: 5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.ctl-arrow.is-pressed svg {
-  stroke: var(--accent);
-}
-
-.ctl-drive {
-  grid-template-rows: 26% 1fr;
-}
-
-.ctl-drive-buttons,
-.ctl-drive-pedals {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  min-height: 0;
-}
-
-/* ---- Settings, overlays --------------------------------------------------------- */
 
 .ctl-settings {
-  position: absolute;
-  left: 50%;
-  bottom: max(10px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
+  justify-self: start;
   display: grid;
   place-items: center;
   width: 40px;
   height: 40px;
+  padding: 0;
   border-radius: 12px;
   border: 1px solid var(--edge);
   background: rgba(255, 255, 255, 0.05);
-  padding: 0;
-  z-index: 3;
-}
-
-.ctl--buttons .ctl-settings {
-  top: max(8px, env(safe-area-inset-top));
-  bottom: auto;
-  left: auto;
-  right: max(12px, env(safe-area-inset-right));
-  transform: none;
 }
 
 .ctl-settings svg {
@@ -247,6 +90,637 @@
   stroke-width: 2;
   stroke-linecap: round;
 }
+
+.ctl-hud {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.ctl-hud-pos b {
+  font-size: clamp(24px, 7vh, 40px);
+  line-height: 1;
+  font-style: italic;
+  color: var(--accent);
+}
+
+.ctl-hud-pos small {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.ctl-hud-lap {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ctl-hud-speed {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.ctl-hud-speed b {
+  font-size: 17px;
+  color: var(--text);
+}
+
+.ctl-top-right {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctl-key {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 42px;
+  min-width: 52px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 1px solid var(--edge);
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 6px 14px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  transition: transform 0.06s ease;
+}
+
+.ctl-key[data-held] {
+  transform: scale(0.95);
+}
+
+.ctl-horn {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ctl-horn[data-held] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 26%, var(--surface));
+}
+
+.ctl-horn[data-held] {
+  color: #fff;
+}
+
+/* The R chip: dim outline, lit white while the car is in reverse. */
+.ctl-rchip {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.ctl-rchip[data-on] {
+  border-color: #fff;
+  background: #fff;
+  color: #0a0c11;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.6);
+}
+
+/* HOLD · RESET: grey while a reset is not available; amber and filling while held. */
+.ctl-reset {
+  min-width: 128px;
+  opacity: 0.38;
+  filter: grayscale(1);
+}
+
+.ctl-reset[data-ready] {
+  opacity: 1;
+  filter: none;
+  border-color: color-mix(in srgb, var(--amber) 45%, transparent);
+}
+
+.ctl-reset-label {
+  position: relative;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  white-space: nowrap;
+}
+
+.ctl-reset-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transform: scaleX(var(--hold, 0));
+  background: linear-gradient(90deg, rgba(255, 176, 32, 0.25), rgba(255, 176, 32, 0.55));
+  pointer-events: none;
+}
+
+.ctl-reset[data-ready][data-held] .ctl-reset-label {
+  color: #fff;
+}
+
+/* ---- Steer zone ------------------------------------------------------------------ */
+
+.ctl-steer {
+  position: absolute;
+  top: calc(14% + 6px);
+  bottom: 0;
+  left: var(--steer-left);
+  width: calc(45% - var(--steer-left));
+  border-radius: var(--radius);
+}
+
+.ctl--drag .ctl-steer {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  /* A fine dot grid reads as a touch surface, like a trackpad. */
+  background:
+    radial-gradient(80% 70% at 50% 50%, rgba(255, 255, 255, 0.035), transparent 70%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1.4px) 0 0 / 18px 18px;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.ctl--drag .ctl-steer[data-held] {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.ctl-idle {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.ctl-idle svg {
+  width: clamp(64px, 24vh, 104px);
+  aspect-ratio: 3 / 2;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.45);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ctl-idle span {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.ctl-steer[data-held] .ctl-idle {
+  opacity: 0;
+}
+
+.ctl--buttons .ctl-steer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+
+/* ---- Pedals and arrows ------------------------------------------------------------ */
+
+.ctl-pedal,
+.ctl-arrow {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  border-radius: var(--radius);
+  border: 1px solid var(--edge);
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.35),
+    0 10px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition:
+    transform 0.06s ease,
+    box-shadow 0.08s ease,
+    border-color 0.08s ease;
+}
+
+.ctl-pedal[data-held],
+.ctl-arrow[data-held] {
+  transform: scale(0.975);
+}
+
+/* Labels sit at the top: the thumb covers below and right of where it touches. */
+.ctl-pedal strong {
+  position: relative;
+  z-index: 1;
+  align-self: start;
+  margin-top: clamp(10px, 4vh, 18px);
+  font-size: clamp(18px, 5.4vh, 30px);
+  letter-spacing: 0.16em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Grip grooves across the lower part of each pedal. */
+.ctl-ridges {
+  position: absolute;
+  inset: 38% 14px 14px;
+  border-radius: 14px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0 8px,
+    transparent 8px 18px
+  );
+  pointer-events: none;
+}
+
+.ctl-ridges--strip {
+  inset: 10px 14px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0 4px,
+    transparent 4px 12px
+  );
+}
+
+/* GAS: right-aligned, tall; the fill shows how much throttle is going in. */
+.ctl-gas {
+  right: 0;
+  bottom: 0;
+  width: 24%;
+  height: 62%;
+  border-color: color-mix(in srgb, var(--gas) 40%, transparent);
+}
+
+.ctl-gas strong {
+  color: var(--gas);
+}
+
+.ctl-gas-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: bottom;
+  transform: scaleY(var(--level, 0));
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--gas) 58%, transparent),
+    color-mix(in srgb, var(--gas) 16%, transparent)
+  );
+  transition: transform 0.06s linear;
+  pointer-events: none;
+}
+
+.ctl-gas[data-held] {
+  border-color: var(--gas);
+  box-shadow:
+    inset 0 0 0 2px var(--gas),
+    0 0 30px color-mix(in srgb, var(--gas) 40%, transparent);
+}
+
+.ctl-gas[data-held] strong {
+  color: #fff;
+}
+
+/* BRAKE·R: directly left of GAS, shorter. */
+.ctl-brake {
+  right: calc(24% + var(--gap));
+  bottom: 0;
+  width: 18%;
+  height: 46%;
+  border-color: rgba(255, 77, 94, 0.32);
+}
+
+.ctl-brake strong {
+  color: var(--brake);
+  font-size: clamp(15px, 4.4vh, 24px);
+  letter-spacing: 0.12em;
+}
+
+.ctl-brake[data-held] {
+  border-color: var(--brake);
+  background: linear-gradient(180deg, rgba(255, 77, 94, 0.3), var(--surface));
+  box-shadow:
+    inset 0 0 0 2px var(--brake),
+    0 0 28px rgba(255, 77, 94, 0.35);
+}
+
+/* The arming ring and its R: fills while the TV arms reverse, lit white once it is on. */
+.ctl-ring {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: min(66%, 7.5rem);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ctl-ring circle {
+  fill: none;
+  stroke-width: 6;
+}
+
+.ctl-ring-track {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.ctl-ring-fill {
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transform: rotate(-90deg);
+  transform-origin: 50px 50px;
+  opacity: 0;
+}
+
+.ctl-ring .ctl-ring-disc {
+  fill: transparent;
+  stroke: none;
+  transition: fill 0.12s ease;
+}
+
+.ctl-ring text {
+  fill: rgba(255, 255, 255, 0.3);
+  font-size: 34px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  transition: fill 0.12s ease;
+}
+
+.ctl-brake[data-reverse='arming'] .ctl-ring-fill {
+  opacity: 1;
+  animation: ctl-arm var(--ring-ms) linear forwards;
+}
+
+.ctl-brake[data-reverse='arming'] .ctl-ring text {
+  fill: #fff;
+}
+
+@keyframes ctl-arm {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Reverse on: the pedal turns white-accented. */
+.ctl-brake[data-reverse='on'] {
+  border-color: #fff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), var(--surface));
+  box-shadow:
+    inset 0 0 0 2px #fff,
+    0 0 30px rgba(255, 255, 255, 0.35);
+}
+
+.ctl-brake[data-reverse='on'] strong {
+  color: #fff;
+}
+
+.ctl-brake[data-reverse='on'] .ctl-ring-fill {
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+
+.ctl-brake[data-reverse='on'] .ctl-ring .ctl-ring-disc {
+  fill: #fff;
+}
+
+.ctl-brake[data-reverse='on'] .ctl-ring text {
+  fill: #0a0c11;
+}
+
+/* HANDBRAKE: a strip directly above GAS, the same width. */
+.ctl-handbrake {
+  right: 0;
+  bottom: calc(62% + var(--gap));
+  width: 24%;
+  height: 16%;
+  align-content: center;
+}
+
+.ctl-handbrake strong {
+  align-self: center;
+  margin: 0;
+  font-size: clamp(12px, 3.4vh, 17px);
+  letter-spacing: 0.2em;
+  color: var(--amber);
+}
+
+.ctl-handbrake[data-held] {
+  border-color: var(--amber);
+  background: linear-gradient(180deg, rgba(255, 176, 32, 0.28), var(--surface));
+  box-shadow:
+    inset 0 0 0 2px var(--amber),
+    0 0 24px rgba(255, 176, 32, 0.3);
+}
+
+/* Buttons mode: the two arrows fill the steer zone. */
+.ctl-arrow {
+  position: relative;
+  place-content: center;
+}
+
+.ctl-arrow svg {
+  width: clamp(44px, 16vh, 84px);
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ctl-arrow[data-held] {
+  border-color: var(--accent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 30%, var(--surface-hi)),
+    var(--surface)
+  );
+  box-shadow:
+    inset 0 0 0 2px var(--accent),
+    0 0 28px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.ctl-arrow[data-held] svg {
+  stroke: #fff;
+}
+
+/* ---- Stuck hint: over the bottom of the steer zone, never in the way of a touch --------- */
+
+.ctl-hint {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 176, 32, 0.95);
+  color: #160f00;
+  font-size: clamp(13px, 3.9vh, 17px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation:
+    ctl-hint-in 0.22s ease-out both,
+    ctl-hint-pulse 1.4s ease-in-out 0.22s infinite alternate;
+}
+
+@keyframes ctl-hint-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes ctl-hint-pulse {
+  to {
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.5),
+      0 0 0 4px rgba(255, 176, 32, 0.35);
+  }
+}
+
+/* ---- Ghost wheel (drag steer) ------------------------------------------------------- */
+
+.ctl-ghost {
+  --wheel: min(44vh, 184px);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  will-change: transform;
+}
+
+.ctl-ghost * {
+  pointer-events: none;
+}
+
+.ctl-ghost.is-on {
+  opacity: 1;
+}
+
+.ctl-wheel {
+  position: absolute;
+  left: calc(var(--wheel) / -2);
+  top: calc(var(--wheel) / -2);
+  width: var(--wheel);
+  height: var(--wheel);
+  overflow: visible;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55));
+  will-change: transform;
+}
+
+.ctl-wheel-rim {
+  fill: none;
+  stroke: rgba(30, 35, 48, 0.88);
+  stroke-width: 16;
+}
+
+.ctl-wheel-grip {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 16;
+  stroke-dasharray: 3 7;
+}
+
+.ctl-wheel-spoke {
+  fill: rgba(30, 35, 48, 0.88);
+}
+
+.ctl-wheel-hub {
+  fill: rgba(16, 19, 26, 0.92);
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.ctl-wheel-marker {
+  fill: var(--accent);
+}
+
+/* Full-lock rail above the wheel: the dot reaches an end tick at full lock. */
+.ctl-ghost-rail {
+  position: absolute;
+  left: 0;
+  top: calc(var(--wheel) / -2 - 20px);
+  height: 4px;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ctl-ghost-rail::before,
+.ctl-ghost-rail::after,
+.ctl-ghost-rail i {
+  content: '';
+  position: absolute;
+  top: -5px;
+  width: 2px;
+  height: 14px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.ctl-ghost-rail::before {
+  left: 0;
+}
+
+.ctl-ghost-rail::after {
+  right: 0;
+}
+
+.ctl-ghost-rail i {
+  left: calc(50% - 1px);
+  height: 10px;
+  top: -3px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.ctl-ghost-dot {
+  position: absolute;
+  left: calc(50% - 7px);
+  top: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+/* ---- Overlays -------------------------------------------------------------------- */
 
 .ctl-overlay {
   position: absolute;
@@ -334,5 +808,31 @@
 @media (orientation: portrait) {
   .ctl-rotate {
     display: grid;
+  }
+}
+
+/*
+ * Narrow phones (iPhone SE class): the race status sits between the gear and the buttons instead
+ * of screen-centred, and keeps place and lap only.
+ */
+@media (max-width: 760px) {
+  .ctl-top {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .ctl-hud {
+    gap: 10px;
+  }
+
+  .ctl-hud-speed {
+    display: none;
+  }
+
+  .ctl-key {
+    padding: 0 10px;
+  }
+
+  .ctl-reset {
+    min-width: 112px;
   }
 }

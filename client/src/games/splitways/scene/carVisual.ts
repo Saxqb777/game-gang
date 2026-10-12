@@ -21,12 +21,6 @@ import { WHEELS } from '../config';
 
 const MODEL_URL = '/models/sports-car.glb';
 const WHEEL_NODE_NAMES = ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr'] as const;
-/**
- * Layer of the shadow-only stand-in: the whole car merged into one mesh, so each shadow pass draws
- * one call per car instead of fourteen. The sun's shadow camera sees this layer; cameras don't.
- */
-export const SHADOW_PROXY_LAYER = 1;
-
 /** The whole model as one position-only geometry, wheels at rest. */
 function mergedSilhouette(model: Object3D): BufferGeometry {
   model.updateMatrixWorld(true);
@@ -98,7 +92,15 @@ function createSharedMaterials(): SharedMaterials {
 /** Loads the model once and hands out per-player cars. */
 export class CarModelLibrary {
   private readonly silhouette: BufferGeometry;
-  private readonly silhouetteMaterial = new MeshBasicMaterial();
+  /**
+   * The shadow-only stand-in: the whole car merged into one mesh, so each shadow pass draws one call
+   * per car instead of fourteen. It sits on the default layer (three culls shadow casters by the
+   * view camera's layers) and writes neither colour nor depth, so in the main pass it is invisible.
+   */
+  private readonly silhouetteMaterial = new MeshBasicMaterial({
+    colorWrite: false,
+    depthWrite: false,
+  });
 
   private constructor(
     private readonly template: Object3D,
@@ -116,7 +118,6 @@ export class CarModelLibrary {
     const visual = new CarVisual(this.template.clone(true), this.shared, colourHex);
     const proxy = new Mesh(this.silhouette, this.silhouetteMaterial);
     proxy.castShadow = true;
-    proxy.layers.set(SHADOW_PROXY_LAYER);
     visual.root.add(proxy);
     return visual;
   }
@@ -165,7 +166,7 @@ export class CarVisual {
 
     model.traverse((object) => {
       if (!(object instanceof Mesh)) return;
-      // The merged stand-in casts the shadow (see SHADOW_PROXY_LAYER).
+      // The merged stand-in casts the shadow (see CarModelLibrary.silhouetteMaterial).
       object.castShadow = false;
       object.receiveShadow = true;
       const materials = (

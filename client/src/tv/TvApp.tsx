@@ -1,6 +1,7 @@
 import './tv.css';
 import { Suspense, useEffect, useSyncExternalStore } from 'react';
 import type { Hub, HubState } from '../hub/hub';
+import { readBenchFlags } from '../games/splitways/debug/benchFlags';
 import { useSoundOn } from './audio';
 import { GAME_STAGES } from './gameStages';
 import { Lobby } from './Lobby';
@@ -11,6 +12,16 @@ const KEYBOARD_PLAYERS = [
   { id: 'keyboard01', name: 'Keys WASD' },
   { id: 'keyboard02', name: 'Keys Arrows' },
 ];
+/**
+ * `?bots=1`: K keeps adding players after the keyboard ones. Bots have no key set, so they sit on
+ * the grid (or drive with the debug autopilot): 4 viewports for benchmarks with one keyboard.
+ */
+const BOT_PLAYERS = [
+  { id: 'botplayer03', name: 'Bot 3' },
+  { id: 'botplayer04', name: 'Bot 4' },
+];
+const BOTS = readBenchFlags(window.location.search).bots;
+const LOCAL_PLAYERS = BOTS ? [...KEYBOARD_PLAYERS, ...BOT_PLAYERS] : KEYBOARD_PLAYERS;
 
 function handleTvKey(hub: Hub, state: HubState, event: KeyboardEvent): void {
   if (event.target instanceof HTMLInputElement) return;
@@ -27,7 +38,7 @@ function handleTvKey(hub: Hub, state: HubState, event: KeyboardEvent): void {
   const localPlayers = state.players.filter((p) => p.local);
   switch (event.code) {
     case 'KeyK': {
-      const next = KEYBOARD_PLAYERS.find((k) => !state.players.some((p) => p.id === k.id));
+      const next = LOCAL_PLAYERS.find((k) => !state.players.some((p) => p.id === k.id));
       if (next) hub.addLocalPlayer(next.id, next.name);
       return;
     }
@@ -69,7 +80,8 @@ function KeyHints({
     <div className={`tv-keys ${phase === 'lobby' ? '' : 'tv-keys--game'}`}>
       {phase === 'lobby' ? (
         <>
-          <kbd>K</kbd> keyboard player · <kbd>Enter</kbd> ready · <kbd>F</kbd> fullscreen
+          <kbd>K</kbd> keyboard player{BOTS ? ' (then bots)' : ''} · <kbd>Enter</kbd> ready ·{' '}
+          <kbd>F</kbd> fullscreen
         </>
       ) : (
         <>

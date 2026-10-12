@@ -190,8 +190,9 @@ respawn wording against the merged P2 race.ts. -->
   frames, starts the next race one preset lower (session memory, kept across TV reloads). Presets
   never change during a race.
 - Shadows: three's SunLight (two cascades refit per view) on High and Medium; on Low one directional
-  light whose shadow box is re-aimed at the car being drawn, one shadow pass per view. Cars cast
-  shadows through a fixed merged stand-in mesh that only the shadow camera sees.
+  light whose shadow box is re-aimed at the car being drawn, one shadow pass per view. Each car
+  casts its shadow through one merged stand-in mesh (1 draw call instead of 14) that writes no
+  colour or depth, so the main pass never shows it.
 - Shaders precompile on the loading screen (`compileAsync` with the HDR scratch bound), then 3 warm-up
   frames run through the same post path. The overlay counts late programs. The podium's first frame
   still compiles a little; that hitch is accepted.

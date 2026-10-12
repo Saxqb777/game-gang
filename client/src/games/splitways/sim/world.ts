@@ -1,6 +1,7 @@
 import type { Collider, EventQueue, World } from '@dimforge/rapier3d-compat';
 import { Quaternion, Vector3 } from 'three';
 import { PHYSICS } from '../config';
+import { SURFACE, type SurfaceId } from '../track/surfaces';
 import { loadRapier, type Rapier } from './rapier';
 
 /** Friction for static scenery. Walls are slippery so cars slide along them instead of sticking. */
@@ -15,6 +16,8 @@ export class PhysicsWorld {
   readonly events: EventQueue;
   /** Every static collider created through the helpers, by handle (used to tell walls from cars). */
   readonly staticColliders = new Set<number>();
+  /** Ground surface of each registered collider, by handle. */
+  private readonly surfaces = new Map<number, SurfaceId>();
 
   private constructor(readonly rapier: Rapier) {
     this.world = new rapier.World({ x: 0, y: -PHYSICS.gravity, z: 0 });
@@ -43,10 +46,13 @@ export class PhysicsWorld {
     );
   }
 
+  /** Static convex hull (the track walls). Min combine like `addBox`, so walls stay slippery. */
   addConvexHull(points: Float32Array, friction: number = SURFACE_FRICTION.ground): Collider {
     const desc = this.rapier.ColliderDesc.convexHull(points);
     if (!desc) throw new Error('Degenerate convex hull');
-    return this.track(desc.setFriction(friction));
+    return this.track(
+      desc.setFriction(friction).setFrictionCombineRule(this.rapier.CoefficientCombineRule.Min),
+    );
   }
 
   /** Static triangle mesh (the track surface). Internal edges are fixed so wheels don't catch on seams. */
@@ -62,6 +68,17 @@ export class PhysicsWorld {
         this.rapier.TriMeshFlags.FIX_INTERNAL_EDGES,
       ).setFriction(friction),
     );
+  }
+
+  /** Tags a collider with the ground surface the wheels feel on it. */
+  registerSurface(collider: Collider, surface: SurfaceId): void {
+    this.surfaces.set(collider.handle, surface);
+  }
+
+  /** The surface a wheel is on; asphalt for unregistered colliders (and for none). */
+  surfaceOf(collider: Collider | null): SurfaceId {
+    if (!collider) return SURFACE.asphalt;
+    return this.surfaces.get(collider.handle) ?? SURFACE.asphalt;
   }
 
   dispose(): void {

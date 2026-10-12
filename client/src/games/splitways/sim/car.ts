@@ -22,11 +22,13 @@ import {
   REVERSE,
   SLIPSTREAM,
   STEERING,
+  SURFACES,
   TYRES,
   WHEELS,
 } from '../config';
 import { NEUTRAL_INPUT, copyInput, type DriveInput } from './input';
 import type { Rapier } from './rapier';
+import { SURFACE, SURFACE_NAMES, type SurfaceId } from '../track/surfaces';
 
 export const WHEEL_COUNT = 4;
 /** Wheel order used everywhere: front left, front right, rear left, rear right. */
@@ -110,6 +112,8 @@ export class Car {
   readonly wheelSlide = new Float32Array(WHEEL_COUNT);
   readonly wheelContact = Array.from({ length: WHEEL_COUNT }, () => new Vector3());
   readonly wheelSkidding = new Uint8Array(WHEEL_COUNT);
+  /** Ground surface under each wheel (SurfaceId); keeps the last value while the wheel is in the air. */
+  readonly wheelSurface = new Uint8Array(WHEEL_COUNT);
 
   /** Wheel hub positions relative to the car origin when the suspension is at rest under load. */
   static readonly wheelOffsets: readonly Vector3[] = [
@@ -129,6 +133,7 @@ export class Car {
     rapier: Rapier,
     private readonly world: World,
     spawn: Spawn,
+    private readonly surfaceOf: (collider: Collider | null) => SurfaceId = () => SURFACE.asphalt,
   ) {
     const yawQuat = tmpQuat.setFromAxisAngle(WORLD_UP, spawn.yaw);
     this.body = world.createRigidBody(
@@ -176,7 +181,6 @@ export class Car {
       this.vehicle.setWheelSuspensionRelaxation(i, WHEELS.suspensionRelaxation);
       this.vehicle.setWheelMaxSuspensionForce(i, WHEELS.maxSuspensionForce);
       this.vehicle.setWheelMaxSuspensionTravel(i, WHEELS.maxSuspensionTravel);
-      this.vehicle.setWheelFrictionSlip(i, i < 2 ? TYRES.frontGrip : TYRES.rearGrip);
       this.vehicle.setWheelSideFrictionStiffness(i, TYRES.sideStiffness);
     }
     this.readPose();
@@ -193,6 +197,23 @@ export class Car {
   /** Speed in km/h for HUDs. */
   get speedKph(): number {
     return Math.abs(this.forwardSpeed) * 3.6;
+  }
+
+  /** The most common surface under the wheels in contact (ties go to the higher id); asphalt when airborne. */
+  get dominantSurface(): SurfaceId {
+    let best: SurfaceId = SURFACE.asphalt;
+    let bestCount = 0;
+    for (let surface = SURFACE_NAMES.length - 1; surface >= 0; surface--) {
+      let count = 0;
+      for (let i = 0; i < WHEEL_COUNT; i++) {
+        if (this.wheelInContact[i] && this.wheelSurface[i] === surface) count++;
+      }
+      if (count > bestCount) {
+        best = surface as SurfaceId;
+        bestCount = count;
+      }
+    }
+    return best;
   }
 
   /** Applies controls and assists. Call before `world.step()`. */
@@ -266,6 +287,7 @@ export class Car {
       this.wheelSuspension[i] = vehicle.wheelSuspensionLength(i) ?? WHEELS.suspensionRestLength;
       const inContact = vehicle.wheelIsInContact(i);
       this.wheelInContact[i] = inContact ? 1 : 0;
+      if (inContact) this.wheelSurface[i] = this.surfaceOf(vehicle.wheelGroundObject(i));
       let slide = 0;
       if (inContact) {
         vehicle.wheelContactPoint(i, tmpVec);
@@ -395,10 +417,13 @@ export class Car {
       // Weight shifts onto the nose under braking: the tail goes light and swings out.
       rearSide *= MathUtils.lerp(1, DRIFT.brakeOversteerRearSide, Math.min(1, input.brake));
     }
-    for (const i of REAR_WHEELS) {
-      vehicle.setWheelFrictionSlip(i, rearGrip);
-      vehicle.setWheelSideFrictionStiffness(i, rearSide);
+    // Tyre grip times the grip of whatever each wheel is rolling on, set every step.
+    for (let i = 0; i < WHEEL_COUNT; i++) {
+      const base = i < 2 ? TYRES.frontGrip : rearGrip;
+      const surface = SURFACES[SURFACE_NAMES[this.wheelSurface[i] as number] ?? 'asphalt'];
+      vehicle.setWheelFrictionSlip(i, base * surface.grip);
     }
+    for (const i of REAR_WHEELS) vehicle.setWheelSideFrictionStiffness(i, rearSide);
   }
 
   private addGroundAssists(
@@ -417,7 +442,15 @@ export class Car {
     if (speed > 0.05) {
       // Slipstream is pure aero: the car in front takes some of the air drag.
       const drag = ENGINE.drag * (1 - SLIPSTREAM.dragCut * this.draft);
-      const resistance = drag * speed * speed + ENGINE.rollingResistance * Math.min(1, speed / 2);
+      // Grass and gravel drag at the wheels on top of the tyres' own rolling resistance.
+      let surfaceRolling = 0;
+      for (let i = 0; i < WHEEL_COUNT; i++) {
+        if (!this.wheelInContact[i]) continue;
+        const surface = SURFACES[SURFACE_NAMES[this.wheelSurface[i] as number] ?? 'asphalt'];
+        surfaceRolling += surface.rolling / WHEEL_COUNT;
+      }
+      const rolling = (ENGINE.rollingResistance + surfaceRolling) * Math.min(1, speed / 2);
+      const resistance = drag * speed * speed + rolling;
       impulse.addScaledVector(velocity, -resistance / speed);
     }
 

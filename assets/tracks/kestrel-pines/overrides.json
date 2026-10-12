@@ -1,0 +1,18 @@
+{
+ "format": "splitways-overrides@1",
+ "id": "kestrel-pines",
+ "name": "Kestrel Pines",
+ "laps": 3,
+ "checkpointCount": 18,
+ "licence": "Proprietary - (C) 2026 Gamer Gang project. All rights reserved.",
+ "credits": [
+  "Original layout by the Gamer Gang project, 2026"
+ ],
+ "closure": {
+  "straights": [
+   "the Ladder",
+   "back straight"
+  ],
+  "arc": "the Drop apex"
+ }
+}

@@ -222,7 +222,7 @@ export class Forest {
       }),
       {
         key: 'sw-pine-v1',
-        afterAo: `reflectedLight.indirectSpecular *= 0.2; reflectedLight.directSpecular *= 0.4;`,
+        afterAo: `reflectedLight.indirectSpecular *= 0.2; reflectedLight.directSpecular *= 0.15;`,
       },
     );
     this.ringMaterial = new MeshStandardMaterial({

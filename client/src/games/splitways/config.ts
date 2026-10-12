@@ -402,10 +402,10 @@ export const LIGHTING = {
   /**
    * The sky picture's sun is capped at this brightness when it lights the scene (the directional
    * light already plays the sun) and in the visible sky (so bloom around it stays a glow, not a
-   * flood).
+   * flood: driving into the low sun must not milk out the horizon).
    */
   skyLightCap: 8,
-  skyVisibleCap: 40,
+  skyVisibleCap: 14,
   /** Light bounced up from the ground (linear RGB): mixed grass, forest floor and asphalt. */
   groundBounce: [0.1, 0.12, 0.07],
   /**
@@ -425,7 +425,7 @@ export const POST = {
   /** Bloom: only pixels brighter than `threshold` glow (with a soft `knee`); `strength` is how much. */
   bloomThreshold: 1.9,
   bloomKnee: 0.8,
-  bloomStrength: 0.07,
+  bloomStrength: 0.055,
   /** Darkening at the edges of each viewport, plus extra at top speed (0 = none). */
   vignette: 0.12,
   vignetteAtSpeed: 0.08,

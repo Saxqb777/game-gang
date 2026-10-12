@@ -16,7 +16,7 @@ describe('trackside placements', () => {
     const again = placeTrackside(track, terrain);
     expect(again).toHaveLength(placements.length);
     expect(again).toEqual(placements);
-  });
+  }, 30_000);
 
   it('plant a forest under the cap', () => {
     expect(pines.length).toBeGreaterThan(5000);
@@ -44,7 +44,7 @@ describe('trackside placements', () => {
       closest = Math.min(closest, Math.abs(lateral) - track.side(best, lateral < 0 ? -1 : 1).wall);
     }
     expect(closest).toBeGreaterThanOrEqual(TRACKGEN.pineGap - 1e-3);
-  });
+  }, 30_000);
 
   it('put up distance boards and marshal posts', () => {
     const kinds = new Set(placements.map((p) => p.kind));

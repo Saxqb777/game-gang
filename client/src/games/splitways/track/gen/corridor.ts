@@ -9,7 +9,7 @@
  * `Track.lateralPoint`, so visuals, physics and terrain agree on the banked cross-section.
  * `trackGeometry.ts` re-exports the geometry functions. Node-safe.
  */
-import { Vector3 } from 'three';
+import { MathUtils, Vector3 } from 'three';
 import { TRACKGEN } from '../../config';
 import { BARRIER, SURFACE, type BarrierId, type SurfaceId } from '../surfaces';
 import type { Track } from '../track';
@@ -237,6 +237,12 @@ const LINE_LIFT = 0.01;
 const KERB_RIDGE = 0.02;
 const KERB_RINGS = [0, 0.25, 0.5, 0.75] as const;
 const KERB_RING_LIFT = [0, KERB_RIDGE, 0, KERB_RIDGE] as const;
+/**
+ * The ridges stop this far (fraction of the kerb width) short of its edges, which stay flat on the
+ * station rings: the kerb then meets the asphalt and run-off edges vertex for vertex, with no slits
+ * under lifted edges and no T-junctions.
+ */
+const KERB_BEVEL = 0.06;
 /** Skirt below the run-off's outer edge (m). */
 const SKIRT_DROP = 1;
 /** Armco rail: bottom and top above the wall foot (m); posts stand this far behind the rail. */
@@ -250,6 +256,8 @@ const TYRE_ROWS = [0.33, 0.95] as const;
 const HULL_STATIONS = 4;
 const HULL_OVERLAP = 0.6;
 const HULL_BELOW = 1;
+/** How far each hull's overlapping end sits behind its neighbour's face (m); more than any contact depth. */
+const HULL_RECESS = 0.05;
 
 /** Which visual band a run-off surface draws in. */
 const RUNOFF_BAND: Record<SurfaceId, BandName> = {
@@ -557,7 +565,11 @@ function buildChunk(track: Track, index: number, from: number, to: number): Corr
   return { index, from, to, centre, radius, bands, tyreStacks, armcoPosts };
 }
 
-/** A vertex of a vertical band at station i, lateral l, `lift` above the corridor surface. */
+/**
+ * A vertex of a vertical band at station i, lateral l (on the wall line), `lift` above the corridor
+ * surface. Its normal is horizontal and square to the wall line (central difference), so the
+ * shading follows the wall where it flares.
+ */
 function vertical(
   band: BandBuilder,
   track: Track,
@@ -568,10 +580,12 @@ function vertical(
   facingDir: Vector3,
   u: number,
 ): number {
+  const side = l < 0 ? -1 : 1;
+  track.lateralPoint(i + 1, side * track.side(i + 1, side).wall, vq);
+  track.lateralPoint(i - 1, side * track.side(i - 1, side).wall, vn);
+  vn.set(vq.z - vn.z, 0, vn.x - vq.x).normalize();
+  if (vn.dot(facingDir) < 0) vn.negate();
   track.lateralPoint(i, l, vp, lift);
-  const r = track.sample(i).right;
-  const sign = facingDir.dot(r) >= 0 ? 1 : -1;
-  vn.set(r.x * sign, 0, r.z * sign);
   return band.vertex(key, vp, vn, u, i * track.spacing);
 }
 
@@ -587,28 +601,45 @@ function addKerb(
   const j = i + 1;
   const [r0, k0] = columns(track, i, side);
   const [r1, k1] = columns(track, j, side);
+  // Per station: inner vertices (slot * 2 + 0 near the road, + 1 near the wall), then the 2 edges.
   // Slot 0 of an interval is its station ring, shared with the previous interval's closing ring.
-  const ringKey = (station: number, slot: number) => (station - from) * 64 + 16 + column + slot * 2;
-  const vertex = (key: number, f: number, l0: number, l1: number, lift: number, u: number) => {
+  const keyOf = (station: number) => (station - from) * 64 + 16 + column * 2;
+  const vertex = (key: number, f: number, t: number, lift: number) => {
     // Stations are 1 m apart, so the quarter rings interpolate the two station points.
+    const l0 = MathUtils.lerp(r0, k0, t);
+    const l1 = MathUtils.lerp(r1, k1, t);
     track.lateralPoint(i, l0, vp, lift);
     track.lateralPoint(j, l1, vq, lift);
     vp.lerp(vq, f);
     if (f < 0.5) surfaceNormal(track, i, r0, k0, l0, vn);
     else surfaceNormal(track, j, r1, k1, l1, vn);
-    return band.vertex(key, vp, vn, u, (i + f) * track.spacing);
+    return band.vertex(key, vp, vn, t, (i + f) * track.spacing);
   };
-  const rings: [number, number][] = KERB_RINGS.map((f, slot) => {
+  const inner: [number, number][] = KERB_RINGS.map((f, slot) => {
     const lift = KERB_RING_LIFT[slot] as number;
-    const key = ringKey(i, slot);
-    return [vertex(key, f, r0, r1, lift, 0), vertex(key + 1, f, k0, k1, lift, 1)];
+    const key = keyOf(i) + slot * 2;
+    return [vertex(key, f, KERB_BEVEL, lift), vertex(key + 1, f, 1 - KERB_BEVEL, lift)];
   });
-  const closing = ringKey(j, 0);
-  rings.push([vertex(closing, 1, r0, r1, 0, 0), vertex(closing + 1, 1, k0, k1, 0, 1)]);
-  for (let s = 0; s < rings.length - 1; s++) {
-    const [a, b] = rings[s] as [number, number];
-    const [c, d] = rings[s + 1] as [number, number];
+  inner.push([vertex(keyOf(j), 1, KERB_BEVEL, 0), vertex(keyOf(j) + 1, 1, 1 - KERB_BEVEL, 0)]);
+  const edges = KERB_RINGS.length * 2;
+  const edge = (station: number, f: number, which: 0 | 1) =>
+    vertex(keyOf(station) + edges + which, f, which, 0);
+  for (let s = 0; s < inner.length - 1; s++) {
+    const [a, b] = inner[s] as [number, number];
+    const [c, d] = inner[s + 1] as [number, number];
     band.quad(a, b, c, d, UP);
+  }
+  // Each edge fans to its inner column: the first half from station i's edge, the rest from j's.
+  const half = inner.length >> 1;
+  for (const which of [0, 1] as const) {
+    const e0 = edge(i, 0, which);
+    const e1 = edge(j, 1, which);
+    for (let s = 0; s < inner.length - 1; s++) {
+      const p = (inner[s] as [number, number])[which];
+      const q = (inner[s + 1] as [number, number])[which];
+      band.triangle(s < half ? e0 : e1, p, q, UP);
+    }
+    band.triangle(e0, (inner[half] as [number, number])[which], e1, UP);
   }
 }
 
@@ -664,40 +695,66 @@ export function corridorPhysicsMesh(track: Track): PhysicsSurfaceMesh {
 }
 
 /**
- * Invisible collision walls: per side, one 8-point convex hull every 4 stations. The inner face runs
- * along the wall line from 1 m below its foot to TRACKGEN.wallHeight above it, the hull is
- * TRACKGEN.wallThickness deep, and each overlaps its neighbours by 0.6 m. Every station has a wall,
- * whatever barrier (if any) is drawn there.
+ * Invisible collision walls: per side, one convex hull every 4 stations. The inner face runs along the
+ * wall line from 1 m below its foot to TRACKGEN.wallHeight above it, and the hull is
+ * TRACKGEN.wallThickness deep. Each end reaches 0.6 m past its station along the neighbouring hull's
+ * line, set back HULL_RECESS behind that neighbour's face: neighbours overlap, but a car pressed
+ * into one hull never meets the next hull's end cap (which would stop it dead), only a shallow ramp.
+ * Every station has a wall, whatever barrier (if any) is drawn there.
  */
 export function wallHulls(track: Track): Float32Array[] {
   const count = track.samples.length;
   const hulls: Float32Array[] = [];
-  const a = new Vector3();
-  const b = new Vector3();
-  const dir = new Vector3();
-  const out = new Vector3();
   for (const side of [-1, 1] as const) {
+    // Hull k runs from anchor k to anchor k + 1; the last anchor is station `count` (= station 0).
+    const anchors: Vector3[] = [];
     for (let i = 0; i < count; i += HULL_STATIONS) {
-      const j = Math.min(i + HULL_STATIONS, count);
-      track.lateralPoint(i, side * track.side(i, side).wall, a);
-      track.lateralPoint(j, side * track.side(j, side).wall, b);
-      dir.subVectors(b, a).setY(0).normalize();
-      a.addScaledVector(dir, -HULL_OVERLAP);
-      b.addScaledVector(dir, HULL_OVERLAP);
+      anchors.push(track.lateralPoint(i, side * track.side(i, side).wall, new Vector3()));
+    }
+    anchors.push(track.lateralPoint(count, side * track.side(count, side).wall, new Vector3()));
+    const segments = anchors.length - 1;
+    const dirs: Vector3[] = [];
+    const outs: Vector3[] = [];
+    for (let k = 0; k < segments; k++) {
+      const a = anchors[k] as Vector3;
+      const b = anchors[k + 1] as Vector3;
+      const dir = new Vector3().subVectors(b, a).setY(0).normalize();
       // Outwards: horizontal, perpendicular to the face, away from the road.
-      out.set(-dir.z, 0, dir.x);
-      const r = track.sample(i).right;
+      const out = new Vector3(-dir.z, 0, dir.x);
+      const r = track.sample(k * HULL_STATIONS).right;
       if (out.x * r.x * side + out.z * r.z * side < 0) out.negate();
-      out.multiplyScalar(TRACKGEN.wallThickness);
-      const points = new Float32Array(24);
-      let k = 0;
-      for (const p of [a, b]) {
+      dirs.push(dir);
+      outs.push(out);
+    }
+    for (let k = 0; k < segments; k++) {
+      const prev = (k + segments - 1) % segments;
+      const next = (k + 1) % segments;
+      const a = anchors[k] as Vector3;
+      const b = anchors[k + 1] as Vector3;
+      const out = outs[k] as Vector3;
+      const aEnd = a
+        .clone()
+        .addScaledVector(dirs[prev] as Vector3, -HULL_OVERLAP)
+        .addScaledVector(outs[prev] as Vector3, HULL_RECESS);
+      const bEnd = b
+        .clone()
+        .addScaledVector(dirs[next] as Vector3, HULL_OVERLAP)
+        .addScaledVector(outs[next] as Vector3, HULL_RECESS);
+      const plan = [
+        aEnd,
+        a,
+        b,
+        bEnd,
+        bEnd.clone().addScaledVector(out, TRACKGEN.wallThickness),
+        aEnd.clone().addScaledVector(out, TRACKGEN.wallThickness),
+      ];
+      const points = new Float32Array(plan.length * 6);
+      let n = 0;
+      for (const p of plan) {
         for (const dy of [-HULL_BELOW, TRACKGEN.wallHeight]) {
-          for (const depth of [0, 1]) {
-            points[k++] = p.x + out.x * depth;
-            points[k++] = p.y + dy;
-            points[k++] = p.z + out.z * depth;
-          }
+          points[n++] = p.x;
+          points[n++] = p.y + dy;
+          points[n++] = p.z;
         }
       }
       hulls.push(points);

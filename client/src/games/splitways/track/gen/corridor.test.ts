@@ -95,6 +95,6 @@ describe('wall hulls', () => {
   it('cover every station on both sides with 8-point hulls', () => {
     const hulls = wallHulls(track);
     expect(hulls).toHaveLength(2 * Math.ceil(n / 4));
-    for (const hull of hulls) expect(hull).toHaveLength(24);
+    for (const hull of hulls) expect(hull).toHaveLength(36);
   });
 });

@@ -3,7 +3,13 @@
  * return a fresh layout (the input is never mutated). Unknown segment names are errors that name the
  * segment, so a typo in an override file never silently does nothing. Node-safe.
  */
-import type { ExtraKerb, LayoutSegment, LayoutSideSpec, TrackLayout, TrackOverrides } from './layout';
+import type {
+  ExtraKerb,
+  LayoutSegment,
+  LayoutSideSpec,
+  TrackLayout,
+  TrackOverrides,
+} from './layout';
 
 export interface OverriddenLayout {
   layout: TrackLayout;
@@ -26,7 +32,7 @@ function indexOfSegment(segments: readonly LayoutSegment[], name: string, where:
 function assignDefined<T extends object>(target: T, patch: Partial<T>): void {
   for (const key of Object.keys(patch) as (keyof T)[]) {
     const value = patch[key];
-    if (value !== undefined) target[key] = value as T[keyof T];
+    if (value !== undefined) target[key] = value;
   }
 }
 

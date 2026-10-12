@@ -161,6 +161,17 @@ export const TRACKGEN = {
   /** Default kerb for an `extraKerbs` override span without its own width (m), and its raise (m). */
   extraKerbWidth: 1.2,
   extraKerbHeight: 0.05,
+  /** Pine candidates: grid spacing and random offset (m; >= 0.43 of the grid, or rows read as an orchard). */
+  pineGrid: 7,
+  pineJitter: 3.2,
+  /** Pines stand at least this far beyond the wall (m), plus up to `pineGapNoise` more where noise says. */
+  pineGap: 8,
+  pineGapNoise: 6,
+  /** Furthest pine beyond the wall (m), and the band beyond the wall where the forest is always dense (m). */
+  pineReach: 260,
+  pineDenseBand: 40,
+  /** Most pines placed; over the cap, the ones furthest from the wall go first. */
+  pineCap: 14_000,
 } as const;
 
 export const RACING_LINE = {

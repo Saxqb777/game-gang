@@ -38,6 +38,8 @@ export interface Racer {
   fade: number;
   respawn: 'none' | 'out' | 'in';
   respawnTimer: number;
+  /** Arc length of the last place the car was driving cleanly on the asphalt (respawn base). */
+  safeDistance: number;
 }
 
 const delta = new Vector3();
@@ -87,6 +89,7 @@ export class Race {
       fade: 0,
       respawn: 'none',
       respawnTimer: 0,
+      safeDistance: track.project(car.position, -1, { index: 0, distance: 0, lateral: 0 }).distance,
     }));
     this.order = [...this.racers];
   }
@@ -153,6 +156,7 @@ export class Race {
       if (this.phase === 'racing' && racer.finishedMs === null) this.checkGate(racer);
       this.updateRespawn(racer, dt);
       this.updateWrongWay(racer, dt);
+      this.updateSafeDistance(racer);
     }
     this.rank();
     if (
@@ -250,9 +254,12 @@ export class Race {
     const tryingToMove = car.input.throttle > 0.3 || car.input.brake > 0.3;
     racer.stuckTime = tryingToMove && stopped ? racer.stuckTime + dt : 0;
     racer.stuckOnGasTime = car.input.throttle > 0.3 && stopped ? racer.stuckOnGasTime + dt : 0;
+    const { index, lateral } = racer.projection;
+    const sample = this.track.sample(index);
     const offTrack =
-      Math.abs(racer.projection.lateral) > this.track.halfDrivable + 3 ||
-      car.position.y < this.track.sample(racer.projection.index).position.y - 4;
+      lateral < -(sample.sideL.wall + 3) ||
+      lateral > sample.sideR.wall + 3 ||
+      car.position.y < sample.position.y + this.track.crossSectionY(index, lateral) - 4;
     if (
       car.flippedTime > RESPAWN.flippedSeconds ||
       racer.stuckTime > RESPAWN.stuckSeconds ||
@@ -265,27 +272,44 @@ export class Race {
     }
   }
 
+  /**
+   * The last clean spot: racing, not respawning, all four wheels down on the asphalt, moving
+   * forwards and not the wrong way. Respawns go back behind it.
+   */
+  private updateSafeDistance(racer: Racer): void {
+    const { car, projection } = racer;
+    if (this.phase !== 'racing' || racer.respawn !== 'none' || car.groundedWheels !== 4) return;
+    if (car.forwardSpeed <= 3 || racer.wrongWayTime !== 0) return;
+    const side = this.track.side(projection.index, projection.lateral < 0 ? -1 : 1);
+    if (Math.abs(projection.lateral) > side.road) return;
+    racer.safeDistance = projection.distance;
+  }
+
+  /** This car's lane at a distance: slots spread across the asphalt half on their side. */
+  private lane(racer: Racer, distance: number): number {
+    const offset = (racer.slot % 4) - 1.5;
+    const index = this.track.indexAt(distance);
+    return offset * 0.5 * this.track.side(index, offset < 0 ? -1 : 1).road;
+  }
+
   /** Debug: drop the car inside its next gate, as if it had driven there. */
   skipToNextGate(racer: Racer): void {
     const gate = this.track.checkpoints[racer.nextGate];
     if (!gate) return;
-    const lane = ((racer.slot % 4) - 1.5) * (this.track.halfRoad * 0.5);
-    racer.car.placeAt(this.track.spawnAt(gate.distance - 2, lane));
+    const distance = gate.distance - 2;
+    racer.car.placeAt(this.track.spawnAt(distance, this.lane(racer, distance)));
     this.track.project(racer.car.position, -1, racer.projection);
+    racer.safeDistance = racer.projection.distance;
   }
 
-  /** Back on the track at the last gate, in this car's own lane, clear of other cars. */
+  /** Back on the asphalt 10 m behind the last clean spot, in this car's own lane, clear of other cars. */
   private teleport(racer: Racer): void {
-    const gates = this.track.checkpoints;
-    const lastGate = gates[(racer.nextGate - 1 + gates.length) % gates.length];
     const base =
-      racer.gatesPassed === 0 || !lastGate
-        ? this.track.startLine.distance - 10
-        : lastGate.distance + 3;
-    const lane = ((racer.slot % 4) - 1.5) * (this.track.halfRoad * 0.5);
-    let spawn: Spawn = this.track.spawnAt(base, lane);
+      racer.gatesPassed === 0 ? this.track.startLine.distance - 10 : racer.safeDistance - 10;
+    let spawn: Spawn = this.track.spawnAt(base, this.lane(racer, base));
     for (let attempt = 1; attempt < 6 && this.occupied(spawn, racer); attempt++) {
-      spawn = this.track.spawnAt(base - attempt * 8, lane);
+      const distance = base - attempt * 8;
+      spawn = this.track.spawnAt(distance, this.lane(racer, distance));
     }
     racer.car.placeAt(spawn);
     this.track.project(racer.car.position, -1, racer.projection);
@@ -302,9 +326,11 @@ export class Race {
 
 export function insideGate(position: Vector3, gate: Checkpoint): boolean {
   delta.subVectors(position, gate.sample.position);
+  const lateral = delta.dot(gate.sample.right);
   return (
     Math.abs(delta.dot(gate.sample.tangent)) <= gate.halfLength &&
-    Math.abs(delta.dot(gate.sample.right)) <= gate.halfWidth &&
+    lateral >= -gate.halfWidthLeft &&
+    lateral <= gate.halfWidthRight &&
     Math.abs(delta.y) <= gate.halfHeight
   );
 }

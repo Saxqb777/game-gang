@@ -47,6 +47,8 @@ export interface ShaderPatch {
   normalMaps?: string;
   /** Replaces `aomap_fragment` (only with an AO map). */
   aoMap?: string;
+  /** After `aomap_fragment`: change `reflectedLight` before it is summed. */
+  afterAo?: string;
 }
 
 /** Applies a patch to a standard material through onBeforeCompile. */
@@ -89,6 +91,12 @@ export function patchMaterial<T extends MeshStandardMaterial>(material: T, patch
     if (patch.normalMaps)
       fragment = fragment.replace('#include <normal_fragment_maps>', patch.normalMaps);
     if (patch.aoMap) fragment = fragment.replace('#include <aomap_fragment>', patch.aoMap);
+    if (patch.afterAo) {
+      fragment = fragment.replace(
+        '#include <aomap_fragment>',
+        `#include <aomap_fragment>\n${patch.afterAo}`,
+      );
+    }
     shader.fragmentShader = fragment;
   };
   material.customProgramCacheKey = () => patch.key;

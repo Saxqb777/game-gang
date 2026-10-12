@@ -11,12 +11,10 @@ import {
   Color,
   DoubleSide,
   Group,
-  InstancedMesh,
   Matrix4,
   Mesh,
   MeshStandardMaterial,
   NearestFilter,
-  Object3D,
   Quaternion,
   Sphere,
   Vector3,
@@ -62,6 +60,8 @@ const LINE_LIFT = 0.012;
 /** Tyre walls: paint bands of this many stations, the pattern red, white, bare. */
 const TYRE_BAND = 3;
 const TYRE_PAINT = [new Color('#9e1f27'), new Color('#d6d4ce'), new Color('#161616')] as const;
+/** Pit wall and fence base concrete. */
+const CONCRETE = new Color('#c4c1b8');
 /** Gravel traps: how far (m) the ragged grass edge reaches into the gravel. */
 const GRAVEL_EDGE = 6;
 
@@ -71,7 +71,6 @@ const tmp2 = new Vector3();
 const matrix = new Matrix4();
 const rotation = new Quaternion();
 const unitScale = new Vector3(1, 1, 1);
-const dummy = new Object3D();
 
 /** Station of a corridor vertex (stations are 1 m apart; uv.y is distance along the lap). */
 function stationOf(track: Track, v: number): number {
@@ -155,6 +154,11 @@ function gravelEdgeDistance(track: Track, side: -1 | 1, cap: number): Float32Arr
   return out;
 }
 
+/** A colour darkened by `k` (a new Color). */
+function shade(colour: Color, k: number): Color {
+  return colour.clone().multiplyScalar(k);
+}
+
 /** Contact grime: darker at the foot, clean from GRIME_HEIGHT up. */
 function grime(height: number): number {
   return GRIME + (1 - GRIME) * Math.min(1, Math.max(0, height / GRIME_HEIGHT));
@@ -187,6 +191,7 @@ export class PropBuilder {
     const base = this.positions.length / 3;
     const p = source.getAttribute('position');
     const n = source.getAttribute('normal');
+    const tint = source.getAttribute('color') as BufferAttribute | undefined;
     const rotate = new Matrix4().extractRotation(transform);
     for (let i = 0; i < p.count; i++) {
       tmp.fromBufferAttribute(p, i);
@@ -196,7 +201,8 @@ export class PropBuilder {
       this.positions.push(tmp.x, tmp.y, tmp.z);
       this.normals.push(tmp2.x, tmp2.y, tmp2.z);
       this.uvs.push(u, 0);
-      this.colours.push(c, c, c);
+      if (tint) this.colours.push(c * tint.getX(i), c * tint.getY(i), c * tint.getZ(i));
+      else this.colours.push(c, c, c);
     }
     const index = source.getIndex();
     if (index) for (let i = 0; i < index.count; i++) this.indices.push(base + index.getX(i));
@@ -218,13 +224,15 @@ export class PropBuilder {
   }
 }
 
-/** A tyre stack: three tyres on a pentagon with bulges and grooves, open top (60 triangles). */
+/**
+ * A tyre stack: three tyres on a pentagon with bulges and grooves, and a dark hole on top (55
+ * triangles). Closed, so it shadows like every other barrier (one shadow program for them all).
+ */
 export function tyreStackGeometry(): BufferGeometry {
   const sides = 5;
   // (height, radius, shade): the grooves between tyres are narrower and darker.
   const rings: [number, number, number][] = [
-    [0, 0.31, GRIME],
-    [0.125, 0.37, 0.85],
+    [0, 0.35, GRIME],
     [0.25, 0.3, 0.55],
     [0.375, 0.37, 1],
     [0.5, 0.3, 0.55],
@@ -250,6 +258,13 @@ export function tyreStackGeometry(): BufferGeometry {
       indices.push(a, a + sides, b, b, a + sides, b + sides);
     }
   }
+  // Top: a fan from the dark centre (the tyre's hole) to the top ring.
+  const top = (rings.length - 1) * sides;
+  const middle = positions.length / 3;
+  positions.push(0, 0.75, 0);
+  normals.push(0, 1, 0);
+  colours.push(0.2, 0.2, 0.2);
+  for (let k = 0; k < sides; k++) indices.push(middle, top + ((k + 1) % sides), top + k);
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3));
   geometry.setAttribute('normal', new BufferAttribute(new Float32Array(normals), 3));
@@ -337,7 +352,6 @@ interface Materials {
   grass: MeshStandardMaterial;
   gravel: MeshStandardMaterial;
   armco: MeshStandardMaterial;
-  tyres: MeshStandardMaterial;
   wall: MeshStandardMaterial;
   fence: MeshStandardMaterial;
   checker: MeshStandardMaterial;
@@ -472,16 +486,9 @@ function createMaterials(textures: TrackTextures, anisotropy: number, owned: Tex
     vertexColors: true,
     metalness: 0.9,
     roughness: 0.42,
-    side: DoubleSide,
-    shadowSide: DoubleSide,
   });
-  const tyres = new MeshStandardMaterial({
-    vertexColors: true,
-    roughness: 0.92,
-    side: DoubleSide,
-    shadowSide: DoubleSide,
-  });
-  const wall = new MeshStandardMaterial({ color: '#c4c1b8', vertexColors: true, roughness: 0.85 });
+  // Concrete walls and tyre walls share one material: their colours are in the vertices.
+  const wall = new MeshStandardMaterial({ vertexColors: true, roughness: 0.88 });
   const fenceMap = fenceTexture(anisotropy);
   owned.push(fenceMap);
   const fence = new MeshStandardMaterial({
@@ -501,7 +508,7 @@ function createMaterials(textures: TrackTextures, anisotropy: number, owned: Tex
     polygonOffsetFactor: -3,
     polygonOffsetUnits: -12,
   });
-  return { road, lines, kerb, grass, gravel, armco, tyres, wall, fence, checker };
+  return { road, lines, kerb, grass, gravel, armco, wall, fence, checker };
 }
 
 /** Builds the corridor meshes. The PBR sets stay owned by the caller; the tiled clones don't. */
@@ -613,27 +620,9 @@ export function createTrackVisual(
     }
     const armco = buildArmco(chunk);
     if (armco) add(armco, materials.armco, chunk).castShadow = true;
-    const walls = buildWalls(track, chunk);
+    const walls = buildWalls(track, chunk, tyreGeometry);
     if (walls.wall) add(walls.wall, materials.wall, chunk).castShadow = true;
     if (walls.fence) add(walls.fence, materials.fence, chunk).receiveShadow = false;
-    if (chunk.tyreStacks.length) {
-      const tyres = new InstancedMesh(tyreGeometry, materials.tyres, chunk.tyreStacks.length);
-      const stations = tyreStations(track, chunk);
-      chunk.tyreStacks.forEach((stack, i) => {
-        const station = stations[i] ?? chunk.from;
-        dummy.position.set(stack.x, stack.y - 0.03, stack.z);
-        dummy.rotation.set(0, stack.yaw + station * 1.7, 0);
-        dummy.updateMatrix();
-        tyres.setMatrixAt(i, dummy.matrix);
-        tyres.setColorAt(i, TYRE_PAINT[Math.floor(station / TYRE_BAND) % 3] as Color);
-      });
-      // Static per-chunk instances: the sphere from all of them is right for good.
-      tyres.computeBoundingSphere();
-      tyres.castShadow = true;
-      tyres.receiveShadow = true;
-      group.add(tyres);
-      meshes++;
-    }
   }
 
   const start = buildStart(track);
@@ -676,6 +665,21 @@ function buildArmco(chunk: CorridorChunk): BufferGeometry | null {
       builder.vertex(tmp, tmp2, rail.uvs[k * 2] as number, rail.uvs[k * 2 + 1] as number, 1);
     }
     for (const i of rail.indices) builder.indices.push(i);
+    // The back of the rail as its own faces, so the mesh is closed: it shadows from either side
+    // with the same shadow program as every other barrier.
+    const back = builder.positions.length / 3;
+    for (let k = 0; k < n; k++) {
+      tmp.fromArray(rail.positions, k * 3);
+      tmp2.fromArray(rail.normals, k * 3).negate();
+      builder.vertex(tmp, tmp2, rail.uvs[k * 2] as number, rail.uvs[k * 2 + 1] as number, 0.8);
+    }
+    for (let t = 0; t < rail.indices.length; t += 3) {
+      builder.indices.push(
+        back + (rail.indices[t] as number),
+        back + (rail.indices[t + 2] as number),
+        back + (rail.indices[t + 1] as number),
+      );
+    }
   }
   const post = postGeometry();
   for (const p of chunk.armcoPosts) {
@@ -727,6 +731,7 @@ function postGeometry(): BufferGeometry {
 function buildWalls(
   track: Track,
   chunk: CorridorChunk,
+  tyreGeometry: BufferGeometry,
 ): { wall: BufferGeometry | null; fence: BufferGeometry | null } {
   const wall = new PropBuilder();
   const fence = new PropBuilder();
@@ -751,7 +756,7 @@ function buildWalls(
             normal,
             0,
             station,
-            grime(Math.max(0, h)),
+            shade(CONCRETE, grime(Math.max(0, h))),
           ),
         );
       const lf0 = side * p0.wall;
@@ -770,10 +775,10 @@ function buildWalls(
         wall.quad(bl[h] as number, br[h] as number, bl[h + 1] as number, br[h + 1] as number);
       }
       // Top: counter-clockwise from above.
-      const t0 = wall.vertex(track.lateralPoint(i, lf0, tmp, WALL_HEIGHT), UP, 0, i, 1);
-      const t1 = wall.vertex(track.lateralPoint(i + 1, lf1, tmp, WALL_HEIGHT), UP, 0, i, 1);
-      const t2 = wall.vertex(track.lateralPoint(i, lb0, tmp, WALL_HEIGHT), UP, 0, i, 1);
-      const t3 = wall.vertex(track.lateralPoint(i + 1, lb1, tmp, WALL_HEIGHT), UP, 0, i, 1);
+      const t0 = wall.vertex(track.lateralPoint(i, lf0, tmp, WALL_HEIGHT), UP, 0, i, CONCRETE);
+      const t1 = wall.vertex(track.lateralPoint(i + 1, lf1, tmp, WALL_HEIGHT), UP, 0, i, CONCRETE);
+      const t2 = wall.vertex(track.lateralPoint(i, lb0, tmp, WALL_HEIGHT), UP, 0, i, CONCRETE);
+      const t3 = wall.vertex(track.lateralPoint(i + 1, lb1, tmp, WALL_HEIGHT), UP, 0, i, CONCRETE);
       if (side > 0) wall.quad(t0, t2, t1, t3);
       else wall.quad(t2, t0, t3, t1);
 
@@ -819,6 +824,30 @@ function buildWalls(
       }
     }
   }
+  // Tyre walls: one stack per metre per row, painted in bands of three stations (red, white,
+  // bare) so the pattern never shimmers at a distance.
+  const stations = tyreStations(track, chunk);
+  const position = new Vector3();
+  const colour = new Color();
+  chunk.tyreStacks.forEach((stack, i) => {
+    const station = stations[i] ?? chunk.from;
+    rotation.setFromAxisAngle(UP, stack.yaw + station * 1.7);
+    matrix.compose(position.set(stack.x, stack.y - 0.03, stack.z), rotation, unitScale);
+    const paint = TYRE_PAINT[Math.floor(station / TYRE_BAND) % 3] as Color;
+    const base = wall.positions.length / 3;
+    wall.geometry(tyreGeometry, matrix, 0, () => 1);
+    // Multiply the stack's shading by its paint.
+    for (let k = base * 3; k < wall.colours.length; k += 3) {
+      colour.setRGB(
+        wall.colours[k] as number,
+        wall.colours[k + 1] as number,
+        wall.colours[k + 2] as number,
+      );
+      wall.colours[k] = colour.r * paint.r;
+      wall.colours[k + 1] = colour.g * paint.g;
+      wall.colours[k + 2] = colour.b * paint.b;
+    }
+  });
   return {
     wall: wall.empty ? null : wall.build(),
     fence: fence.empty ? null : fence.build(),

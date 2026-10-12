@@ -25,6 +25,7 @@ import {
 } from 'three';
 import { SCENERY } from '../config';
 import { fbm } from '../track/noise';
+import { patchMaterial } from './materials';
 import { hash32, mulberry32, type Placement } from '../track/gen/placement';
 import type { Terrain } from '../track/terrain';
 import type { Track } from '../track/track';
@@ -211,12 +212,19 @@ export class Forest {
     placements: readonly Placement[],
     blocked: (x: number, z: number) => boolean,
   ) {
-    this.pineMaterial = new MeshStandardMaterial({
-      color: new Color().setRGB(...SCENERY.pineTint, LinearSRGBColorSpace),
-      vertexColors: true,
-      roughness: 0.85,
-      metalness: 0,
-    });
+    // Needles scatter light: almost no sheen, or the sunlit sides of distant pines read as snow.
+    this.pineMaterial = patchMaterial(
+      new MeshStandardMaterial({
+        color: new Color().setRGB(...SCENERY.pineTint, LinearSRGBColorSpace),
+        vertexColors: true,
+        roughness: 0.9,
+        metalness: 0,
+      }),
+      {
+        key: 'sw-pine-v1',
+        afterAo: `reflectedLight.indirectSpecular *= 0.2; reflectedLight.directSpecular *= 0.4;`,
+      },
+    );
     this.ringMaterial = new MeshStandardMaterial({
       vertexColors: true,
       roughness: 0.9,

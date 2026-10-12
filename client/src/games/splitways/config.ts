@@ -246,17 +246,17 @@ export const PAD_STATUS = {
 
 export const CAMERA = {
   /** Chase camera distance behind the car, height above it, and the point it looks at. */
-  distance: 6.4,
-  height: 2.3,
+  distance: 6.1,
+  height: 2.1,
   lookAhead: 4,
-  lookHeight: 0.9,
+  lookHeight: 1,
   /** How quickly the camera catches up with the car. Lower = more lag and swing. */
   followStiffness: 9,
   /** How much the camera swings towards the direction of travel when the car slides (0..1). */
   velocityHeadingBlend: 0.35,
   /** Vertical field of view (degrees) at rest, and how much it widens at top speed. */
-  baseFov: 62,
-  speedFov: 16,
+  baseFov: 57,
+  speedFov: 10,
   /** Above this horizontal FOV (degrees) the vertical FOV shrinks, so wide split viewports don't fish-eye. */
   maxHorizontalFov: 100,
 } as const;
@@ -387,11 +387,16 @@ export const BENCH = {
 } as const;
 
 export const LIGHTING = {
-  /** Compass bearing of the sun (0 north, 90 east, 180 south, 270 west). The sea is to the south. */
-  sunBearing: 240,
+  /**
+   * Compass bearing of the sun (0 north, 90 east, 180 south, 270 west). Kestrel Pines' start line
+   * heads due east (bearing 90), so 330 puts the sun behind and to the left of the grid, 120 degrees
+   * off the direction of travel: lit rear three-quarters on the grid, a lit grandstand, and tree
+   * shadows striping the road.
+   */
+  sunBearing: 330,
   /** The sun is a directional light (it casts the shadows). Colour and strength. */
-  sunColour: 0xffd2a1,
-  sunIntensity: 6,
+  sunColour: 0xffe2b4,
+  sunIntensity: 7.5,
   /** Soft light from the sky picture on every surface. Higher = flatter, brighter shadows. */
   environmentIntensity: 1,
   /**
@@ -401,29 +406,86 @@ export const LIGHTING = {
    */
   skyLightCap: 8,
   skyVisibleCap: 40,
-  /** Light bounced up from the sand (linear RGB): what the underside of a car sees. */
-  groundBounce: [0.3, 0.24, 0.17],
-  /** Haze: exponential fog density per metre. Higher = distant dunes and towers fade sooner. */
-  fogDensity: 0.0013,
+  /** Light bounced up from the ground (linear RGB): mixed grass, forest floor and asphalt. */
+  groundBounce: [0.1, 0.12, 0.07],
+  /**
+   * Haze: exponential-squared fog density per metre (13% at 200 m, 44% at 400 m, all but gone at
+   * 1400 m, so no preset's far plane ever shows). Higher = distant treelines fade sooner.
+   */
+  fogDensity: 0.0019,
+  /** Multiplies the sky colour the haze fades to: distant treelines stay a shade darker and cooler than the sky. */
+  fogTint: 0xe2e9ef,
+  /** Neutral sky/ground fill so shadows keep detail without turning sky-blue. */
+  hemisphere: { sky: 0xdfe4e2, ground: 0x3a4430, intensity: 0.25 },
 } as const;
 
 export const POST = {
-  /** Brightness before tone mapping (ACES). */
-  exposure: 1.5,
+  /** Brightness before tone mapping (ACES). A forest is darker than sand, so this opens up a third of a stop. */
+  exposure: 1.95,
   /** Bloom: only pixels brighter than `threshold` glow (with a soft `knee`); `strength` is how much. */
-  bloomThreshold: 2.5,
-  bloomKnee: 1,
-  bloomStrength: 0.08,
+  bloomThreshold: 1.9,
+  bloomKnee: 0.8,
+  bloomStrength: 0.07,
   /** Darkening at the edges of each viewport, plus extra at top speed (0 = none). */
-  vignette: 0.2,
-  vignetteAtSpeed: 0.12,
-  /** Speed lines fade in from the first speed and are fully visible at the second (km/h). */
+  vignette: 0.12,
+  vignetteAtSpeed: 0.08,
+  /** Speed lines fade in from the first speed and are fully visible at the second (km/h). Off: speed comes from FOV and the trackside. */
   speedLinesFromKph: 115,
   speedLinesFullKph: 175,
-  speedLinesOpacity: 0.2,
-  /** Golden-hour grade: colour multiplied into the image (r, g, b) and saturation (1 = unchanged). */
-  tint: [1.05, 1.0, 0.93],
-  saturation: 1.1,
+  speedLinesOpacity: 0,
+  /** Grade: colour multiplied into the image (r, g, b) and saturation (1 = unchanged). The warmth comes from the sun, not a wash. */
+  tint: [0.99, 1.0, 0.985],
+  saturation: 1.05,
+} as const;
+
+/** Track 1 dressing: surface materials, forest and trackside props. Colours are linear multipliers unless a name says hex. */
+export const SCENERY = {
+  /** Texture tile sizes (m): asphalt, grass run-off, gravel, terrain grass and forest floor. */
+  asphaltTile: 2.5,
+  grassTile: 3,
+  gravelTile: 2,
+  terrainGrassTile: 4,
+  forestTile: 3,
+  /** The asphalt texture is far darker than real tarmac (mean 0.013), so its colour is scaled up; the paved apron is older, lighter tarmac. */
+  asphaltAlbedo: 6,
+  apronAlbedo: 7.5,
+  /** Rubber line: half width (m) around the racing line, albedo multiplier and roughness drop. */
+  rubberHalfWidth: 1.1,
+  rubberAlbedo: 0.82,
+  rubberRoughness: 0.12,
+  /** Grass run-off, gravel and the two terrain layers: colour multipliers on the textures (linear RGB). */
+  grassColour: [0.72, 0.86, 1.35],
+  gravelColour: [1, 0.97, 0.92],
+  terrainGrassColour: [0.66, 0.8, 1.25],
+  forestFloorColour: [0.62, 0.78, 0.95],
+  /** The deep forest floor is darker (albedo x (1 - this x wildness)), so it reads as shaded forest even without tree shadows. */
+  canopyDarkening: 0.35,
+  /** Pines: young trees in the edge band and tall emergents everywhere break up the treeline. */
+  pineEdgeBand: 30,
+  pineYoungShare: 0.25,
+  pineEmergentShare: 0.03,
+  /** Pines catch this much sky light (absolute; they would go black on their shadow side at the scene's own level). */
+  pineSkyLight: 1.6,
+  /** The sky light on the pines is blue: this warms their albedo back to a needle green (linear RGB). */
+  pineTint: [1, 0.97, 0.78],
+  /** Forest tile size (m): one instanced mesh per tile, so the main and shadow passes cull them. */
+  pineTile: 200,
+  /** Treeline ring around the land's edge: height range (m) and how far the skyline rolls (m). */
+  ringHeightMin: 25,
+  ringHeightMax: 40,
+  ringRoll: 12,
+  /** Blob shadow under each car: size (m) and darkness. */
+  blobLength: 4.4,
+  blobWidth: 2.2,
+  blobOpacity: 0.55,
+  /** Kerb camera shake per unit of surface rumble, at most once per this many seconds, above this speed (m/s). */
+  kerbShake: 0.25,
+  kerbShakeEvery: 0.2,
+  kerbShakeMinSpeed: 10,
+  /** High-speed buffeting: a faint shake from this speed (km/h), full strength after this many km/h more. */
+  buffetFromKph: 160,
+  buffetRampKph: 27,
+  buffetShake: 0.12,
 } as const;
 
 export const AUDIO = {
@@ -433,7 +495,8 @@ export const AUDIO = {
   engine: 0.26,
   screech: 0.32,
   wind: 0.1,
-  sand: 0.22,
+  /** Off-road and kerb rumble, scaled by the surface's `rumble`. */
+  surface: 0.3,
   impact: 0.75,
   horn: 0.2,
   beeps: 0.3,

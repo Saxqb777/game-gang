@@ -3,8 +3,9 @@
  * six-speed gearbox, tyre screech, wind (louder in a slipstream), off-road rumble, horn, impacts,
  * countdown beeps and a crowd. Each car is panned towards its viewport's side of the screen.
  */
-import { AUDIO } from '../config';
+import { AUDIO, SURFACES } from '../config';
 import type { Car } from '../sim/car';
+import { SURFACE_NAMES, type SurfaceId } from '../track/surfaces';
 
 /** Time constant for smoothly following per-frame targets (s). */
 const FOLLOW = 0.04;
@@ -18,7 +19,7 @@ interface Voice {
   screechFilter: BiquadFilterNode;
   screechGain: GainNode;
   windGain: GainNode;
-  sandGain: GainNode;
+  surfaceGain: GainNode;
   hornGain: GainNode;
   panner: StereoPannerNode;
   gear: number;
@@ -96,7 +97,13 @@ export class RaceAudio {
    * Once per frame per car. `throttle` and `horn` are what the player is pressing, even while the
    * car is held on the grid (so engines rev during the countdown).
    */
-  updateCar(index: number, throttle: number, horn: boolean, onSand: boolean, draft: number): void {
+  updateCar(
+    index: number,
+    throttle: number,
+    horn: boolean,
+    surface: SurfaceId,
+    draft: number,
+  ): void {
     const voice = this.voices[index];
     if (!voice) return;
     const { car } = voice;
@@ -145,15 +152,18 @@ export class RaceAudio {
     for (let i = 0; i < 4; i++) {
       if (car.wheelSkidding[i] === 1) slide = Math.max(slide, car.wheelSlide[i] ?? 0);
     }
-    const screech = onSand ? 0 : Math.min(1, Math.max(0, (slide - 2.5) / 7));
+    // Tyres only screech on a hard surface; in grass and gravel they rumble instead.
+    const name = SURFACE_NAMES[surface] ?? 'asphalt';
+    const hard = name === 'asphalt' || name === 'kerb';
+    const screech = hard ? Math.min(1, Math.max(0, (slide - 2.5) / 7)) : 0;
     voice.screechGain.gain.setTargetAtTime(AUDIO.screech * screech, now, 0.05);
     voice.screechFilter.frequency.setTargetAtTime(1300 + Math.min(slide, 20) * 60, now, 0.05);
 
     const fast = Math.min(1, speed / 52);
     // Slipstream: the wind roars louder in another car's wake.
     voice.windGain.gain.setTargetAtTime(AUDIO.wind * fast * fast * (1 + 2.5 * draft), now, 0.1);
-    voice.sandGain.gain.setTargetAtTime(
-      onSand ? AUDIO.sand * Math.min(1, speed / 25) : 0,
+    voice.surfaceGain.gain.setTargetAtTime(
+      AUDIO.surface * SURFACES[name].rumble * Math.min(1, speed / 25),
       now,
       0.05,
     );
@@ -220,7 +230,7 @@ export class RaceAudio {
         voice.engineGain,
         voice.screechGain,
         voice.windGain,
-        voice.sandGain,
+        voice.surfaceGain,
         voice.hornGain,
       ]) {
         gain.gain.cancelScheduledValues(now);
@@ -280,7 +290,7 @@ export class RaceAudio {
     sub.connect(mix);
     mix.connect(shaper).connect(engineFilter).connect(engineGain).connect(panner);
 
-    // One noise loop per car feeds the screech, the wind and the sand rumble.
+    // One noise loop per car feeds the screech, the wind and the off-road and kerb rumble.
     const noise = ctx.createBufferSource();
     noise.buffer = this.whiteNoise;
     noise.loop = true;
@@ -298,12 +308,12 @@ export class RaceAudio {
     const windGain = ctx.createGain();
     windGain.gain.value = 0;
     noise.connect(windFilter).connect(windGain).connect(panner);
-    const sandFilter = ctx.createBiquadFilter();
-    sandFilter.type = 'lowpass';
-    sandFilter.frequency.value = 380;
-    const sandGain = ctx.createGain();
-    sandGain.gain.value = 0;
-    noise.connect(sandFilter).connect(sandGain).connect(panner);
+    const surfaceFilter = ctx.createBiquadFilter();
+    surfaceFilter.type = 'lowpass';
+    surfaceFilter.frequency.value = 380;
+    const surfaceGain = ctx.createGain();
+    surfaceGain.gain.value = 0;
+    noise.connect(surfaceFilter).connect(surfaceGain).connect(panner);
 
     // Horn: two notes a third apart.
     const hornGain = ctx.createGain();
@@ -328,7 +338,7 @@ export class RaceAudio {
       screechFilter,
       screechGain,
       windGain,
-      sandGain,
+      surfaceGain,
       hornGain,
       panner,
       gear: 1,

@@ -11,6 +11,7 @@ import {
   Vector3,
 } from 'three';
 import type { Car } from '../sim/car';
+import { SURFACE } from '../track/surfaces';
 
 const MAX_SEGMENTS = 8000;
 const HALF_WIDTH = 0.12;
@@ -19,8 +20,14 @@ const SEGMENT_LENGTH = 0.4;
 /** Height above the road, on top of the polygon offset. */
 const LIFT = 0.02;
 const WHEELS = 4;
-const ASPHALT = [0.015, 0.015, 0.015] as const;
-const SAND = [0.16, 0.11, 0.06] as const;
+/** Mark colours (linear) by SurfaceId: rubber on asphalt and kerbs, dark-brown ruts in grass, grey-brown in gravel. */
+const RUBBER = [0.015, 0.015, 0.015] as const;
+const MARK_COLOURS: readonly (readonly [number, number, number])[] = [
+  RUBBER,
+  RUBBER,
+  [0.05, 0.035, 0.018],
+  [0.12, 0.1, 0.075],
+];
 
 const UP = new Vector3(0, 1, 0);
 const direction = new Vector3();
@@ -78,8 +85,9 @@ export class SkidMarks {
         transparent: true,
         depthWrite: false,
         polygonOffset: true,
-        polygonOffsetFactor: -2,
-        polygonOffsetUnits: -2,
+        // In front of the road and kerbs, which are themselves pulled forward over the terrain.
+        polygonOffsetFactor: -3,
+        polygonOffsetUnits: -12,
       }),
     );
     this.mesh.frustumCulled = false;
@@ -94,16 +102,20 @@ export class SkidMarks {
     this.trails.set(car, trails);
   }
 
-  /** After each physics step. `onSand`: the car is on the shoulder, so marks are sandy ruts. */
-  update(car: Car, onSand: boolean): void {
+  /**
+   * After each physics step. On asphalt and kerbs only sliding wheels mark the road; in grass and
+   * gravel every rolling wheel leaves a rut. Each wheel uses its own ground surface.
+   */
+  update(car: Car): void {
     const trails = this.trails.get(car);
     if (!trails) return;
     for (let i = 0; i < WHEELS; i++) {
       const trail = trails[i] as Trail;
-      // On sand every rolling wheel leaves a rut; on asphalt only sliding ones do.
+      const surface = car.wheelSurface[i] ?? SURFACE.asphalt;
+      const offRoad = surface === SURFACE.grass || surface === SURFACE.gravel;
       const marking =
         car.wheelInContact[i] === 1 &&
-        (car.wheelSkidding[i] === 1 || (onSand && Math.abs(car.forwardSpeed) > 3));
+        (car.wheelSkidding[i] === 1 || (offRoad && Math.abs(car.forwardSpeed) > 3));
       if (!marking) {
         trail.active = false;
         continue;
@@ -121,8 +133,9 @@ export class SkidMarks {
       if (length < SEGMENT_LENGTH) continue;
       side.crossVectors(direction, UP).normalize().multiplyScalar(HALF_WIDTH);
       if (trail.lastSide.lengthSq() === 0) trail.lastSide.copy(side);
-      const strength = onSand ? 0.5 : Math.min(0.75, 0.3 + (car.wheelSlide[i] ?? 0) * 0.05);
-      this.addSegment(trail.last, trail.lastSide, contact, side, onSand ? SAND : ASPHALT, strength);
+      const strength = offRoad ? 0.55 : Math.min(0.75, 0.3 + (car.wheelSlide[i] ?? 0) * 0.05);
+      const colour = MARK_COLOURS[surface] ?? RUBBER;
+      this.addSegment(trail.last, trail.lastSide, contact, side, colour, strength);
       trail.last.copy(contact);
       trail.lastSide.copy(side);
     }

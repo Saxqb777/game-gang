@@ -46,10 +46,13 @@ export class PhysicsWorld {
     );
   }
 
+  /** Static convex hull (the track walls). Min combine like `addBox`, so walls stay slippery. */
   addConvexHull(points: Float32Array, friction: number = SURFACE_FRICTION.ground): Collider {
     const desc = this.rapier.ColliderDesc.convexHull(points);
     if (!desc) throw new Error('Degenerate convex hull');
-    return this.track(desc.setFriction(friction));
+    return this.track(
+      desc.setFriction(friction).setFrictionCombineRule(this.rapier.CoefficientCombineRule.Min),
+    );
   }
 
   /** Static triangle mesh (the track surface). Internal edges are fixed so wheels don't catch on seams. */

@@ -420,14 +420,10 @@ export class Car {
     // Tyre grip times the grip of whatever each wheel is rolling on, set every step.
     for (let i = 0; i < WHEEL_COUNT; i++) {
       const base = i < 2 ? TYRES.frontGrip : rearGrip;
-      vehicle.setWheelFrictionSlip(i, base * this.surfaceSpec(i).grip);
+      const surface = SURFACES[SURFACE_NAMES[this.wheelSurface[i] as number] ?? 'asphalt'];
+      vehicle.setWheelFrictionSlip(i, base * surface.grip);
     }
     for (const i of REAR_WHEELS) vehicle.setWheelSideFrictionStiffness(i, rearSide);
-  }
-
-  private surfaceSpec(wheel: number): (typeof SURFACES)[keyof typeof SURFACES] {
-    const name = SURFACE_NAMES[this.wheelSurface[wheel] as number] ?? 'asphalt';
-    return SURFACES[name];
   }
 
   private addGroundAssists(
@@ -449,7 +445,9 @@ export class Car {
       // Grass and gravel drag at the wheels on top of the tyres' own rolling resistance.
       let surfaceRolling = 0;
       for (let i = 0; i < WHEEL_COUNT; i++) {
-        if (this.wheelInContact[i]) surfaceRolling += this.surfaceSpec(i).rolling / WHEEL_COUNT;
+        if (!this.wheelInContact[i]) continue;
+        const surface = SURFACES[SURFACE_NAMES[this.wheelSurface[i] as number] ?? 'asphalt'];
+        surfaceRolling += surface.rolling / WHEEL_COUNT;
       }
       const rolling = (ENGINE.rollingResistance + surfaceRolling) * Math.min(1, speed / 2);
       const resistance = drag * speed * speed + rolling;

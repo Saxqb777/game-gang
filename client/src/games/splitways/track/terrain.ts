@@ -1,7 +1,8 @@
 /**
  * The land around a track as a heightfield. Inside the corridor it sits just under the generated
- * surface (so it never pokes through the road or run-off), it continues the run-off slope for 2 m
- * past each wall, then blends over a noisy shoulder into a natural forest floor of low hills.
+ * surface (so it never pokes through the road or run-off), it continues the run-off slope for 7 m
+ * past each wall, then blends over a noisy shoulder into a natural forest floor of low hills. The
+ * shoulder widens where the road sits far above or below that floor, so it never becomes a cliff.
  * Built by splatting stations onto the grid (each cell keeps its nearest station), so it costs one
  * pass over the stations instead of a nearest-station search per cell. Node-safe; the terrain
  * mesh, placements and scenery all read it.
@@ -47,8 +48,14 @@ const FLAT_PAST_WALL = 2 + TRACKGEN.terrainSpacing;
 /** Below the corridor surface at the wall foot (m), and the extra depth deep inside it (m). */
 const INSET_EDGE = 0.05;
 const INSET_DEEP = 0.35;
-/** Stations splat this far past the shoulder (m), so every shoulder cell is reached. */
-const SPLAT_MARGIN = 5;
+/** Steepest the shoulder blend may get (rise/run, about 35 deg); a bigger height step widens it. */
+const SHOULDER_MAX_SLOPE = 0.7;
+/** ...but never beyond this width (m). */
+const SHOULDER_WIDEST = 48;
+/** Smoothstep's steepest slope is this many times its mean slope. */
+const SMOOTHSTEP_PEAK = 1.5;
+/** Stations splat this far past the widest shoulder (m), so every shoulder cell is reached. */
+const SPLAT_MARGIN = 3;
 /** Corners tighter than this radius (m) keep a low sight line across their inside... */
 const SIGHT_RADIUS = 200;
 /** ...for this far beyond the inside wall (m), no higher than this above the road (m). */
@@ -135,8 +142,9 @@ export class Terrain {
 
     // Splat: every station claims the cells within its reach on each side; the nearest one wins.
     samples.forEach((s, i) => {
-      const reachL = s.sideL.wall + TRACKGEN.shoulderMax + SPLAT_MARGIN;
-      const reachR = s.sideR.wall + TRACKGEN.shoulderMax + SPLAT_MARGIN;
+      const beyond = FLAT_PAST_WALL + SHOULDER_WIDEST + SPLAT_MARGIN;
+      const reachL = s.sideL.wall + beyond;
+      const reachR = s.sideR.wall + beyond;
       const reach = Math.max(reachL, reachR);
       const { x: px, z: pz } = s.position;
       const [c0, c1] = range(px, reach, minX, cols - 1);
@@ -214,7 +222,9 @@ export class Terrain {
         } else {
           const edge = side * (wall + FLAT_PAST_WALL);
           const edgeY = centreY + track.crossSectionY(i, edge) - INSET_EDGE;
-          const shoulder = TRACKGEN.shoulderMin + shoulderSpan * fbm(x * 0.01, z * 0.01, 2);
+          const noisy = TRACKGEN.shoulderMin + shoulderSpan * fbm(x * 0.01, z * 0.01, 2);
+          const gentle = (SMOOTHSTEP_PEAK * Math.abs(natural - edgeY)) / SHOULDER_MAX_SLOPE;
+          const shoulder = Math.min(SHOULDER_WIDEST, Math.max(noisy, gentle));
           const w = MathUtils.smoothstep(a - wall - FLAT_PAST_WALL, 0, shoulder);
           heights[cell] = MathUtils.lerp(edgeY, natural, w);
           wildness[cell] = w;

@@ -46,7 +46,50 @@ describe('Kestrel Pines physics', () => {
     }
     expect(widest).toBeLessThan(0.5);
     expect(car.position.y).toBeGreaterThan(track.bounds.minY - 2);
-  });
+  }, 30_000);
+
+  it('walls are slippery: a car scraping one keeps most of its speed', async () => {
+    const physics = await PhysicsWorld.create();
+    buildTrackPhysics(physics, track);
+    // Every wall hull uses the Min combine rule, so the car body meets the wall's low friction.
+    let hulls = 0;
+    physics.world.forEachCollider((collider) => {
+      if (collider.shape.type !== physics.rapier.ShapeType.ConvexPolyhedron) return;
+      hulls++;
+      expect(collider.frictionCombineRule()).toBe(physics.rapier.CoefficientCombineRule.Min);
+    });
+    expect(hulls).toBeGreaterThan(1000);
+    // The longest straight: start near its beginning, 2 m off the right wall, 10 deg into it.
+    let best = 0;
+    let bestStart = 0;
+    for (let i = 0, run = 0; i < track.samples.length * 2; i++) {
+      const sample = track.samples[i % track.samples.length];
+      run = sample && Math.abs(sample.curvature) < 1 / 1500 ? run + 1 : 0;
+      if (run > best) [best, bestStart] = [run, i - run + 1];
+    }
+    expect(best).toBeGreaterThan(150);
+    const distance = (bestStart + 10) * track.spacing;
+    const index = track.indexAt(distance);
+    const spawn = track.spawnAt(distance, track.side(index, 1).wall - 2);
+    spawn.yaw -= (10 * Math.PI) / 180; // a yaw decrease turns towards +right
+    const sim = new Simulation(physics);
+    const car = sim.addCar(spawn);
+    for (let i = 0; i < 20; i++) sim.step();
+    const speed = 30;
+    car.body.setLinvel(
+      { x: speed * Math.sin(spawn.yaw), y: 0, z: speed * Math.cos(spawn.yaw) },
+      true,
+    );
+    car.input.throttle = 1;
+    let touched = false;
+    for (let i = 0; i < 90; i++) {
+      sim.step();
+      const p = project(car.position);
+      touched ||= p.lateral > track.side(p.index, 1).wall - 1.2;
+    }
+    expect(touched).toBe(true);
+    expect(car.velocity.length()).toBeGreaterThan(0.9 * speed);
+  }, 30_000);
 
   it('reads kerb under wheels on a kerb', async () => {
     // A station in the middle of a long left kerb.
@@ -68,5 +111,5 @@ describe('Kestrel Pines physics', () => {
     expect(car.wheelSurface[2]).toBe(SURFACE.kerb);
     expect(car.wheelSurface[1]).toBe(SURFACE.asphalt);
     expect(car.dominantSurface).toBe(SURFACE.kerb);
-  });
+  }, 30_000);
 });

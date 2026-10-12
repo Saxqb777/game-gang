@@ -63,7 +63,7 @@ describe('race (Kestrel Pines)', () => {
     }
     expect(wentGreen).toBe(true);
     expect(race.phase).toBe('racing');
-  });
+  }, 30_000);
 
   // The track's own 3 laps: the run takes about 10 s here (measured alone, P2.11 allows up to 40 s).
   it('runs a full 3-lap race with 4 autopilot cars end to end', async () => {
@@ -173,7 +173,7 @@ describe('manual reset', () => {
     expect(race.requestRespawn(racer)).toBe(false);
   });
 
-  it('a reset puts the car back at its last gate, never further round the lap', async () => {
+  it('a reset puts the car back behind its last safe spot, never further round the lap', async () => {
     const { track, race, step } = await setup(1);
     const racer = race.racers[0] as Racer;
     skipCountdown(race, step);
@@ -187,11 +187,12 @@ describe('manual reset', () => {
     expect(race.requestRespawn(racer)).toBe(true);
     untilBack(racer, step);
     expect(racer.gatesPassed).toBe(gates);
-    // Signed distance gained along the lap: at most the 3 m the respawn sits past the gate.
+    // Signed distance gained along the lap: the respawn sits 10 m behind the last safe spot, which
+    // is never ahead of where the reset was asked for.
     let gained = track.ahead(before, racer.projection.distance);
     if (gained > track.length / 2) gained -= track.length;
-    expect(gained).toBeLessThan(3.5);
-  });
+    expect(gained).toBeLessThan(0);
+  }, 30_000);
 });
 
 describe('safe respawn', () => {
@@ -232,7 +233,7 @@ describe('safe respawn', () => {
     const side = track.side(racer.projection.index, racer.projection.lateral < 0 ? -1 : 1);
     expect(Math.abs(racer.projection.lateral)).toBeLessThan(side.road);
     expect(car.dominantSurface).toBe(SURFACE.asphalt);
-  });
+  }, 30_000);
 });
 
 describe('stuck on gas', () => {

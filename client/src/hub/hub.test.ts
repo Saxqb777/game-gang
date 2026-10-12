@@ -41,8 +41,17 @@ function send(peerId: string, message: PadMessage): void {
   transport.events.onPeerMessage(peerId, message);
 }
 
+/** Joins like a real pad: with the seat key from the last `joined` this peer id received. */
 function join(peerId: string, name: string, colour: ColourId, rejoin?: boolean): void {
-  send(peerId, { type: 'join', room: 'ABCD', name, colour, ...(rejoin ? { rejoin } : {}) });
+  const seatKey = transport.joined(peerId)?.seatKey;
+  send(peerId, {
+    type: 'join',
+    room: 'ABCD',
+    name,
+    colour,
+    ...(rejoin ? { rejoin } : {}),
+    ...(seatKey ? { seatKey } : {}),
+  });
 }
 
 function connectAndJoin(peerId: string, name: string, colour: ColourId): void {
@@ -98,7 +107,12 @@ describe('hub rejoin', () => {
       inGame: true,
     });
     expect(onPlayerConnection).toHaveBeenLastCalledWith(B, true);
-    expect(transport.joined(B)).toEqual({ type: 'joined', playerId: B, colour: 'blue', slot: 1 });
+    expect(transport.joined(B)).toMatchObject({
+      type: 'joined',
+      playerId: B,
+      colour: 'blue',
+      slot: 1,
+    });
 
     send(B, {
       type: 'input',
@@ -149,11 +163,40 @@ describe('hub rejoin', () => {
     startRace(A, B);
     hub.finishGame();
     reload(B);
-    join(B, 'Bo', 'blue', true);
+    // A stale stored colour: the pre-fix hub would have repainted B to lime here.
+    join(B, 'Bo', 'lime', true);
     send(A, { type: 'vote', choice: 'again' });
     send(B, { type: 'vote', choice: 'again' });
     expect(hub.getState().phase).toBe('lobby');
     expect(hub.player(B)).toMatchObject({ colour: 'blue', slot: 1 });
+  });
+
+  it('does not start the race without a pad that is reloading in the lobby', () => {
+    connectAndJoin(A, 'Ana', 'red');
+    connectAndJoin(B, 'Bo', 'blue');
+    send(B, { type: 'ready', ready: true });
+    reload(B);
+    send(A, { type: 'ready', ready: true });
+    expect(hub.getState().phase).toBe('lobby');
+
+    // B comes back still ready, so the race starts with both cars.
+    join(B, 'Bo', 'blue', true);
+    expect(hub.getState().phase).toBe('playing');
+    expect(hub.getState().players.map((p) => [p.id, p.inGame])).toEqual([
+      [A, true],
+      [B, true],
+    ]);
+  });
+
+  it('starts without a dropped pad once its grace runs out', () => {
+    connectAndJoin(A, 'Ana', 'red');
+    connectAndJoin(B, 'Bo', 'blue');
+    reload(B);
+    send(A, { type: 'ready', ready: true });
+    expect(hub.getState().phase).toBe('lobby');
+    vi.advanceTimersByTime(20_000);
+    expect(hub.getState().phase).toBe('playing');
+    expect(hub.getState().players.map((p) => p.id)).toEqual([A]);
   });
 
   it('treats a rejoin from an id it does not know as an ordinary join', () => {
@@ -163,6 +206,83 @@ describe('hub rejoin', () => {
     expect(hub.getState().players).toHaveLength(2);
     expect(hub.player(C)?.colour).not.toBe('red');
     expect(hub.player(A)).toMatchObject({ colour: 'red', slot: 0 });
+  });
+});
+
+describe('hub seat keys', () => {
+  /** Another phone that copied B's public player id from the lobby list. */
+  function impostor(peerId: string, rejoin: boolean): void {
+    transport.events.onPeerOpen(peerId);
+    send(peerId, { type: 'join', room: 'ABCD', name: 'Mal', colour: 'lime', rejoin });
+  }
+
+  it('gives each phone seat its own key, only in its own joined message', () => {
+    connectAndJoin(A, 'Ana', 'red');
+    connectAndJoin(B, 'Bo', 'blue');
+    const keyA = transport.joined(A)?.seatKey;
+    const keyB = transport.joined(B)?.seatKey;
+    expect(keyA).toMatch(/^[a-z0-9]{24}$/);
+    expect(keyB).toMatch(/^[a-z0-9]{24}$/);
+    expect(keyA).not.toBe(keyB);
+    const lobby = JSON.stringify(transport.sent.filter((s) => s.message.type === 'lobby'));
+    expect(lobby).not.toContain(keyB);
+  });
+
+  it('refuses a join for an existing seat without its key', () => {
+    connectAndJoin(A, 'Ana', 'red');
+    connectAndJoin(B, 'Bo', 'blue');
+    startRace(A, B);
+    for (const rejoin of [true, false]) {
+      // What a link takeover looks like to the hub: B's link closes, the impostor's opens.
+      transport.events.onPeerClose(B);
+      impostor(B, rejoin);
+      expect(transport.sent.at(-1)).toEqual({
+        peerId: B,
+        message: { type: 'kicked', reason: 'taken' },
+      });
+      expect(hub.player(B)).toMatchObject({ name: 'Bo', colour: 'blue', connected: false });
+    }
+  });
+
+  it('ignores inputs, votes and ready from a link that has not proved its seat', () => {
+    connectAndJoin(A, 'Ana', 'red');
+    connectAndJoin(B, 'Bo', 'blue');
+    send(B, { type: 'ready', ready: true });
+    send(A, { type: 'ready', ready: true });
+    expect(hub.getState().phase).toBe('playing');
+    reload(B);
+    send(B, {
+      type: 'input',
+      steer: 1,
+      throttle: 1,
+      brake: 0,
+      handbrake: false,
+      horn: false,
+      t: 1,
+    });
+    send(B, { type: 'leave' });
+    expect(onInput).not.toHaveBeenCalled();
+    expect(hub.player(B)).toBeDefined();
+
+    // The real pad comes back with its key and drives again.
+    join(B, 'Bo', 'blue', true);
+    send(B, {
+      type: 'input',
+      steer: 1,
+      throttle: 1,
+      brake: 0,
+      handbrake: false,
+      horn: false,
+      t: 2,
+    });
+    expect(onInput).toHaveBeenCalledWith(B, expect.objectContaining({ steer: 1 }));
+  });
+
+  it('refuses a phone claiming a keyboard player id', () => {
+    hub.addLocalPlayer('localkeys1', 'Keys');
+    impostor('localkeys1', true);
+    expect(transport.sent.at(-1)?.message).toEqual({ type: 'kicked', reason: 'taken' });
+    expect(hub.player('localkeys1')).toMatchObject({ local: true, connected: true });
   });
 });
 
@@ -184,8 +304,13 @@ describe('hub leave', () => {
     send(B, { type: 'leave' });
     expect(hub.player(B)).toMatchObject({ connected: false, inGame: true });
     expect(onPlayerConnection).toHaveBeenLastCalledWith(B, false);
+    // The seat cannot be claimed back after a Leave, even by the same tab.
+    join(B, 'Bo', 'blue', true);
+    expect(transport.sent.at(-1)?.message).toEqual({ type: 'kicked', reason: 'taken' });
+    // Back in the lobby the slot is freed at once (no grace), so A can start straight away.
     hub.returnToLobby();
-    vi.advanceTimersByTime(20_000);
     expect(hub.getState().players.map((p) => p.id)).toEqual([A]);
+    send(A, { type: 'ready', ready: true });
+    expect(hub.getState().phase).toBe('playing');
   });
 });

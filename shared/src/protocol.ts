@@ -58,6 +58,11 @@ export type HubPhase = (typeof HUB_PHASES)[number];
 export const colourSchema = z.enum(COLOUR_IDS);
 export const roomCodeSchema = z.string().regex(/^[A-Z]{4}$/);
 export const playerIdSchema = z.string().regex(/^[a-z0-9]{8,24}$/);
+/**
+ * Secret the TV hands a pad in `joined`, and only to that pad. Player ids are public (every pad
+ * sees them in the lobby), so a join for a seat that already exists must also carry this key.
+ */
+export const seatKeySchema = z.string().regex(/^[a-z0-9]{16,32}$/);
 /** Names: 1-12 visible characters, no control characters. */
 export const playerNameSchema = z
   .string()
@@ -78,6 +83,7 @@ const timestamp = z.number().nonnegative();
  * Join (or update name/colour after joining). `rejoin` is set by a pad that reloaded and is
  * claiming back the seat it already had (matched by its peer id): the TV keeps that player's
  * name, colour and car. For a peer id the TV does not know it is an ordinary join.
+ * `seatKey` is the key from `joined`; the TV refuses a join for an existing seat without it.
  */
 export const joinSchema = z.object({
   type: z.literal('join'),
@@ -85,6 +91,7 @@ export const joinSchema = z.object({
   name: playerNameSchema,
   colour: colourSchema,
   rejoin: z.boolean().optional(),
+  seatKey: seatKeySchema.optional(),
 });
 
 /** The player tapped Leave: free the seat now instead of after the reconnect grace period. */
@@ -154,6 +161,8 @@ export type PadMessage = z.infer<typeof padMessageSchema>;
 export const joinedSchema = z.object({
   type: z.literal('joined'),
   playerId: playerIdSchema,
+  /** Proves this pad owns the seat on later joins (reconnect, reload, name edit). */
+  seatKey: seatKeySchema,
   colour: colourSchema,
   slot: z
     .number()
@@ -233,7 +242,8 @@ export const hapticSchema = z.object({
 
 export const kickedSchema = z.object({
   type: z.literal('kicked'),
-  reason: z.enum(['full']),
+  /** `taken`: the seat for this pad's id belongs to another phone (no or wrong seat key). */
+  reason: z.enum(['full', 'taken']),
 });
 
 export const pingSchema = z.object({

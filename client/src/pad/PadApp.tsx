@@ -2,7 +2,7 @@ import './pad.css';
 import { colourHex } from '@gamergang/shared';
 import { Suspense, useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { PAD_CONTROLLERS } from './controllers';
-import { enterFullscreen, keepScreenAwake } from './device';
+import { enterFullscreen, enterFullscreenOnNextTouch, keepScreenAwake } from './device';
 import { getPadStore } from './padStore';
 import {
   clientId,
@@ -38,9 +38,12 @@ export default function PadApp() {
     document.title = 'Gamer Gang · Pad';
     const room = roomFromUrl();
     if (!room) return;
-    // The wake lock needs no tap, so a reloaded pad re-takes it straight away.
-    if (loadSeat(room)) keepScreenAwake();
     store.connect(room);
+    if (!loadSeat(room)) return;
+    // A reloaded pad skips the Join tap. The wake lock needs no gesture, so it is re-taken now;
+    // fullscreen and the landscape lock come back on the first touch.
+    keepScreenAwake();
+    return enterFullscreenOnNextTouch();
   }, [store]);
 
   const commitProfile = useCallback((next: Profile) => {

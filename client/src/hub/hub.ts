@@ -16,7 +16,7 @@ import {
   type PadMessage,
   type TvMessage,
 } from '@gamergang/shared';
-import { PING_INTERVAL_MS } from '../net/rtc';
+import { PING_INTERVAL_MS, randomId } from '../net/rtc';
 import type { HostTransportEvents, HostTransportPort, RoomInfo } from '../net/hostTransport';
 
 export interface HubPlayer {
@@ -48,6 +48,8 @@ export interface GameSessionHandlers {
 
 /** Disconnected players keep their slot this long in the lobby before it is freed. */
 const LOBBY_GRACE_MS = 15_000;
+/** Length of the per-seat secret a pad must show to claim an existing seat. */
+const SEAT_KEY_LENGTH = 24;
 /** If every player is gone for this long mid-game, the hub returns to the lobby. */
 const ABANDONED_GAME_MS = 30_000;
 const IDLE_POLL_MS: Record<HubPhase, number> = { lobby: 1000, playing: 2000, results: 1000 };
@@ -59,6 +61,13 @@ export class Hub {
   private readonly lastInputTime = new Map<string, number>();
   private readonly rtt = new Map<string, number>();
   private readonly removalTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  /** Phone seats' secrets, sent only to the owning pad in `joined`. */
+  private readonly seatKeys = new Map<string, string>();
+  /**
+   * Links that proved they own their seat (a join with the right key) since they opened. Peer ids
+   * are public and signalling does not check them, so an unproven link may not drive, vote or ready.
+   */
+  private readonly verified = new Set<string>();
   private readonly transport: HostTransportPort;
   private session: GameSessionHandlers | null = null;
   private pingTimer: ReturnType<typeof setInterval> | undefined;
@@ -151,7 +160,10 @@ export class Hub {
       players: this.state.players.map((p) => ({ ...p, ready: false, inGame: false })),
     });
     for (const player of this.state.players) {
-      if (!player.connected) this.scheduleRemoval(player.id);
+      if (player.connected) continue;
+      // A phone that tapped Leave gave up its key: free its slot now instead of after the grace.
+      if (!player.local && !this.seatKeys.has(player.id)) this.removePlayer(player.id);
+      else this.scheduleRemoval(player.id);
     }
     this.onEnd?.();
   }
@@ -176,12 +188,14 @@ export class Hub {
 
   private handlePeerOpen(peerId: string): void {
     this.peers.add(peerId);
+    this.verified.delete(peerId);
     // A fresh pad needs the lobby (taken colours, phase) before it joins.
     this.transport.send(peerId, this.lobbyMessage());
   }
 
   private handlePeerClose(peerId: string): void {
     this.peers.delete(peerId);
+    this.verified.delete(peerId);
     this.rtt.delete(peerId);
     this.lastInputTime.delete(peerId);
     const player = this.player(peerId);
@@ -193,10 +207,17 @@ export class Hub {
   }
 
   private handleMessage(peerId: string, message: PadMessage): void {
+    if (message.type === 'join') {
+      this.handleJoin(peerId, message);
+      return;
+    }
+    if (message.type === 'pong') {
+      this.rtt.set(peerId, Math.max(0, performance.now() - message.t));
+      return;
+    }
+    // Everything else acts for a seat, so it needs a link that has proved it owns one.
+    if (!this.verified.has(peerId)) return;
     switch (message.type) {
-      case 'join':
-        this.handleJoin(peerId, message);
-        return;
       case 'leave':
         this.handleLeave(peerId);
         return;
@@ -220,15 +241,18 @@ export class Hub {
         this.session?.onInput(peerId, message);
         return;
       }
-      case 'pong':
-        this.rtt.set(peerId, Math.max(0, performance.now() - message.t));
-        return;
     }
   }
 
   private handleJoin(peerId: string, message: JoinMessage): void {
     const existing = this.player(peerId);
     if (existing) {
+      // Anyone can learn a player id from the lobby list, so only the seat's key claims it.
+      const ownKey = this.seatKeys.get(peerId);
+      if (!ownKey || message.seatKey !== ownKey) {
+        this.transport.send(peerId, { type: 'kicked', reason: 'taken' });
+        return;
+      }
       // Same peer id: a link reconnect, a reloaded pad claiming its seat back, or an edit.
       clearTimeout(this.removalTimers.get(peerId));
       this.removalTimers.delete(peerId);
@@ -251,14 +275,19 @@ export class Hub {
       this.addPlayer(peerId, message.name, colour, false);
     }
     const player = this.player(peerId);
-    if (player) {
+    const seatKey = this.seatKeys.get(peerId);
+    if (player && seatKey) {
+      this.verified.add(peerId);
       this.transport.send(peerId, {
         type: 'joined',
         playerId: peerId,
+        seatKey,
         colour: player.colour,
         slot: player.slot,
       });
     }
+    // A pad that was ready before its reload may have been the last one the lobby waited for.
+    this.maybeStart();
   }
 
   /** An explicit Leave: the seat is freed now, unless the player's car is in the race. */
@@ -271,6 +300,9 @@ export class Hub {
       return;
     }
     // Mid-game the car stays on the grid without a driver; the lobby frees the slot afterwards.
+    // Without its key the seat can no longer be claimed back.
+    this.seatKeys.delete(peerId);
+    this.verified.delete(peerId);
     if (player.connected) {
       this.patchPlayer(peerId, { connected: false });
       this.session?.onPlayerConnection(peerId, false);
@@ -297,6 +329,7 @@ export class Hub {
     const taken = new Set(this.state.players.map((p) => p.slot));
     let slot = 0;
     while (taken.has(slot)) slot++;
+    if (!local) this.seatKeys.set(id, randomId(SEAT_KEY_LENGTH));
     const player: HubPlayer = {
       id,
       name,
@@ -312,6 +345,8 @@ export class Hub {
 
   private removePlayer(id: string): void {
     this.removalTimers.delete(id);
+    this.seatKeys.delete(id);
+    this.verified.delete(id);
     this.update({ players: this.state.players.filter((p) => p.id !== id) });
     this.maybeStart();
   }
@@ -321,6 +356,8 @@ export class Hub {
     this.removalTimers.set(
       id,
       setTimeout(() => {
+        // The grace is over either way, so this seat no longer holds up the start.
+        this.removalTimers.delete(id);
         const player = this.player(id);
         if (player && !player.connected && this.state.phase === 'lobby') this.removePlayer(id);
       }, LOBBY_GRACE_MS),
@@ -336,6 +373,9 @@ export class Hub {
     const present = this.state.players.filter((p) => p.connected);
     if (this.state.phase !== 'lobby' || present.length === 0) return;
     if (!present.every((p) => p.ready)) return;
+    // A pad inside its reconnect grace (most often a reload) still holds its seat: wait for it,
+    // or for the grace to run out, rather than start the race without it.
+    if (this.state.players.some((p) => !p.connected && this.removalTimers.has(p.id))) return;
     this.update({
       phase: 'playing',
       votes: [],

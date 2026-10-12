@@ -42,6 +42,7 @@ const { PadStore } = await import('./padStore');
 const { loadSeat } = await import('./profile');
 
 const ROOM = 'ABCD';
+const KEY = 'seatkey0123456789abcdefg';
 
 function memoryStorage(): Storage {
   const data = new Map<string, string>();
@@ -72,7 +73,13 @@ function joinedTab(colourFromTv: 'red' | 'blue' = 'blue') {
   const link = latest();
   link.status('open');
   store.join('Bo', 'red', 'buttons');
-  link.receive({ type: 'joined', playerId: link.clientId, colour: colourFromTv, slot: 1 });
+  link.receive({
+    type: 'joined',
+    playerId: link.clientId,
+    seatKey: KEY,
+    colour: colourFromTv,
+    slot: 1,
+  });
   return { store, link };
 }
 
@@ -98,7 +105,13 @@ describe('pad rejoin after a reload', () => {
 
   it('remembers the seat with the colour the TV gave, and the steering mode', () => {
     joinedTab('blue');
-    expect(loadSeat(ROOM)).toEqual({ room: ROOM, name: 'Bo', colour: 'blue', mode: 'buttons' });
+    expect(loadSeat(ROOM)).toEqual({
+      room: ROOM,
+      name: 'Bo',
+      colour: 'blue',
+      mode: 'buttons',
+      seatKey: KEY,
+    });
   });
 
   it('rejoins on its own after a reload, as the same player with the same colour', () => {
@@ -113,9 +126,9 @@ describe('pad rejoin after a reload', () => {
     expect(store.getState().rejoining).toBe(true);
     link.status('open');
     expect(link.joins()).toEqual([
-      { type: 'join', room: ROOM, name: 'Bo', colour: 'blue', rejoin: true },
+      { type: 'join', room: ROOM, name: 'Bo', colour: 'blue', rejoin: true, seatKey: KEY },
     ]);
-    link.receive({ type: 'joined', playerId: clientId, colour: 'blue', slot: 1 });
+    link.receive({ type: 'joined', playerId: clientId, seatKey: KEY, colour: 'blue', slot: 1 });
     expect(store.getState()).toMatchObject({ rejoining: false, me: { colour: 'blue', slot: 1 } });
   });
 
@@ -129,7 +142,38 @@ describe('pad rejoin after a reload', () => {
       name: 'Bo',
       colour: 'blue',
       rejoin: true,
+      seatKey: KEY,
     });
+  });
+
+  it('keeps the seat key when the player edits their name', () => {
+    const { store, link } = joinedTab('blue');
+    store.join('Bobby', 'blue', 'buttons');
+    expect(link.joins().at(-1)).toEqual({
+      type: 'join',
+      room: ROOM,
+      name: 'Bobby',
+      colour: 'blue',
+      seatKey: KEY,
+    });
+  });
+
+  it('starts over as a new player when the TV says the seat is not ours', () => {
+    const { store, link } = joinedTab('blue');
+    link.receive({ type: 'kicked', reason: 'taken' });
+    expect(link.stopped).toBe(true);
+    const fresh = latest();
+    expect(fresh).not.toBe(link);
+    expect(fresh.clientId).not.toBe(link.clientId);
+    expect(loadSeat(ROOM)).toBeNull();
+    expect(store.getState()).toMatchObject({
+      room: ROOM,
+      kicked: null,
+      rejoining: false,
+      me: null,
+    });
+    fresh.status('open');
+    expect(fresh.joins()).toEqual([]);
   });
 
   it('keeps a steering change made after joining', () => {
@@ -163,13 +207,21 @@ describe('pad rejoin after a reload', () => {
     latest().status('open');
     expect(reloaded.getState().rejoining).toBe(false);
     expect(latest().joins()).toEqual([]);
+    // Coming back is a new player, not a claim on the seat just given up.
+    expect(latest().clientId).not.toBe(link.clientId);
   });
 
   it('ignores a leaving link that is still flushing', () => {
     vi.useFakeTimers();
     const { store, link } = joinedTab();
     store.leaveRoom();
-    link.receive({ type: 'joined', playerId: link.clientId, colour: 'blue', slot: 1 });
+    link.receive({
+      type: 'joined',
+      playerId: link.clientId,
+      seatKey: KEY,
+      colour: 'blue',
+      slot: 1,
+    });
     expect(store.getState().me).toBeNull();
     expect(loadSeat(ROOM)).toBeNull();
   });

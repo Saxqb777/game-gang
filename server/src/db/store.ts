@@ -8,6 +8,7 @@ import {
   type LeaderboardEntry,
   type PostLapsRequest,
   type PostSignalRequest,
+  type PostTelemetryRequest,
   type SignalMessage,
 } from '@gamergang/shared';
 import { SCHEMA } from './schema';
@@ -19,6 +20,27 @@ const SIGNAL_TTL_SECONDS = 120;
 const MAX_PENDING_SIGNALS = 64;
 
 export type RoomStatus = 'ok' | 'not-found' | 'forbidden';
+export type TelemetryStatus = RoomStatus | 'rate-limited';
+
+/** Telemetry rows older than this are deleted (on the next telemetry post, never on signal polls). */
+export const TELEMETRY_RETENTION_DAYS = 90;
+/** One room may store at most TELEMETRY_ROOM_MAX_ROWS samples per this many seconds... */
+export const TELEMETRY_ROOM_WINDOW_SECONDS = 600;
+export const TELEMETRY_ROOM_MAX_ROWS = 40;
+/** ...and the whole service at most this many per hour, so abuse can't grow the database. */
+export const TELEMETRY_GLOBAL_MAX_ROWS_PER_HOUR = 2000;
+
+export interface TelemetryLimits {
+  retentionDays: number;
+  roomWindowSeconds: number;
+  roomMaxRows: number;
+  globalMaxRowsPerHour: number;
+}
+
+export interface StoreOptions {
+  /** Overrides for tests. */
+  telemetry?: Partial<TelemetryLimits>;
+}
 
 export interface Store {
   createRoom(): Promise<{ code: string; hostKey: string }>;
@@ -31,6 +53,7 @@ export interface Store {
   ): Promise<{ status: RoomStatus; messages: SignalMessage[] }>;
   postLaps(request: PostLapsRequest): Promise<RoomStatus>;
   leaderboard(track: string): Promise<LeaderboardEntry[]>;
+  postTelemetry(request: PostTelemetryRequest): Promise<TelemetryStatus>;
 }
 
 /** Runs before every request: expired rooms (and their signals, via cascade) disappear. */
@@ -68,7 +91,15 @@ function toSignalMessage(row: Row): SignalMessage | null {
   return { from: row.from_peer, payload: payload.data };
 }
 
-export function createStore(sql: SqlRunner): Store {
+export function createStore(sql: SqlRunner, options: StoreOptions = {}): Store {
+  const limits: TelemetryLimits = {
+    retentionDays: TELEMETRY_RETENTION_DAYS,
+    roomWindowSeconds: TELEMETRY_ROOM_WINDOW_SECONDS,
+    roomMaxRows: TELEMETRY_ROOM_MAX_ROWS,
+    globalMaxRowsPerHour: TELEMETRY_GLOBAL_MAX_ROWS_PER_HOUR,
+    ...options.telemetry,
+  };
+
   async function run(queries: SqlQuery[]): Promise<Row[][]> {
     try {
       return await sql.batch(queries);
@@ -190,6 +221,40 @@ export function createStore(sql: SqlRunner): Store {
         bestLapMs: Number(row.best_lap_ms),
         at: toIsoString(row.created_at),
       }));
+    },
+
+    async postTelemetry({ room, key, session, build, device, samples }) {
+      // All samples of a batch go in, or none: the caps are checked once against existing rows.
+      const results = await run([
+        ...CLEANUP,
+        touch(room),
+        q(
+          `DELETE FROM telemetry WHERE created_at < now() - make_interval(days => $1)`,
+          limits.retentionDays,
+        ),
+        q(
+          `INSERT INTO telemetry (room, session, build, device, kind, scenario, preset, viewports, fps_avg, frame_ms_p99, gpu_ms_avg, sample)
+           SELECT $1, $3, $4, $5::jsonb, s->>'kind', s->>'scenario', s->>'preset', (s->>'viewports')::smallint,
+                  (s->>'fpsAvg')::real, (s->>'frameMsP99')::real, (s->>'gpuMsAvg')::real, s
+           FROM jsonb_array_elements($6::jsonb) AS s
+           WHERE EXISTS (SELECT 1 FROM rooms WHERE code = $1 AND host_key = $2)
+             AND (SELECT count(*) FROM telemetry WHERE room = $1 AND created_at > now() - make_interval(secs => $7)) + jsonb_array_length($6::jsonb) <= $8
+             AND (SELECT count(*) FROM telemetry WHERE created_at > now() - interval '1 hour') < $9
+           RETURNING 1 AS ok`,
+          room,
+          key,
+          session,
+          build,
+          JSON.stringify(device),
+          JSON.stringify(samples),
+          limits.roomWindowSeconds,
+          limits.roomMaxRows,
+          limits.globalMaxRowsPerHour,
+        ),
+      ]);
+      const status = roomStatus(results.at(-3), key);
+      if (status !== 'ok') return status;
+      return results.at(-1)?.length ? 'ok' : 'rate-limited';
     },
   };
 }

@@ -3,8 +3,10 @@ import { MAX_LAP_MS, MIN_LAP_MS, colourHex, type LeaderboardEntry } from '@gamer
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import type { Hub } from '../../../hub/hub';
 import { api } from '../../../net/api';
+import { createTelemetryClient } from '../../../net/telemetry';
 import { audioContext } from '../../../tv/audio';
-import { SplitWaysGame, type RaceResult } from '../game';
+import { readBenchFlags } from '../debug/benchFlags';
+import { SplitWaysGame, type GameHooks, type RaceResult } from '../game';
 import { formatTime } from '../hud/viewportHud';
 import { TRACK_1 } from '../track/tracks';
 
@@ -110,12 +112,23 @@ export default function SplitWaysStage({ hub }: { hub: Hub }) {
     if (!container) return;
     let game: SplitWaysGame | null = null;
     let cancelled = false;
+    // Read through a function: TypeScript would keep narrowing the variable across awaits.
+    const isCancelled = () => cancelled;
     const players = hub
       .getState()
       .players.filter((p) => p.inGame)
       .map(({ id, name, colour, slot, local }) => ({ id, name, colour, slot, local }));
 
-    SplitWaysGame.create(container, players, {
+    const flags = readBenchFlags(window.location.search);
+    const telemetry = createTelemetryClient(hub, () => game?.rendererInfo() ?? null);
+    // A closing TV page still sends what it measured (soak windows not posted yet).
+    const onPageHide = () => {
+      if (game) telemetry.queue(game.drainTelemetry());
+      telemetry.flushBeacon();
+    };
+    window.addEventListener('pagehide', onPageHide);
+
+    const hooks: GameHooks = {
       send: (playerId, message) => {
         hub.send(playerId, message);
       },
@@ -133,28 +146,39 @@ export default function SplitWaysStage({ hub }: { hub: Hub }) {
           },
         );
       },
-    }).then(
-      (created) => {
-        if (cancelled) {
+      telemetry: (samples) => {
+        telemetry.sendSamples(samples);
+      },
+    };
+
+    void (async () => {
+      try {
+        const created = await SplitWaysGame.create(container, players, hooks, {
+          bench: flags.bench,
+        });
+        if (isCancelled()) {
           created.dispose();
           return;
         }
         game = created;
+        // Pad input during loading is harmless: the race holds the cars until GO.
         hub.attachSession({
           onInput: (playerId, input) => created.handleInput(playerId, input),
           onAction: (playerId, action) => created.handleAction(playerId, action),
           onPlayerConnection: (playerId, connected) => created.setConnected(playerId, connected),
         });
-        setStatus('running');
-      },
-      (error: unknown) => {
+        // Shader compile and the loading benchmark run behind the loading screen.
+        await created.prepare();
+        if (!isCancelled()) setStatus('running');
+      } catch (error: unknown) {
         console.error('[splitways] failed to start', error);
-        if (!cancelled) setStatus('failed');
-      },
-    );
+        if (!isCancelled()) setStatus('failed');
+      }
+    })();
 
     return () => {
       cancelled = true;
+      window.removeEventListener('pagehide', onPageHide);
       hub.attachSession(null);
       game?.dispose();
     };

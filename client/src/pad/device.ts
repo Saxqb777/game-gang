@@ -15,6 +15,31 @@ export function enterFullscreen(): void {
     .catch(() => undefined);
 }
 
+/** Touch and key events that can carry the user activation fullscreen needs (HTML spec list). */
+const ACTIVATION_EVENTS = ['pointerdown', 'pointerup', 'touchend', 'keydown'] as const;
+
+/**
+ * A reloaded pad rejoins without a Join tap, and a reload always leaves fullscreen. Fullscreen needs
+ * a user gesture, so the player's next touch anywhere (usually the first steer or gas) restores it
+ * and the landscape lock. Returns a function that stops waiting.
+ */
+export function enterFullscreenOnNextTouch(): () => void {
+  if (typeof document.documentElement.requestFullscreen !== 'function') return () => undefined;
+  const stop = () => {
+    for (const type of ACTIVATION_EVENTS) window.removeEventListener(type, enterFullscreen, true);
+    document.removeEventListener('fullscreenchange', onChange);
+  };
+  // Some of these events carry no activation (a touch pointerdown), so wait for success to stop.
+  const onChange = () => {
+    if (document.fullscreenElement) stop();
+  };
+  for (const type of ACTIVATION_EVENTS) {
+    window.addEventListener(type, enterFullscreen, { capture: true, passive: true });
+  }
+  document.addEventListener('fullscreenchange', onChange);
+  return stop;
+}
+
 let wakeLock: WakeLockSentinel | null = null;
 let wakeLockWanted = false;
 

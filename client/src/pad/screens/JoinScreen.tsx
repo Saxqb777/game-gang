@@ -72,7 +72,7 @@ export function JoinScreen({
 }: {
   room: string;
   lobby: LobbyMessage;
-  myId: string | null;
+  myId: string;
   profile: Profile;
   submitLabel: string;
   /** Runs inside the tap, which fullscreen needs. */

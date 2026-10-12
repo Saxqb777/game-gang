@@ -1,13 +1,9 @@
 import { PLAYER_COLOURS, playerNameSchema, type ColourId } from '@gamergang/shared';
 import { randomId } from '../net/rtc';
 
-/** Pad steering layouts, the first being the default. Drag steering joins this list next. */
-export const STEERING_MODES = ['buttons'] as const;
+/** Pad steering layouts, the first being the default: drag a thumb, or hold arrow buttons. */
+export const STEERING_MODES = ['drag', 'buttons'] as const;
 export type SteeringMode = (typeof STEERING_MODES)[number];
-
-function isSteeringMode(value: unknown): value is SteeringMode {
-  return STEERING_MODES.some((mode) => mode === value);
-}
 
 export interface Profile {
   name: string;
@@ -30,8 +26,8 @@ export function loadProfile(): Profile {
     return {
       name: playerNameSchema.safeParse(raw.name).success ? String(raw.name) : '',
       colour: isColour(raw.colour) ? raw.colour : fallback.colour,
-      // Retired modes (an old saved profile) fall back to the default.
-      mode: isSteeringMode(raw.mode) ? raw.mode : fallback.mode,
+      // Any other stored value becomes drag.
+      mode: raw.mode === 'buttons' ? 'buttons' : 'drag',
     };
   } catch {
     return fallback;

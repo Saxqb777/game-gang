@@ -9,7 +9,7 @@ import {
   type RefObject,
 } from 'react';
 import type { PadControllerProps } from '../../../pad/controllers';
-import { DRAG, STUCK_HINTS, dragSteer, featherThrottle, shapeSteer } from '../input/controls';
+import { DRAG, PAD, STUCK_HINTS, dragSteer, featherThrottle, shapeSteer } from '../input/controls';
 import { InputSender } from './inputSender';
 import { rampSteer } from './steering';
 
@@ -49,10 +49,6 @@ interface Contact {
   fired: boolean;
 }
 
-/** Input is also sampled on this timer, in case animation frames stall (ms). */
-const PUMP_MS = 50;
-/** Hold RESET this long to fire it (ms). */
-const RESET_HOLD_MS = 600;
 /** The arming ring fills a little faster than the TV arms, so it is full when reverse engages. */
 const RING_FILL_MS = REVERSE_ARM_MS * 0.85;
 /** Display-only copy of the TV's STEER_INPUT shaping, so the ghost wheel turns like the car does. */
@@ -294,8 +290,8 @@ export default function SplitWaysController({
               break;
             }
             finger.heldMs += dt * 1000;
-            hold = Math.min(1, finger.heldMs / RESET_HOLD_MS);
-            if (finger.heldMs >= RESET_HOLD_MS) {
+            hold = Math.min(1, finger.heldMs / PAD.resetHoldMs);
+            if (finger.heldMs >= PAD.resetHoldMs) {
               finger.fired = true;
               hold = 0;
               store.action('reset');
@@ -329,7 +325,7 @@ export default function SplitWaysController({
     frame = requestAnimationFrame(tick);
     // Frames can stall (a busy GPU, a system overlay) while the page still runs: keep the input
     // flowing on a timer too, or the TV would treat a held pedal as a lost pad.
-    const pump = setInterval(sample, PUMP_MS);
+    const pump = setInterval(sample, PAD.samplePumpMs);
 
     // A phone that locks or switches app must not leave the gas held down.
     const onHide = () => {

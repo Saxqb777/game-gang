@@ -175,6 +175,11 @@ export const REVERSE = {
   releaseBrake: 0.05,
 } as const;
 
+export const PAD_STATUS = {
+  /** Min gap (ms) between pushes of a changed reverse gear, stuck hint or RESET state to a pad. */
+  pushMinMs: 50,
+} as const;
+
 export const CAMERA = {
   /** Chase camera distance behind the car, height above it, and the point it looks at. */
   distance: 6.4,

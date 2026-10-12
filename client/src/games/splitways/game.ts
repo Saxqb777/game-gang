@@ -18,7 +18,7 @@ import { DebugOverlay } from './debug/debugOverlay';
 import { ViewportHud, formatTime } from './hud/viewportHud';
 import { KeyboardDriver } from './input/keyboard';
 import type { RaceMessage } from '@gamergang/shared';
-import { REVERSE, RESPAWN } from './config';
+import { PAD_STATUS, REVERSE, RESPAWN } from './config';
 import { STUCK_HINTS, type StuckHint } from './input/controls';
 import { SteerProcessor } from './input/steerProcessor';
 import { FixedStepLoop } from './loop';
@@ -702,9 +702,6 @@ export class SplitWaysGame {
     });
   }
 
-  /** A changed reverse gear, hint or reset availability reaches the pad at most this late (ms). */
-  private static readonly STATUS_PUSH_MIN_MS = 50;
-
   /**
    * Pushes a pad's status as soon as its reverse gear, stuck hint or reset availability changes,
    * so the arming ring, the banner and RESET react without waiting for the 5 Hz status tick.
@@ -714,7 +711,7 @@ export class SplitWaysGame {
     if (this.mode === 'podium') return;
     for (let i = 0; i < this.drivers.length; i++) {
       const driver = this.drivers[i] as Driver;
-      if (driver.player.local || now - driver.statusPushedAt < SplitWaysGame.STATUS_PUSH_MIN_MS) {
+      if (driver.player.local || now - driver.statusPushedAt < PAD_STATUS.pushMinMs) {
         continue;
       }
       if (

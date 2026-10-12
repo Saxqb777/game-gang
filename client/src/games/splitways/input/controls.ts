@@ -19,6 +19,14 @@ export const DRAG = {
   edgeInsetPx: 24,
 } as const;
 
+/** Pad button and timing constants (pad-only, like DRAG). */
+export const PAD = {
+  /** Hold RESET this long to fire it (ms). */
+  resetHoldMs: 600,
+  /** Input is also sampled on this timer, in case animation frames stall (ms). */
+  samplePumpMs: 50,
+} as const;
+
 /** Throttle is sent in steps of this size, so tiny thumb wobbles are not news. */
 const THROTTLE_STEP = 0.05;
 const THROTTLE_STEPS = Math.round(1 / THROTTLE_STEP);

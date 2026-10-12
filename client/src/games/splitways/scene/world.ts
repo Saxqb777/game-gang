@@ -21,8 +21,6 @@ export class WorldVisual {
   private readonly trackVisual: TrackVisual;
   private readonly terrainGroup: Group;
   private readonly scenery: Scenery;
-  /** The preset last applied with setQuality. */
-  quality: QualityPreset | null = null;
 
   private constructor(
     track: Track,
@@ -63,12 +61,10 @@ export class WorldVisual {
   }
 
   /**
-   * Applies a quality preset's world settings (pine density and pine shadows). The forest arrives
-   * with Track 1's dressing; until then there is nothing to thin.
+   * Applies a quality preset's world settings (pine density and pine shadows). A no-op stub: the
+   * forest arrives with Track 1's dressing, and until then there is nothing to thin.
    */
-  setQuality(preset: QualityPreset): void {
-    this.quality = preset;
-  }
+  readonly setQuality: (preset: QualityPreset) => void = () => undefined;
 
   dispose(): void {
     this.trackVisual.dispose();

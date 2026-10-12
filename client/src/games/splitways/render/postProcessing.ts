@@ -19,6 +19,7 @@ import {
   Mesh,
   OneFactor,
   OrthographicCamera,
+  SRGBColorSpace,
   ShaderMaterial,
   Vector2,
   Vector3,
@@ -411,7 +412,8 @@ export class PostChain {
       speedLines: { value: POST.speedLinesOpacity },
       time: { value: 0 },
     });
-    const seam = new Color(RENDER.seamColour);
+    // Color converts hex to linear working space; the canvas wants the sRGB bytes back.
+    const seam = new Color(RENDER.seamColour).getRGB({ r: 0, g: 0, b: 0 }, SRGBColorSpace);
     this.final = pass(FINAL, {
       tLdr: { value: null },
       uLdrSize: { value: new Vector2(1, 1) },

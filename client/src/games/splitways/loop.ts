@@ -25,10 +25,6 @@ export class FixedStepLoop {
     private readonly render: (alpha: number, frameSeconds: number) => void,
   ) {}
 
-  get isRunning(): boolean {
-    return this.running;
-  }
-
   start(): void {
     if (this.running) return;
     this.running = true;

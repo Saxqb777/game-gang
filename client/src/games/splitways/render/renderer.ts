@@ -33,6 +33,8 @@ export interface RenderStats {
   drops: number;
   scale: number;
   minScale: number;
+  /** Dynamic resolution is steering (false while debug key R pins the scale at 1). */
+  resolutionAuto: boolean;
   /** Viewport 0's rendered size this frame. */
   internalWidth: number;
   internalHeight: number;
@@ -284,6 +286,7 @@ export class GameRenderer {
       drops: sessionDrops(),
       scale: this.resolution.scale,
       minScale: this.currentPreset.minScale,
+      resolutionAuto: this.resolution.enabled,
       internalWidth: this.usedWidth[0] ?? 0,
       internalHeight: this.usedHeight[0] ?? 0,
       outputWidth: rect?.width ?? 0,

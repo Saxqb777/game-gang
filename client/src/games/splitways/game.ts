@@ -24,6 +24,7 @@ import {
   flythroughScenario,
   formatBenchTable,
   formatSoakSummary,
+  sleep,
   telemetrySample,
 } from './debug/benchmark';
 import { ViewportHud, formatTime } from './hud/viewportHud';
@@ -61,7 +62,7 @@ import { PhysicsWorld } from './sim/world';
 import { Terrain } from './track/terrain';
 import type { Track } from './track/track';
 import { buildTrackPhysics } from './track/trackPhysics';
-import { TRACK_1, loadTrack1 } from './track/tracks';
+import { loadTrack1 } from './track/tracks';
 
 export interface GamePlayer {
   id: string;
@@ -176,12 +177,7 @@ export class SplitWaysGame {
   private clock = 0;
   private stepTime = 0;
   private frames = 0;
-  private fps = 0;
-  private fpsFrames = 0;
-  private fpsWindowStart = performance.now();
-  private readonly options: GameOptions;
-  private readonly playerCount: number;
-  private readonly benchPanel: BenchPanel;
+  private benchPanel: BenchPanel | null = null;
   private disposed = false;
   private started = false;
   /** A fly-through is running: its cameras replace the race views. */
@@ -245,14 +241,12 @@ export class SplitWaysGame {
     private readonly track: Track,
     private readonly world: WorldVisual,
     skyTexture: DataTexture,
-    options: GameOptions,
+    private readonly options: GameOptions,
     preset: QualityPreset,
   ) {
     this.canvas.className = 'sw-canvas';
     this.hudLayer.className = 'sw-hud-layer';
     container.append(this.canvas, this.hudLayer);
-    this.options = options;
-    this.playerCount = players.length;
     this.renderer = new GameRenderer(this.canvas, preset);
 
     this.sky = new Sky(this.renderer.webgl, skyTexture);
@@ -322,7 +316,6 @@ export class SplitWaysGame {
     this.overviewBadge.textContent = 'Live';
     this.hudLayer.appendChild(this.overviewBadge);
     this.debug = new DebugOverlay(container);
-    this.benchPanel = new BenchPanel(container);
     window.addEventListener('keydown', this.onKey);
     this.resizeObserver = new ResizeObserver(() => this.layout());
     this.resizeObserver.observe(container);
@@ -463,13 +456,7 @@ export class SplitWaysGame {
     });
     if (this.isDisposed()) return;
     const window = renderer.frameStats.snapshot();
-    const sample = telemetrySample(
-      'loading-benchmark',
-      'loading',
-      window,
-      renderer.stats,
-      TRACK_1.id,
-    );
+    const sample = telemetrySample('loading-benchmark', 'loading', window, renderer.stats);
     const target = RESOLUTION.targetShare * frameIntervalMs(renderer.frameStats.refreshHz());
     gpu.sort((a, b) => a - b);
     const gpuMedian = gpu[gpu.length >> 1];
@@ -479,7 +466,7 @@ export class SplitWaysGame {
         : window.frames > 0 &&
           window.missedFrames / window.frames > RESOLUTION.loadingDropMissedShare;
     if (slow && measured.id !== 'low') {
-      noteLoadingDrop(this.playerCount);
+      noteLoadingDrop(this.drivers.length);
       this.loop.stop();
       await this.applyPreset(getPreset(lowerPreset(measured.id)));
       if (this.isDisposed()) return;
@@ -516,7 +503,7 @@ export class SplitWaysGame {
     const runs = benchRuns(mode);
     const samples: TelemetrySample[] = [];
     for (const [i, run] of runs.entries()) {
-      this.benchPanel.show(
+      this.showBenchPanel(
         `BENCHMARK ${mode}  run ${i + 1}/${runs.length}  ${flythroughScenario(run)}`,
         false,
       );
@@ -542,7 +529,7 @@ export class SplitWaysGame {
       if (this.isDisposed()) return;
       const scenario = flythroughScenario(run);
       const stats = this.renderer.stats;
-      samples.push(telemetrySample('flythrough', scenario, stats.window, stats, TRACK_1.id));
+      samples.push(telemetrySample('flythrough', scenario, stats.window, stats));
     }
     this.flight = null;
     this.layout();
@@ -556,14 +543,7 @@ export class SplitWaysGame {
     this.hudLayer.hidden = false;
     this.loop.stepping = true;
     this.benchRunning = false;
-    this.benchPanel.show(
-      formatBenchTable(
-        `SPLIT WAYS BENCHMARK  ${mode}  ${TRACK_1.name}`,
-        samples,
-        this.renderer.stats,
-      ),
-      true,
-    );
+    this.showBenchPanel(formatBenchTable(mode, samples, this.renderer.stats), true);
     this.hooks.telemetry(samples);
     console.info('[splitways-bench]', JSON.stringify(samples));
   }
@@ -595,8 +575,8 @@ export class SplitWaysGame {
       this.raceWindowClosed = true;
       if (!this.benchRanThisRace && this.options.bench !== 'soak') {
         const stats = renderer.stats;
-        const sample = telemetrySample('race', 'race', stats.window, stats, TRACK_1.id);
-        recordRaceOutcome(this.playerCount, {
+        const sample = telemetrySample('race', 'race', stats.window, stats);
+        recordRaceOutcome(this.drivers.length, {
           atFloorShare: renderer.resolution.atFloorShare(),
           missedShare: renderer.resolution.missedShare(),
         });
@@ -613,9 +593,7 @@ export class SplitWaysGame {
     if (due.window !== null) {
       const scenario = `soak-${String(due.window).padStart(2, '0')}`;
       const stats = renderer.stats;
-      this.pendingTelemetry.push(
-        telemetrySample('soak', scenario, stats.window, stats, TRACK_1.id),
-      );
+      this.pendingTelemetry.push(telemetrySample('soak', scenario, stats.window, stats));
       renderer.frameStats.resetWindow();
     }
     if (due.done) {
@@ -625,10 +603,9 @@ export class SplitWaysGame {
         'soak-total',
         renderer.frameStats.snapshotTotal(),
         stats,
-        TRACK_1.id,
       );
       this.pendingTelemetry.push(total);
-      this.benchPanel.show(formatSoakSummary(total, BENCH.soakMinutes, stats), false);
+      this.showBenchPanel(formatSoakSummary(total, BENCH.soakMinutes, stats), false);
     }
     if (due.post || due.done) this.flushTelemetry();
   }
@@ -636,6 +613,12 @@ export class SplitWaysGame {
   private flushTelemetry(): void {
     const samples = this.drainTelemetry();
     if (samples.length > 0) this.hooks.telemetry(samples);
+  }
+
+  /** The panel only exists once a benchmark or soak has something to show. */
+  private showBenchPanel(text: string, closeOnKey: boolean): void {
+    this.benchPanel ??= new BenchPanel(this.container);
+    this.benchPanel.show(text, closeOnKey);
   }
 
   handleInput(playerId: string, message: InputMessage): void {
@@ -680,7 +663,7 @@ export class SplitWaysGame {
     this.resizeObserver.disconnect();
     this.keyboard.dispose();
     this.debug.dispose();
-    this.benchPanel.dispose();
+    this.benchPanel?.dispose();
     for (const driver of this.drivers) {
       driver.visual.dispose();
       driver.hud.dispose();
@@ -871,7 +854,7 @@ export class SplitWaysGame {
     renderer.endFrame(this.clock, this.loop.lastCpuMs);
     this.tickLoadingBench();
     if (this.started) this.trackRaceWindow(now);
-    this.trackFps(now);
+    this.frames++;
     if (this.debug.needsPaint) this.paintDebug();
   }
 
@@ -926,7 +909,8 @@ export class SplitWaysGame {
       );
       this.paintHud(driver, i, countdownText);
     }
-    if (this.audio) {
+    // Not during the loading benchmark: the first countdown beep belongs to the visible "3".
+    if (this.audio && this.started) {
       for (let i = 0; i < this.drivers.length; i++) {
         const driver = this.drivers[i] as Driver;
         this.audio.updateCar(
@@ -978,16 +962,6 @@ export class SplitWaysGame {
     hud.setTag(car.draft > 0.4 ? 'SLIPSTREAM' : '');
   }
 
-  private trackFps(now: number): void {
-    this.frames++;
-    this.fpsFrames++;
-    if (now - this.fpsWindowStart >= 1000) {
-      this.fps = (this.fpsFrames * 1000) / (now - this.fpsWindowStart);
-      this.fpsFrames = 0;
-      this.fpsWindowStart = now;
-    }
-  }
-
   private paintDebug(): void {
     this.debug.update(
       {
@@ -995,8 +969,6 @@ export class SplitWaysGame {
         physicsMs: this.sim.lastStepMs,
         autopilot: this.autopilotOn,
         viewports: this.drivers.length,
-        fps: this.fps,
-        autoResolution: this.renderer.resolution.enabled,
       },
       this.drivers.map((d) => ({
         name: d.player.name,
@@ -1046,8 +1018,4 @@ export class SplitWaysGame {
 function speedEffect(kph: number): number {
   const t = (kph - POST.speedLinesFromKph) / (POST.speedLinesFullKph - POST.speedLinesFromKph);
   return Math.min(1, Math.max(0, t));
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -4,13 +4,14 @@
  *    at 45 m/s, one per viewport, for each viewport count and preset; one telemetry sample per run.
  *  - soak (`?bench=soak`): a 99-lap autopilot race, one sample per minute, a summary after 30 min.
  */
-import type { TelemetrySample, TrackId } from '@gamergang/shared';
+import type { TelemetrySample } from '@gamergang/shared';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { BENCH } from '../config';
 import type { FrameWindow } from '../render/frameStats';
 import { PRESET_ORDER, type PresetId } from '../render/quality';
 import type { RenderStats } from '../render/renderer';
 import type { Track } from '../track/track';
+import { TRACK_1 } from '../track/tracks';
 
 export interface BenchRun {
   views: number;
@@ -76,18 +77,17 @@ export class FlyThrough {
   }
 }
 
-/** One telemetry sample from a frame window and the renderer's current state. */
+/** One telemetry sample (on Track 1) from a frame window and the renderer's current state. */
 export function telemetrySample(
   kind: TelemetrySample['kind'],
   scenario: string,
   window: FrameWindow,
   render: RenderStats,
-  track: TrackId | null,
 ): TelemetrySample {
   return {
     kind,
     scenario,
-    track,
+    track: TRACK_1.id,
     viewports: render.viewports,
     preset: render.preset,
     durationMs: window.durationMs,
@@ -119,7 +119,7 @@ const opt = (n: number | null) => (n === null ? '-' : n.toFixed(1));
 
 /** The results table shown after a fly-through. */
 export function formatBenchTable(
-  title: string,
+  mode: 'auto' | 'matrix',
   samples: readonly TelemetrySample[],
   render: RenderStats,
 ): string {
@@ -156,7 +156,7 @@ export function formatBenchTable(
     ].join(' '),
   );
   return [
-    title,
+    `SPLIT WAYS BENCHMARK  ${mode}  ${TRACK_1.name}`,
     `refresh ${render.refreshHz} Hz  gpu timer ${render.timing === 'timer-query' ? 'yes' : 'no'}  dpr ${render.devicePixelRatio.toFixed(2)}  drops ${render.drops}`,
     '',
     header,
@@ -256,4 +256,8 @@ export class BenchPanel {
   private readonly onKey = (): void => {
     this.hide();
   };
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

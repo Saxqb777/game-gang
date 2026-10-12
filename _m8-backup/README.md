@@ -1,6 +1,6 @@
 # M8 work-in-progress backup
 
-Saved 2026-10-10 when the owner paused M8. This branch is a backup only: it is not deployed and must
+Saved 2026-10-10 when the owner paused M8; updated 2026-10-12 (second pause). This branch is a backup only: it is not deployed and must
 not be merged into `claude/gracious-bell-2pgra5` as it is. Delete `_m8-backup/` before any merge.
 
 ## Branch state at the pause
@@ -43,3 +43,11 @@ copy `plan/m8-gate.sh` to `/tmp/claude-0/m8-gate.sh`.
 - `workflows/`: the orchestration scripts and the journals of every run (agent results).
 
 Nothing from Speed Dreams is included.
+
+## Update 2026-10-12
+
+- m8/integration now has P1, P2, P3, P4 and the phone auto-rejoin fix merged (178 tests, gate passes).
+- m8/p5-track1 (P5 dressing) was mid-build when paused; m8/p6-docs holds the docs draft.
+- e2e/e2e-int has the section 2.9 acceptance scripts (run-all.sh).
+- Owner plan: M8 live, then the cars update (5 debranded cars, car select, paint), then Track 1 polish;
+  owner tests once at the end. cars-v2/ and cars/CARS-SPEC.md hold the partial car prep, if any.

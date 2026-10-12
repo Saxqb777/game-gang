@@ -16,3 +16,9 @@
 - Check-in trigger deleted. No dev servers or browsers left running.
 - State at pause: P3 built and committed (d73440e, 6b2a7a1), P4 built and committed (f10c59a), P2 mid-build
   (a62b35c + 4 uncommitted files). Integration = 94eb246 (P1 merged). Nothing pushed.
+
+# 2026-10-12 (owner)
+- Phone reload mid-race: auto-rejoin (done, merged).
+- Order after M8: push M8 live, then cars (5 debranded cars, car select, paint; former M12 scope pulled
+  forward), then Track 1 polish (M9). Push each live when green. Owner tests once at the end with the full
+  set of screenshots. No owner playtest stop in between.

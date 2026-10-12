@@ -443,6 +443,8 @@ function createMaterials(textures: TrackTextures, anisotropy: number, owned: Tex
     }),
     {
       key: 'sw-grass-v1',
+      // Blades scatter light: keep the low sun from turning the lawn into a pale sheet.
+      afterAo: `reflectedLight.directSpecular *= 0.3; reflectedLight.indirectSpecular *= 0.5;`,
       vertexHead: `varying vec2 vGrassUv;`,
       vertex: `vGrassUv = uv;`,
       fragmentHead: `varying vec2 vGrassUv;`,
@@ -465,6 +467,7 @@ function createMaterials(textures: TrackTextures, anisotropy: number, owned: Tex
     }),
     {
       key: 'sw-gravel-v1',
+      afterAo: `reflectedLight.directSpecular *= 0.5; reflectedLight.indirectSpecular *= 0.6;`,
       vertexHead: `attribute vec2 gravelInfo;\nvarying vec2 vGravelUv;\nvarying vec2 vGravel;`,
       vertex: `vGravelUv = uv; vGravel = gravelInfo;`,
       fragmentHead: `varying vec2 vGravelUv;\nvarying vec2 vGravel;`,

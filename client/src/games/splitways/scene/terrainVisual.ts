@@ -86,7 +86,10 @@ function splatMaterial(grass: PbrSet, forest: PbrSet, owned: Texture[]): MeshSta
       #if defined( USE_ENVMAP ) && defined( STANDARD )
         float dotNV = saturate( dot( geometryNormal, geometryViewDir ) );
         reflectedLight.indirectSpecular *= computeSpecularOcclusion( dotNV, ambientOcclusion, material.roughness );
-      #endif`,
+      #endif
+      // Grass and leaf litter are matte: little sheen into the low sun.
+      reflectedLight.directSpecular *= 0.3;
+      reflectedLight.indirectSpecular *= 0.5;`,
   });
 }
 

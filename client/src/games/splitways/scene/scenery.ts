@@ -44,7 +44,8 @@ const CORNER_STANDS = [
   { at: 3058, length: 40, rows: 7, side: 1 as const },
 ];
 const FOOTBRIDGE_AT = 2610;
-const BECK = { from: 2246, to: 2316 };
+/** Beck bridge: parapets along these distances (m), their height (m), and the beck's short visible run. */
+const BECK = { from: 2246, to: 2316, parapet: 1.25, stream: 2281, streamLength: 9 };
 const MILL_AT = 318;
 const LOOKOUT_AT = 1330;
 const KNOLL_AT = 1745;
@@ -663,29 +664,49 @@ export class Scenery {
     }
   }
 
-  /** The stone Beck bridge: rubble parapets with capping stones behind the barriers. */
+  /** The stone Beck bridge: rubble parapets with capping stones behind the barriers, and the beck. */
   private addBeckBridge(): void {
     const { track } = this;
     const from = this.station(BECK.from);
     const to = this.station(BECK.to);
+    const rng = mulberry32(hash32('beck'));
+    const stone = new Color();
     for (const side of [-1, 1] as const) {
       for (let i = from; i < to; i += 2) {
-        const p = track.side(i, side);
-        const lateral = side * (p.wall + 0.75);
+        const lateral = side * (track.side(i, side).wall + 0.55);
         const a = this.ground(i, lateral, new Vector3());
-        const b = this.ground(i + 2, side * (track.side(i + 2, side).wall + 0.75), new Vector3());
+        const b = this.ground(i + 2, side * (track.side(i + 2, side).wall + 0.55), new Vector3());
         const length = Math.hypot(b.x - a.x, b.z - a.z);
         this.frameAt((a.x + b.x) / 2, Math.min(a.y, b.y), (a.z + b.z) / 2, b.x - a.x, b.z - a.z);
-        // A capping stone on a rubble wall.
-        this.props.box(m, 0.6, 0.95, length + 0.05, C.stone, { grime: true });
+        // A rubble wall (each stretch a slightly different stone) under a pale capping stone,
+        // standing well clear of the armco in front of it.
+        stone.copy(C.stone).multiplyScalar(0.85 + 0.25 * rng());
+        this.props.box(m, 0.6, BECK.parapet, length + 0.05, stone, { grime: true });
         this.props.box(
-          m2.makeTranslation(0, 0.95, 0).premultiply(m),
-          0.72,
-          0.12,
+          m2.makeTranslation(0, BECK.parapet, 0).premultiply(m),
+          0.74,
+          0.14,
           length + 0.05,
           C.concrete,
         );
       }
+    }
+    // The beck: a short run of water and muddy banks on each side, where it leaves and joins
+    // the flat ground beside the bridge.
+    const i = this.station(BECK.stream);
+    const s = track.sample(i);
+    for (const side of [-1, 1] as const) {
+      const start = track.side(i, side).wall + 1;
+      const points: Vector3[] = [];
+      for (let d = 0; d <= BECK.streamLength; d += 2) {
+        const drift = Math.sin(d * 0.35) * 0.8;
+        const x = s.position.x + s.right.x * side * (start + d) + s.tangent.x * drift;
+        const z = s.position.z + s.right.z * side * (start + d) + s.tangent.z * drift;
+        points.push(new Vector3(x, this.terrain.heightAt(x, z), z));
+      }
+      this.ribbon(points, 8, 4);
+      const mid = points[points.length >> 1] as Vector3;
+      this.zone(mid.x, mid.z, s.right.x, s.right.z, BECK.streamLength / 2 + 2, 6);
     }
   }
 

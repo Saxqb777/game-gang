@@ -35,12 +35,23 @@ export function MessageScreen({
   );
 }
 
-export function ConnectingScreen({ room, reconnecting }: { room: string; reconnecting: boolean }) {
+export function ConnectingScreen({
+  room,
+  reconnecting,
+  rejoining = false,
+}: {
+  room: string;
+  reconnecting: boolean;
+  /** A reloaded pad on its way back into its seat. */
+  rejoining?: boolean;
+}) {
   return (
     <main className="pad-screen pad-message">
       <Brand room={room} />
       <div className="pad-spinner" aria-hidden />
-      <h1>{reconnecting ? 'Reconnecting...' : 'Connecting to the TV...'}</h1>
+      <h1>
+        {rejoining ? 'Rejoining...' : reconnecting ? 'Reconnecting...' : 'Connecting to the TV...'}
+      </h1>
       <p>Make sure the TV page is open and showing room {room}.</p>
     </main>
   );

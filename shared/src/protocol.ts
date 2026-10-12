@@ -74,12 +74,22 @@ const timestamp = z.number().nonnegative();
 // Pad -> TV
 // ---------------------------------------------------------------------------
 
-/** Join (or update name/colour after joining). */
+/**
+ * Join (or update name/colour after joining). `rejoin` is set by a pad that reloaded and is
+ * claiming back the seat it already had (matched by its peer id): the TV keeps that player's
+ * name, colour and car. For a peer id the TV does not know it is an ordinary join.
+ */
 export const joinSchema = z.object({
   type: z.literal('join'),
   room: roomCodeSchema,
   name: playerNameSchema,
   colour: colourSchema,
+  rejoin: z.boolean().optional(),
+});
+
+/** The player tapped Leave: free the seat now instead of after the reconnect grace period. */
+export const leaveSchema = z.object({
+  type: z.literal('leave'),
 });
 
 /**
@@ -122,6 +132,7 @@ export const pongSchema = z.object({
 
 export const padMessageSchema = z.discriminatedUnion('type', [
   joinSchema,
+  leaveSchema,
   inputSchema,
   readySchema,
   voteSchema,

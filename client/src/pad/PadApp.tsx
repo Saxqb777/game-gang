@@ -4,7 +4,14 @@ import { Suspense, useCallback, useEffect, useState, useSyncExternalStore } from
 import { PAD_CONTROLLERS } from './controllers';
 import { enterFullscreen, keepScreenAwake } from './device';
 import { getPadStore } from './padStore';
-import { loadProfile, saveProfile, type Profile, type SteeringMode } from './profile';
+import {
+  clientId,
+  loadProfile,
+  loadSeat,
+  saveProfile,
+  type Profile,
+  type SteeringMode,
+} from './profile';
 import { JoinScreen } from './screens/JoinScreen';
 import { LobbyScreen, SettingsSheet } from './screens/LobbyScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
@@ -18,14 +25,22 @@ function roomFromUrl(): string | null {
 export default function PadApp() {
   const store = getPadStore();
   const state = useSyncExternalStore(store.subscribe, store.getState);
-  const [profile, setProfile] = useState<Profile>(loadProfile);
+  // A tab that reloads inside a room keeps the name, colour and steering it joined with.
+  const [profile, setProfile] = useState<Profile>(() => {
+    const room = roomFromUrl();
+    const seat = room ? loadSeat(room) : null;
+    return seat ? { name: seat.name, colour: seat.colour, mode: seat.mode } : loadProfile();
+  });
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     document.title = 'Gamer Gang · Pad';
     const room = roomFromUrl();
-    if (room) store.connect(room);
+    if (!room) return;
+    // The wake lock needs no tap, so a reloaded pad re-takes it straight away.
+    if (loadSeat(room)) keepScreenAwake();
+    store.connect(room);
   }, [store]);
 
   const commitProfile = useCallback((next: Profile) => {
@@ -38,12 +53,13 @@ export default function PadApp() {
     enterFullscreen();
     keepScreenAwake();
     commitProfile(next);
-    store.join(next.name, next.colour);
+    store.join(next.name, next.colour, next.mode);
     setEditing(false);
   };
 
   const changeMode = (mode: SteeringMode) => {
     commitProfile({ ...profile, mode });
+    store.setMode(mode);
   };
 
   const { room, status, lobby, me, kicked } = state;
@@ -78,7 +94,15 @@ export default function PadApp() {
       </MessageScreen>
     );
   }
-  if (!lobby) return <ConnectingScreen room={room} reconnecting={status === 'reconnecting'} />;
+  if (!lobby || (state.rejoining && !me)) {
+    return (
+      <ConnectingScreen
+        room={room}
+        reconnecting={status === 'reconnecting'}
+        rejoining={state.rejoining}
+      />
+    );
+  }
 
   const myPlayer = me ? lobby.players.find((p) => p.id === me.playerId) : undefined;
   let screen;
@@ -87,7 +111,8 @@ export default function PadApp() {
       <JoinScreen
         room={room}
         lobby={lobby}
-        myId={me?.playerId ?? null}
+        // Before `joined` our id is still known: the TV uses this tab's client id as player id.
+        myId={me?.playerId ?? clientId()}
         profile={profile}
         submitLabel={me ? 'Save' : 'Join'}
         onSubmit={submitJoin}
@@ -149,6 +174,10 @@ export default function PadApp() {
                 }
               : null
           }
+          onLeave={() => {
+            setSettingsOpen(false);
+            leave();
+          }}
           onClose={() => setSettingsOpen(false)}
         />
       ) : null}

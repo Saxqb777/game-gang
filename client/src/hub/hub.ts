@@ -197,6 +197,9 @@ export class Hub {
       case 'join':
         this.handleJoin(peerId, message);
         return;
+      case 'leave':
+        this.handleLeave(peerId);
+        return;
       case 'ready':
         if (this.player(peerId) && this.state.phase === 'lobby')
           this.setReady(peerId, message.ready);
@@ -226,11 +229,17 @@ export class Hub {
   private handleJoin(peerId: string, message: JoinMessage): void {
     const existing = this.player(peerId);
     if (existing) {
-      // Rejoin after a reconnect, or a name/colour change.
+      // Same peer id: a link reconnect, a reloaded pad claiming its seat back, or an edit.
       clearTimeout(this.removalTimers.get(peerId));
       this.removalTimers.delete(peerId);
-      const colour = this.isColourFree(message.colour, peerId) ? message.colour : existing.colour;
-      this.patchPlayer(peerId, { name: message.name, colour, connected: true });
+      // A car already on track keeps its paint and name tag, so the pad must not drift from it.
+      const locked = existing.inGame && this.state.phase !== 'lobby';
+      if (message.rejoin || locked) {
+        this.patchPlayer(peerId, { connected: true });
+      } else {
+        const colour = this.isColourFree(message.colour, peerId) ? message.colour : existing.colour;
+        this.patchPlayer(peerId, { name: message.name, colour, connected: true });
+      }
       if (existing.inGame && !existing.connected) this.session?.onPlayerConnection(peerId, true);
       clearTimeout(this.abandonTimer);
     } else {
@@ -249,6 +258,23 @@ export class Hub {
         colour: player.colour,
         slot: player.slot,
       });
+    }
+  }
+
+  /** An explicit Leave: the seat is freed now, unless the player's car is in the race. */
+  private handleLeave(peerId: string): void {
+    const player = this.player(peerId);
+    if (!player || player.local) return;
+    if (this.state.phase === 'lobby' || !player.inGame) {
+      clearTimeout(this.removalTimers.get(peerId));
+      this.removePlayer(peerId);
+      return;
+    }
+    // Mid-game the car stays on the grid without a driver; the lobby frees the slot afterwards.
+    if (player.connected) {
+      this.patchPlayer(peerId, { connected: false });
+      this.session?.onPlayerConnection(peerId, false);
+      this.checkAbandoned();
     }
   }
 

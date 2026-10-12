@@ -11,8 +11,14 @@ export interface Profile {
   mode: SteeringMode;
 }
 
+/** The seat this tab holds in a room: what a reloaded pad needs to rejoin without a tap. */
+export interface Seat extends Profile {
+  room: string;
+}
+
 const PROFILE_KEY = 'gamergang.pad.profile';
 const CLIENT_ID_KEY = 'gamergang.pad.clientId';
+const SEAT_KEY = 'gamergang.pad.seat';
 
 function isColour(value: unknown): value is ColourId {
   return PLAYER_COLOURS.some((c) => c.id === value);
@@ -53,4 +59,41 @@ export function clientId(): string {
     sessionStorage.setItem(CLIENT_ID_KEY, id);
   }
   return id;
+}
+
+/**
+ * The seat this tab joined in `room`, or null. Kept in sessionStorage next to the client id it
+ * belongs to: the TV knows the player by that id, so a seat is only meaningful in the same tab.
+ * A fresh phone or tab has none and gets the join screen.
+ */
+export function loadSeat(room: string): Seat | null {
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(SEAT_KEY) ?? 'null') as Partial<Seat> | null;
+    if (raw?.room !== room || !playerNameSchema.safeParse(raw.name).success) return null;
+    if (!isColour(raw.colour)) return null;
+    return {
+      room,
+      name: String(raw.name),
+      colour: raw.colour,
+      mode: raw.mode === 'buttons' ? 'buttons' : 'drag',
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function saveSeat(seat: Seat): void {
+  try {
+    sessionStorage.setItem(SEAT_KEY, JSON.stringify(seat));
+  } catch {
+    // Without storage a reload shows the join screen, as before.
+  }
+}
+
+export function clearSeat(): void {
+  try {
+    sessionStorage.removeItem(SEAT_KEY);
+  } catch {
+    // Nothing stored, nothing to clear.
+  }
 }

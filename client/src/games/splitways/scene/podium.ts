@@ -2,6 +2,7 @@
  * Results ceremony: the top three cars turning slowly on their podium blocks under spotlights,
  * with confetti raining on the winner. Its own little scene, rendered full screen after the race.
  */
+import { colourHex, type CarId, type ColourId } from '@gamergang/shared';
 import {
   BoxGeometry,
   Color,
@@ -27,7 +28,8 @@ import { canvasTexture } from './textures';
 
 export interface PodiumEntry {
   place: 1 | 2 | 3;
-  colourHex: string;
+  car: CarId;
+  paint: ColourId;
 }
 
 const BLOCK = { width: 5.4, depth: 6 };
@@ -118,7 +120,7 @@ export class Podium {
 
       const pivot = new Group();
       pivot.position.set(X[entry.place], height, 0);
-      const visual = models.create(entry.colourHex);
+      const visual = models.create(entry.car, entry.paint);
       visual.root.position.set(0, 0.03, 0);
       pivot.add(visual.root);
       scene.add(pivot);
@@ -140,7 +142,7 @@ export class Podium {
     );
     const winner = entries.find((e) => e.place === 1);
     const palette = [
-      winner?.colourHex ?? '#ffd60a',
+      winner ? colourHex(winner.paint) : '#ffd60a',
       '#ffd60a',
       '#ffffff',
       '#ff4fb0',

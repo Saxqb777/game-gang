@@ -4,8 +4,11 @@
  * receive inputs, and tells the hub when it has finished.
  */
 import {
+  DEFAULT_CAR_ID,
+  LOCAL_CAR_ORDER,
   MAX_PLAYERS,
   PLAYER_COLOURS,
+  type CarId,
   type ColourId,
   type GameAction,
   type GameId,
@@ -22,7 +25,10 @@ import type { HostTransportEvents, HostTransportPort, RoomInfo } from '../net/ho
 export interface HubPlayer {
   id: string;
   name: string;
+  /** Paint and identity colour (D-C1); unique per seat. */
   colour: ColourId;
+  /** Cars may repeat; only the paint is unique. */
+  car: CarId;
   slot: number;
   ready: boolean;
   connected: boolean;
@@ -172,7 +178,10 @@ export class Hub {
 
   addLocalPlayer(id: string, name: string): void {
     if (this.player(id) || this.state.players.length >= MAX_PLAYERS) return;
-    this.addPlayer(id, name, this.firstFreeColour(), true);
+    // A fixed order by local index, so a bot soak runs different cars (D-C10).
+    const localCount = this.state.players.filter((p) => p.local).length;
+    const car = LOCAL_CAR_ORDER[localCount % LOCAL_CAR_ORDER.length] ?? DEFAULT_CAR_ID;
+    this.addPlayer(id, name, this.firstFreeColour(), car, true);
   }
 
   removeLocalPlayer(id: string): void {
@@ -256,13 +265,15 @@ export class Hub {
       // Same peer id: a link reconnect, a reloaded pad claiming its seat back, or an edit.
       clearTimeout(this.removalTimers.get(peerId));
       this.removalTimers.delete(peerId);
-      // A car already on track keeps its paint and name tag, so the pad must not drift from it.
+      // A car already on track keeps its model, paint and name tag, so the pad must not drift
+      // from it. A rejoin restores what the TV holds, whatever the reloaded pad remembered.
       const locked = existing.inGame && this.state.phase !== 'lobby';
       if (message.rejoin || locked) {
         this.patchPlayer(peerId, { connected: true });
       } else {
         const colour = this.isColourFree(message.colour, peerId) ? message.colour : existing.colour;
-        this.patchPlayer(peerId, { name: message.name, colour, connected: true });
+        const car = message.car ?? existing.car;
+        this.patchPlayer(peerId, { name: message.name, colour, car, connected: true });
       }
       if (existing.inGame && !existing.connected) this.session?.onPlayerConnection(peerId, true);
       clearTimeout(this.abandonTimer);
@@ -272,7 +283,8 @@ export class Hub {
         return;
       }
       const colour = this.isColourFree(message.colour) ? message.colour : this.firstFreeColour();
-      this.addPlayer(peerId, message.name, colour, false);
+      // An older pad sends no car: it gets the default.
+      this.addPlayer(peerId, message.name, colour, message.car ?? DEFAULT_CAR_ID, false);
     }
     const player = this.player(peerId);
     const seatKey = this.seatKeys.get(peerId);
@@ -283,6 +295,7 @@ export class Hub {
         playerId: peerId,
         seatKey,
         colour: player.colour,
+        car: player.car,
         slot: player.slot,
       });
     }
@@ -325,7 +338,7 @@ export class Hub {
 
   // ---- State helpers ---------------------------------------------------------
 
-  private addPlayer(id: string, name: string, colour: ColourId, local: boolean): void {
+  private addPlayer(id: string, name: string, colour: ColourId, car: CarId, local: boolean): void {
     const taken = new Set(this.state.players.map((p) => p.slot));
     let slot = 0;
     while (taken.has(slot)) slot++;
@@ -334,6 +347,7 @@ export class Hub {
       id,
       name,
       colour,
+      car,
       slot,
       ready: false,
       connected: true,
@@ -412,15 +426,18 @@ export class Hub {
       room: this.state.room?.code ?? 'XXXX',
       game: this.game,
       state: this.state.phase,
-      players: this.state.players.map(({ id, name, colour, ready, connected, inGame, slot }) => ({
-        id,
-        name,
-        colour,
-        ready,
-        connected,
-        inGame,
-        slot,
-      })),
+      players: this.state.players.map(
+        ({ id, name, colour, car, ready, connected, inGame, slot }) => ({
+          id,
+          name,
+          colour,
+          car,
+          ready,
+          connected,
+          inGame,
+          slot,
+        }),
+      ),
       votes: [...this.state.votes],
       votesNeeded: this.votesNeeded(),
     };

@@ -5,6 +5,7 @@
  */
 import {
   colourHex,
+  type CarId,
   type ColourId,
   type GameAction,
   type InputMessage,
@@ -75,6 +76,7 @@ export interface GamePlayer {
   id: string;
   name: string;
   colour: ColourId;
+  car: CarId;
   slot: number;
   /** Plays on the TV keyboard. */
   local: boolean;
@@ -84,6 +86,7 @@ export interface RaceResult {
   id: string;
   name: string;
   colour: ColourId;
+  car: CarId;
   place: number;
   totalMs: number | null;
   bestLapMs: number | null;
@@ -230,7 +233,7 @@ export class SplitWaysGame {
       const track = await loadTrack1();
       const terrain = new Terrain(track);
       const [models, world, skyTexture] = await Promise.all([
-        CarModelLibrary.load(),
+        CarModelLibrary.load(players.map((p) => p.car)),
         WorldVisual.create(track, terrain, preset),
         Sky.loadTexture(),
       ]);
@@ -305,7 +308,7 @@ export class SplitWaysGame {
     let nextKeySet = 0;
     this.drivers = ordered.map((player, index) => {
       const car = cars[index] as Car;
-      const visual = models.create(colourHex(player.colour));
+      const visual = models.create(player.car, player.colour);
       const tag = createNameTag(player.name, colourHex(player.colour));
       this.scene.add(visual.root, tag);
       // Keyboard players get a key set each; with no keyboard players WASD also drives the first car.
@@ -873,6 +876,7 @@ export class SplitWaysGame {
         id: driver.player.id,
         name: driver.player.name,
         colour: driver.player.colour,
+        car: driver.player.car,
         place: racer.place,
         totalMs: racer.finishedMs,
         bestLapMs: racer.bestLapMs,
@@ -880,7 +884,8 @@ export class SplitWaysGame {
     });
     const entries: PodiumEntry[] = results.slice(0, 3).map((result, i) => ({
       place: (i + 1) as 1 | 2 | 3,
-      colourHex: colourHex(result.colour),
+      car: result.car,
+      paint: result.colour,
     }));
     this.podium = new Podium(this.models, entries, this.scene.environment);
     this.hudLayer.hidden = true;

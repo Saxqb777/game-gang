@@ -12,6 +12,7 @@ export const PHYSICS = {
   gravity: 13,
 } as const;
 
+/** Reference car (D-C3): the track planner's car and the base every car in `CARS` builds on. */
 export const CAR = {
   /** Total mass. More mass = harder to push around in bumps, same acceleration (forces scale with it). */
   mass: 1300,
@@ -29,6 +30,7 @@ export const CAR = {
   bodyFriction: 0.4,
 } as const;
 
+/** Reference car (D-C3) wheels; suspension settings apply to every car. */
 export const WHEELS = {
   /** Matches the car model: wheel centres at x = +-0.79, z = +-1.29, 0.32 above the ground. */
   halfTrack: 0.79,
@@ -48,6 +50,7 @@ export const WHEELS = {
   maxSuspensionForce: 80_000,
 } as const;
 
+/** Reference car (D-C3) tyres. */
 export const TYRES = {
   /** Grip (friction coefficient). ~1 is a road car, 2+ is arcade-sticky. */
   frontGrip: 1.9,
@@ -56,6 +59,7 @@ export const TYRES = {
   sideStiffness: 1.0,
 } as const;
 
+/** Reference car (D-C3) engine. */
 export const ENGINE = {
   /** Peak driving force at a standstill. Higher = faster 0-100. */
   force: 11_500,
@@ -71,6 +75,7 @@ export const ENGINE = {
   rollingResistance: 180,
 } as const;
 
+/** Reference car (D-C3) brakes. */
 export const BRAKES = {
   /** Braking impulse per wheel per physics step. Higher = shorter stopping distance. */
   impulse: 62,
@@ -102,6 +107,252 @@ export const DRIFT = {
   brakeOversteerMinSteer: 0.25,
   /** While sliding, power + opposite lock helps the car straighten up again. */
   counterSteerAssist: 0.9,
+} as const;
+
+/**
+ * The five cars (keys = `CAR_IDS` order; a test checks). Each is the reference car (`CAR`, `WHEELS`,
+ * `TYRES`, `ENGINE`, `BRAKES`) plus these values: real geometry and a light handling character.
+ * Factors are 1 on the reference car. All cars aim at equal lap times on Kestrel Pines.
+ */
+export const CARS = {
+  nightjar: {
+    /** Measured from the runtime model (pnpm assets:cars prints it; the asset test checks it). */
+    geometry: {
+      /** Hub z = +-wheelbaseHalf from the axle midpoint. */
+      wheelbaseHalf: 1.471,
+      /** Hub x = +-halfTrack. */
+      halfTrackFront: 0.836,
+      halfTrackRear: 0.838,
+      /** Tyre radius; also the hub height above the ground at rest. */
+      radiusFront: 0.378,
+      radiusRear: 0.378,
+      /** Body size without mirrors. */
+      length: 4.73,
+      width: 2.01,
+      height: 1.35,
+    },
+    /** Kilograms. */
+    mass: 1400,
+    /** Centre of mass above the ground. Higher rolls more. */
+    comHeight: 0.28,
+    /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
+    comForward: -0.05,
+    /** Peak engine force at a standstill (N). */
+    force: 12_400,
+    /** Speed (m/s) where the engine runs out of push. */
+    topSpeed: 52,
+    /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
+    curve: 2,
+    /** Share of engine force on the front wheels. */
+    frontShare: 0.3,
+    /** Tyre grip (friction coefficient), front and rear. */
+    frontGrip: 1.9,
+    rearGrip: 1.82,
+    /** x reference braking deceleration. */
+    brake: 1,
+    /** x reference downforce per kg. */
+    downforce: 1,
+    /** x reference air drag. */
+    drag: 1,
+    /** x derived inertia; below 1 is snappier. */
+    inertia: 1,
+  },
+  scree: {
+    /** Measured from the runtime model (pnpm assets:cars prints it; the asset test checks it). */
+    geometry: {
+      /** Hub z = +-wheelbaseHalf from the axle midpoint. */
+      wheelbaseHalf: 1.153,
+      /** Hub x = +-halfTrack. */
+      halfTrackFront: 0.83,
+      halfTrackRear: 0.86,
+      /** Tyre radius; also the hub height above the ground at rest. */
+      radiusFront: 0.349,
+      radiusRear: 0.349,
+      /** Body size without mirrors. */
+      length: 3.96,
+      width: 2.0,
+      height: 1.34,
+    },
+    /** Kilograms. */
+    mass: 1200,
+    /** Centre of mass above the ground. Higher rolls more. */
+    comHeight: 0.28,
+    /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
+    comForward: 0,
+    /** Peak engine force at a standstill (N). */
+    force: 11_250,
+    /** Speed (m/s) where the engine runs out of push. */
+    topSpeed: 49,
+    /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
+    curve: 1.6,
+    /** Share of engine force on the front wheels. */
+    frontShare: 0.5,
+    /** Tyre grip (friction coefficient), front and rear. */
+    frontGrip: 1.98,
+    rearGrip: 1.92,
+    /** x reference braking deceleration. */
+    brake: 1,
+    /** x reference downforce per kg. */
+    downforce: 0.95,
+    /** x reference air drag. */
+    drag: 1,
+    /** x derived inertia; below 1 is snappier. */
+    inertia: 0.9,
+  },
+  haymaker: {
+    /** Measured from the runtime model (pnpm assets:cars prints it; the asset test checks it). */
+    geometry: {
+      /** Hub z = +-wheelbaseHalf from the axle midpoint. */
+      wheelbaseHalf: 1.524,
+      /** Hub x = +-halfTrack. */
+      halfTrackFront: 0.829,
+      halfTrackRear: 0.889,
+      /** Tyre radius; also the hub height above the ground at rest. */
+      radiusFront: 0.364,
+      radiusRear: 0.364,
+      /** Body size without mirrors. */
+      length: 4.77,
+      width: 2.17,
+      height: 1.4,
+    },
+    /** Kilograms. */
+    mass: 1500,
+    /** Centre of mass above the ground. Higher rolls more. */
+    comHeight: 0.28,
+    /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
+    comForward: 0.05,
+    /** Peak engine force at a standstill (N). */
+    force: 14_000,
+    /** Speed (m/s) where the engine runs out of push. */
+    topSpeed: 54.5,
+    /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
+    curve: 2.4,
+    /** Share of engine force on the front wheels. */
+    frontShare: 0.2,
+    /** Tyre grip (friction coefficient), front and rear. */
+    frontGrip: 1.84,
+    rearGrip: 1.7,
+    /** x reference braking deceleration. */
+    brake: 0.95,
+    /** x reference downforce per kg. */
+    downforce: 0.95,
+    /** x reference air drag. */
+    drag: 1,
+    /** x derived inertia; below 1 is snappier. */
+    inertia: 1.1,
+  },
+  zanna: {
+    /** Measured from the runtime model (pnpm assets:cars prints it; the asset test checks it). */
+    geometry: {
+      /** Hub z = +-wheelbaseHalf from the axle midpoint. */
+      wheelbaseHalf: 1.37,
+      /** Hub x = +-halfTrack. */
+      halfTrackFront: 0.833,
+      halfTrackRear: 0.945,
+      /** Tyre radius; also the hub height above the ground at rest. */
+      radiusFront: 0.357,
+      radiusRear: 0.376,
+      /** Body size without mirrors. */
+      length: 4.79,
+      width: 2.05,
+      height: 1.21,
+    },
+    /** Kilograms. */
+    mass: 1350,
+    /** Centre of mass above the ground. Higher rolls more. */
+    comHeight: 0.28,
+    /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
+    comForward: -0.15,
+    /** Peak engine force at a standstill (N). */
+    force: 12_900,
+    /** Speed (m/s) where the engine runs out of push. */
+    topSpeed: 54,
+    /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
+    curve: 2.2,
+    /** Share of engine force on the front wheels. */
+    frontShare: 0.25,
+    /** Tyre grip (friction coefficient), front and rear. */
+    frontGrip: 1.92,
+    rearGrip: 1.76,
+    /** x reference braking deceleration. */
+    brake: 1.05,
+    /** x reference downforce per kg. */
+    downforce: 1.05,
+    /** x reference air drag. */
+    drag: 1,
+    /** x derived inertia; below 1 is snappier. */
+    inertia: 0.9,
+  },
+  sagitta: {
+    /** Measured from the runtime model (pnpm assets:cars prints it; the asset test checks it). */
+    geometry: {
+      /** Hub z = +-wheelbaseHalf from the axle midpoint. */
+      wheelbaseHalf: 1.255,
+      /** Hub x = +-halfTrack. */
+      halfTrackFront: 0.826,
+      halfTrackRear: 0.826,
+      /** Tyre radius; also the hub height above the ground at rest. */
+      radiusFront: 0.375,
+      radiusRear: 0.375,
+      /** Body size without mirrors. */
+      length: 4.65,
+      width: 2.0,
+      height: 1.1,
+    },
+    /** Kilograms. */
+    mass: 1450,
+    /** Centre of mass above the ground. Higher rolls more. */
+    comHeight: 0.28,
+    /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
+    comForward: -0.08,
+    /** Peak engine force at a standstill (N). */
+    force: 13_900,
+    /** Speed (m/s) where the engine runs out of push. */
+    topSpeed: 50.5,
+    /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
+    curve: 1.5,
+    /** Share of engine force on the front wheels. */
+    frontShare: 0.45,
+    /** Tyre grip (friction coefficient), front and rear. */
+    frontGrip: 1.9,
+    rearGrip: 1.86,
+    /** x reference braking deceleration. */
+    brake: 1.05,
+    /** x reference downforce per kg. */
+    downforce: 1.15,
+    /** x reference air drag. */
+    drag: 1,
+    /** x derived inertia; below 1 is snappier. */
+    inertia: 1,
+  },
+} as const;
+
+/**
+ * Car paint per player colour (D-C1; keys = `PLAYER_COLOURS` order, a test checks). The UI keeps the
+ * bright identity hex; the paint is a deeper tone so it does not glow under ACES tone mapping and bloom.
+ * `hex` is sRGB; metalness and roughness are the base coat, clearcoat sits on top.
+ */
+export const PAINTS = {
+  red: { hex: 0xb3121a, metalness: 0.6, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.05 },
+  orange: {
+    hex: 0xd9560f,
+    metalness: 0.5,
+    roughness: 0.34,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+  },
+  yellow: {
+    hex: 0xe8b90c,
+    metalness: 0.2,
+    roughness: 0.38,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+  },
+  lime: { hex: 0x6fc219, metalness: 0.45, roughness: 0.36, clearcoat: 1, clearcoatRoughness: 0.05 },
+  cyan: { hex: 0x11a9b5, metalness: 0.55, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.05 },
+  blue: { hex: 0x1746c9, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 },
+  purple: { hex: 0x5a2bb8, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 },
+  pink: { hex: 0xd22a86, metalness: 0.5, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.05 },
 } as const;
 
 export const ASSISTS = {

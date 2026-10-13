@@ -117,7 +117,7 @@ export default function SplitWaysStage({ hub }: { hub: Hub }) {
     const players = hub
       .getState()
       .players.filter((p) => p.inGame)
-      .map(({ id, name, colour, slot, local }) => ({ id, name, colour, slot, local }));
+      .map(({ id, name, colour, car, slot, local }) => ({ id, name, colour, car, slot, local }));
 
     const flags = readBenchFlags(window.location.search);
     const telemetry = createTelemetryClient(hub, () => game?.rendererInfo() ?? null);

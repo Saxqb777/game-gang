@@ -21,6 +21,7 @@
     "test": "vitest run",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
     "assets:car": "node client/scripts/build-car-model.mjs",
+    "assets:cars": "tsx client/scripts/build-cars.mjs",
     "assets:track": "tsx client/scripts/check-track.mjs"
   },
   "devDependencies": {

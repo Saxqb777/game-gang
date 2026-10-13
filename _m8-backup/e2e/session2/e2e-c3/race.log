@@ -1,0 +1,31 @@
+15:11:20 TV game loaded in 78 s
+15:11:20 overlay autopilot line: B benchmark  P autopilot  N next checkpoint  R resolution
+15:13:52 PASS [2.9-1] race started: lap clocks running
+15:15:08 screenshot /tmp/claude-0/e2e-c3/c3-midrace.png
+15:16:08 overlay: Keys WASD -0.07 1.00 0.00 - - 84 -1° - 1 1 1 | Keys Arrows -0.10 1.00 0.00 - - 84 1° - 2 1 1 | Bot 3 0.25 1.00 0.00 - - 84 0° - 3 1 1 | Bot 4 0.01 1.00 0.00 - - 96 0° - 4 1 1
+15:17:08 overlay: Keys WASD -1.00 1.00 0.00 - - 102 -25° - 1 1 1 | Keys Arrows -0.10 1.00 0.00 - - 114 -0° - 2 1 1 | Bot 3 0.06 1.00 0.00 - - 114 0° - 3 1 1 | Bot 4 -0.05 1.00 0.00 - - 114 -0° - 4 1 1
+15:18:08 overlay: Keys WASD -1.00 1.00 0.00 - - 24 -20° - 4 1 1 | Keys Arrows 0.00 1.00 0.00 - - 141 -0° - 1 1 1 | Bot 3 0.06 0.00 0.00 - - 141 0° - 2 1 1 | Bot 4 -0.03 1.00 0.00 - - 141 -0° - 3 1 1
+15:19:08 overlay: Keys WASD 0.02 1.00 0.00 - - 85 0° - 4 1 1 | Keys Arrows -0.00 0.00 0.00 - - 103 -0° - 1 1 2 | Bot 3 0.07 0.00 0.00 - - 103 0° - 3 1 2 | Bot 4 -0.03 0.00 1.00 - - 103 0° - 2 1 2
+15:20:08 overlay: Keys WASD 0.00 0.00 1.00 - - 101 0° - 4 1 2 | Keys Arrows -0.07 0.00 0.00 - - 88 -0° - 1 1 2 | Bot 3 0.01 0.00 0.00 - - 82 -0° - 3 1 2 | Bot 4 -0.15 0.00 0.00 - - 82 -0° - 2 1 2
+15:20:14 screenshot /tmp/claude-0/e2e-c3/c3-driving.png
+15:20:35 N x8: Keys WASD -0.15 1.00 0.00 - - 0 0° - 4 1 6 | Keys Arrows -1.00 1.00 0.00 - - 0 0° - 1 1 6 | Bot 3 -1.00 1.00 0.00 - - 0 0° - 3 1 6 | Bot 4 -1.00 1.00 0.00 - - 0 0° - 2 1 6
+15:21:00 N x16: Keys WASD 1.00 1.00 0.00 - - 0 0° - 4 1 12 | Keys Arrows 1.00 1.00 0.00 - - 0 0° - 1 1 12 | Bot 3 1.00 1.00 0.00 - - 0 0° - 3 1 12 | Bot 4 0.26 1.00 0.00 - - 0 0° - 2 1 12
+15:21:24 N x24: Keys WASD 1.00 1.00 0.00 - - 0 0° - 4 1 16 | Keys Arrows 1.00 1.00 0.00 - - 0 0° - 1 1 16 | Bot 3 0.65 1.00 0.00 - - 0 0° - 3 1 16 | Bot 4 -0.22 1.00 0.00 - - 0 0° - 2 1 16
+15:21:48 N x32: Keys WASD 1.00 1.00 0.00 - - 0 0° - 4 2 4 | Keys Arrows 1.00 1.00 0.00 - - 0 0° - 1 2 4 | Bot 3 0.52 1.00 0.00 - - 0 0° - 3 2 4 | Bot 4 -0.28 1.00 0.00 - - 0 0° - 2 2 4
+15:22:12 N x40: Keys WASD -0.15 1.00 0.00 - - 0 0° - 4 2 9 | Keys Arrows -1.00 1.00 0.00 - - 0 0° - 1 2 9 | Bot 3 -1.00 1.00 0.00 - - 0 0° - 3 2 9 | Bot 4 -1.00 1.00 0.00 - - 0 0° - 2 2 9
+15:22:36 N x48: Keys WASD 1.00 1.00 0.00 - - 0 0° - 4 2 14 | Keys Arrows 1.00 1.00 0.00 - - 0 0° - 1 2 14 | Bot 3 0.29 1.00 0.00 - - 0 0° - 3 2 14 | Bot 4 -0.59 1.00 0.00 - - 0 0° - 2 2 14
+15:23:00 N x56: Keys WASD -0.19 1.00 0.00 - - 0 0° - 4 3 2 | Keys Arrows -1.00 1.00 0.00 - - 0 0° - 1 3 2 | Bot 3 -1.00 1.00 0.00 - - 0 0° - 3 3 2 | Bot 4 -1.00 1.00 0.00 - - 0 0° - 2 3 2
+15:23:25 N x64: Keys WASD -0.15 1.00 0.00 - - 0 0° - 4 3 6 | Keys Arrows -1.00 1.00 0.00 - - 0 0° - 1 3 6 | Bot 3 -1.00 1.00 0.00 - - 0 0° - 3 3 6 | Bot 4 -1.00 1.00 0.00 - - 0 0° - 2 3 6
+15:23:49 N x72: Keys WASD -0.28 1.00 0.00 - - 0 0° - 4 3 11 | Keys Arrows -1.00 1.00 0.00 - - 0 0° - 1 3 11 | Bot 3 -1.00 1.00 0.00 - - 0 0° - 3 3 11 | Bot 4 -1.00 1.00 0.00 - - 0 0° - 2 3 11
+15:24:13 N x80: Keys WASD 1.00 1.00 0.00 - - 0 0° - 4 3 16 | Keys Arrows 1.00 1.00 0.00 - - 0 0° - 1 3 16 | Bot 3 0.65 1.00 0.00 - - 0 0° - 3 3 16 | Bot 4 -0.22 1.00 0.00 - - 0 0° - 2 3 16
+15:24:36 pressed N 85 times
+15:24:36 PASS [2.9-1] autopilot race finished, results shown (567 s wall)
+15:24:36 result 1Keys Arrows0:16.45best 0:01.58
+15:24:36 result 2Bot 40:16.45best 0:01.58
+15:24:36 result 3Bot 30:16.45best 0:01.58
+15:24:36 result 4Keys WASD0:16.45best 0:01.58
+15:24:36 PASS [2.9-1] four finishers (4)
+15:24:43 screenshot /tmp/claude-0/e2e-c3/c3-results.png
+15:24:43 PASS [2.9-7] c3-race: no pageerror on the TV or any pad (0)
+15:24:43 console errors (informational): 0
+15:24:43 SUMMARY c3-race: 4 PASS, 0 FAIL

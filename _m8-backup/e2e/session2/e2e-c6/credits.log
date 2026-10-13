@@ -1,0 +1,33 @@
+14:34:16 screenshot /tmp/claude-0/e2e-c6/c6-landing-desktop.png
+14:34:17 PASS [2.9-1] footer link opens /credits (http://localhost:5500/credits)
+14:34:17 PASS [2.9-1] five car credits (5)
+14:34:17 PASS [2.9-1] page mentions Dashwood Nightjar
+14:34:17 PASS [2.9-1] page mentions Arvanta Sagitta
+14:34:17 PASS [2.9-1] page mentions CC BY 4.0
+14:34:17 PASS [2.9-1] page mentions CC0 1.0
+14:34:17 PASS [2.9-1] page mentions Modified:
+14:34:17 PASS [2.9-1] page mentions Poly Haven
+14:34:17 PASS [2.9-1] page mentions Chakra Petch
+14:34:17 PASS [2.9-1] page mentions Rapier
+14:34:17 PASS [2.9-1] page mentions Kestrel Pines
+14:34:17 PASS [2.9-1] page mentions Synthesised
+14:34:17 screenshot /tmp/claude-0/e2e-c6/c6-credits-desktop.png
+14:34:18 PASS [2.9-1] phone: no horizontal scroll (0)
+14:34:19 screenshot /tmp/claude-0/e2e-c6/c6-credits-phone.png
+14:34:19 screenshot /tmp/claude-0/e2e-c6/c6-landing-phone.png
+14:34:21 screenshot /tmp/claude-0/e2e-c6/c6-landing-phone-landscape.png
+14:34:24 PASS [2.9-2] lobby key hint: K keyboard player · Enter ready · F fullscreen · C credits
+14:34:24 PASS [2.9-2] TV body text 24.96 px at 1080p
+14:34:24 FAIL [2.9-2] TV panel fits one screen (1370 / 1080)
+14:34:26 screenshot /tmp/claude-0/e2e-c6/c6-tv-credits.png
+14:34:26 PASS [2.9-2] Esc closes
+14:34:26 PASS [2.9-2] C opens again
+14:34:26 PASS [2.9-2] C toggles closed
+14:35:55 TV game loaded in 89 s
+14:35:57 PASS [2.9-2] C ignored in a game
+14:35:57 PASS [2.9-2] .sw-canvas exists
+14:36:13 PASS [2.9-2] back in lobby, credits stay closed
+14:36:13 PASS [2.9-7] c6-credits: no pageerror on the TV or any pad (0)
+14:36:13 console errors (informational): 0
+14:36:13 SUMMARY c6-credits: 22 PASS, 1 FAIL
+14:36:13   FAIL [2.9-2] TV panel fits one screen (1370 / 1080)

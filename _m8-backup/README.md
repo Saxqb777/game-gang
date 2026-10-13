@@ -51,3 +51,19 @@ Nothing from Speed Dreams is included.
 - e2e/e2e-int has the section 2.9 acceptance scripts (run-all.sh).
 - Owner plan: M8 live, then the cars update (5 debranded cars, car select, paint), then Track 1 polish;
   owner tests once at the end. cars-v2/ and cars/CARS-SPEC.md hold the partial car prep, if any.
+
+## Update 2026-10-13 (paused by owner, project thread "air game sesh")
+
+Branch tips (all reachable from this branch through the "ours" merge):
+
+| Branch | Commit | State |
+|---|---|---|
+| `m8/p5-fix` | b9173cc | P5 + integration merged + blob AO fix. Gate green (182 tests). P5 browser run partly done (heroes, views2/3/4); gravel, bench and 4-car race not run. |
+| `m8/p6-docs` | fe545e9 | P6 draft + P5 merged + ROADMAP order (cars before polish). PROGRESS M8 entry still to write. |
+| `cars/integration` | 32215e5 | M8 (p5-fix) + C1 foundation + C6 credits code. Cars gate green (207 tests). |
+| `cars/c2-assets` | 40582fb | C2a asset pipeline, WIP (interrupted). |
+| `cars/c3-handling` | 1bdff7d | C3 handling, nearly done (pre-handoff merge done, not reviewed). |
+| `cars/c4-select` | 6131f5a | C4 phone car select, nearly done (browser 22/22, pre-handoff merge done). |
+
+Next: finish C2a, C3, C4 → merge; C5 visuals; C2b real cars; C7 balance; C6 docs; §2.11; M8 §2.9; Track 1 polish; then ONE live push of everything (owner wants the finished game live at once; production = claude/gracious-bell-2pgra5).
+Agent prompt template: plan/cars-common.txt; gate: plan/cars-gate.sh. Browser scripts from this session: e2e/session2/.

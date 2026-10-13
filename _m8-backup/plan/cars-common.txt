@@ -1,0 +1,17 @@
+You implement one package of the "cars update" for the Split Ways browser racing game (Gamer Gang: TV page /tv, phones as controllers at /pad; three.js r186, Rapier, React/Vite, TypeScript). Never call any mcp__hearthbot__ tool.
+
+Spec: /home/claude/m8-wt/backup/_m8-backup/cars/CARS-SPEC.md. Read section 0 (rules), 1, 2.1, 2.2, your package section, every section-3 contract your package touches, section 4 and section 5. Follow it exactly; where it is ambiguous, pick the reasonable choice and list it as a deviation.
+
+Path mapping (the spec was written on another machine):
+- Never use the main checkout /home/claude/game-gang or any /home/claude/m8-wt/* worktree (except reading the backup folder below).
+- Spec worktree /home/user/cars-wt/<x> → /home/claude/cars-wt/<x>. Your worktree and branch are given below; it was created from cars/integration (M8 complete + C1 foundation merged) and pnpm install is done.
+- `SCR/carkit` (KIT/) → /home/claude/m8-wt/backup/_m8-backup/carkit ; `SCR/cars-v2` (V2/) → /home/claude/m8-wt/backup/_m8-backup/cars-v2. V2/ is ALREADY DELIVERED: all five debranded cars with NOTES.md and CREDITS.md. Treat both as read-only data; never run tools from inside them.
+- Cars gate: `sh /tmp/claude-0/cars-gate.sh` in your worktree root.
+- Browser checks: Playwright installed globally (NODE_PATH=$(npm root -g)); Chromium at /opt/pw-browsers/chromium-1194/chrome-linux/chrome with --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist. Headless SwiftShader is very slow (TV load 30-90 s, races in slow motion), so keep browser checks short and few. Helpers to copy from: /tmp/claude-0/e2e-p5/lib.cjs, /tmp/claude-0/e2e-c1/smoke.cjs, /tmp/claude-0/e2e-rejoin/. Put scripts in /tmp/claude-0/e2e-<pkg>/, run each under `flock /tmp/claude-0/cars-browser.lock`. Use your package's ports from spec 2.1; start only your own dev server and stop it at the end.
+
+Rules: never push, never deploy, never create or copy a .env, no new npm dependencies (pnpm-lock.yaml must not change). Stay inside the files/regions your package owns (spec 2.2). Commit locally on your branch only, with commit messages ending in exactly:
+Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WfTcjf13jCaxDkXpVDgBmt
+(use git -c user.name=Claude -c user.email=noreply@anthropic.com). Before finishing, do the pre-handoff `git merge cars/integration` and re-run the gate.
+
+Return a short report: what you did, gate output tail, test counts, browser results with screenshot paths, deviations with reasons, bugs found outside your package, open issues.

@@ -1,0 +1,9 @@
+13:34:14 TV loaded in 38 s
+13:34:16 2P grid: preset MEDIUM viewports 2 draws 328 tris 1.8M programs 33 late 0
+13:34:16 PASS 2P: no shader compiled after the loading screen (late 0)
+13:34:47 screenshot /tmp/claude-0/e2e-p5/p5-views2-grid.png
+14:05:20 2P mid-lap (Kestrel): preset MEDIUM viewports 2 draws 228 tris 1.6M programs 33 late 0
+14:05:20 PASS 2P: no late shader mid-lap (late 0)
+14:05:44 screenshot /tmp/claude-0/e2e-p5/p5-views2-midlap.png
+14:05:44 PASS no pageerror (0)
+14:05:44 PASS no console or WebGL errors (0)

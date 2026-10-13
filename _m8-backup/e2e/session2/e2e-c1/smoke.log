@@ -1,0 +1,22 @@
+14:21:49 room KGRS
+14:21:53 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"lobby","players":[],"votes":[],"votesNeeded":1}
+14:21:54 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"lobby","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":false,"connected":true,"inGame":false,"slot":0}],"votes":[],"votesNeeded":1}
+14:21:54 [pad msg] {"type":"joined","playerId":"io8pqvadc88zlzx7","seatKey":"01avj0464pyczda4n60xtpo5","colour":"red","car":"nightjar","slot":0}
+14:21:55 PASS [2.9-1] joined carries car nightjar
+14:21:55 PASS [2.9-1] pad lobby messages carry car 'nightjar' (1 with players)
+14:21:55 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"lobby","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":true,"inGame":false,"slot":0}],"votes":[],"votesNeeded":1}
+14:21:55 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"playing","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":true,"inGame":true,"slot":0}],"votes":[],"votesNeeded":1}
+14:22:32 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"playing","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":false,"inGame":true,"slot":0}],"votes":[],"votesNeeded":1}
+14:22:32 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"playing","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":true,"inGame":true,"slot":0}],"votes":[],"votesNeeded":1}
+14:22:32 [pad msg] {"type":"joined","playerId":"io8pqvadc88zlzx7","seatKey":"01avj0464pyczda4n60xtpo5","colour":"red","car":"nightjar","slot":0}
+14:22:48 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"playing","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":false,"inGame":true,"slot":0}],"votes":[],"votesNeeded":1}
+14:22:48 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"playing","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":true,"inGame":true,"slot":0}],"votes":[],"votesNeeded":1}
+14:22:48 [pad msg] {"type":"joined","playerId":"io8pqvadc88zlzx7","seatKey":"01avj0464pyczda4n60xtpo5","colour":"red","car":"nightjar","slot":0}
+14:23:19 TV game loaded in 84 s
+14:24:07 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"playing","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":false,"inGame":true,"slot":0}],"votes":[],"votesNeeded":1}
+14:24:07 [pad msg] {"type":"lobby","room":"KGRS","game":"splitways","state":"playing","players":[{"id":"io8pqvadc88zlzx7","name":"Cara","colour":"red","car":"nightjar","ready":true,"connected":true,"inGame":true,"slot":0}],"votes":[],"votesNeeded":1}
+14:24:07 [pad msg] {"type":"joined","playerId":"io8pqvadc88zlzx7","seatKey":"01avj0464pyczda4n60xtpo5","colour":"red","car":"nightjar","slot":0}
+14:24:52 PASS [2.9-1] race started: lap clock running
+14:24:55 PASS [2.9-7] c1-smoke: no pageerror on the TV or any pad (0)
+14:24:55 console errors (informational): 0
+14:24:55 SUMMARY c1-smoke: 4 PASS, 0 FAIL

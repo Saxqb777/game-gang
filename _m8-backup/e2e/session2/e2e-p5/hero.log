@@ -1,0 +1,25 @@
+12:10:12 TV loaded in 32 s
+12:10:14 grid overlay: preset HIGH draws 155 tris 1.3M programs 33 late 0
+12:10:58 screenshot /tmp/claude-0/e2e-p5/hero-grid.png
+12:14:45 t1-millrace (268 m, t=10.6 s): preset HIGH draws 107 tris 856k late 0
+12:15:05 screenshot /tmp/claude-0/e2e-p5/hero-t1-millrace.png
+12:16:10 t1-apex (305 m, t=12.1 s): preset HIGH draws 124 tris 975k late 0
+12:16:29 screenshot /tmp/claude-0/e2e-p5/hero-t1-apex.png
+12:25:43 brow (1022 m, t=30.4 s): preset HIGH draws 149 tris 1.3M late 0
+12:26:17 screenshot /tmp/claude-0/e2e-p5/hero-brow.png
+12:30:08 windhover (1330 m, t=36.8 s): preset HIGH draws 133 tris 1.3M late 0
+12:30:42 screenshot /tmp/claude-0/e2e-p5/hero-windhover.png
+12:34:05 kestrel (1715 m, t=46.1 s): preset HIGH draws 107 tris 1.1M late 0
+12:34:31 screenshot /tmp/claude-0/e2e-p5/hero-kestrel.png
+12:39:06 kestrel-exit (1830 m, t=49.5 s): preset HIGH draws 273 tris 2.1M late 0
+12:39:36 screenshot /tmp/claude-0/e2e-p5/hero-kestrel-exit.png
+12:48:10 beck (2262 m, t=61.8 s): preset HIGH draws 224 tris 1.9M late 0
+12:48:40 screenshot /tmp/claude-0/e2e-p5/hero-beck.png
+12:52:25 hollow (2468 m, t=67.6 s): preset HIGH draws 173 tris 1.4M late 0
+12:53:02 screenshot /tmp/claude-0/e2e-p5/hero-hollow.png
+12:58:30 switchback (3036 m, t=84.7 s): preset HIGH draws 91 tris 961k late 0
+12:58:49 screenshot /tmp/claude-0/e2e-p5/hero-switchback.png
+13:00:42 switchback-exit (3105 m, t=87.4 s): preset HIGH draws 162 tris 1.3M late 0
+13:01:16 screenshot /tmp/claude-0/e2e-p5/hero-switchback-exit.png
+13:01:16 PASS no pageerror (0)
+13:01:16 console errors: 0

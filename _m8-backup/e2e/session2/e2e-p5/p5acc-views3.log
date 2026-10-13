@@ -1,0 +1,11 @@
+14:28:31 TV loaded in 37 s
+14:28:32 3P grid: preset LOW viewports 4 draws 571 tris 1.8M programs 32 late 0
+14:28:32 PASS 3P: no shader compiled after the loading screen (late 0)
+14:28:59 screenshot /tmp/claude-0/e2e-p5/p5-views3-grid.png
+15:31:51 3P mid-lap (Kestrel): preset LOW viewports 4 draws 522 tris 1.9M programs 32 late 0
+15:31:51 PASS 3P: no late shader mid-lap (late 0)
+15:32:36 screenshot /tmp/claude-0/e2e-p5/p5-views3-midlap.png
+15:32:36 tile 0 0,0 638x358 mean 136 std 58.8 | tile 1 642,0 638x358 mean 156 std 72.3 | tile 2 0,362 638x358 mean 154 std 70.2 | tile 3 642,362 638x358 mean 138 std 32.8 | seam h mean 6 std 1.2 | seam v mean 6 std 1.2 | OK
+15:32:36 PASS 3 views render with clean seams
+15:32:36 PASS no pageerror (0)
+15:32:36 PASS no console or WebGL errors (0)

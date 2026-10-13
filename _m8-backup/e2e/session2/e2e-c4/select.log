@@ -1,0 +1,40 @@
+15:26:53 room TLTL
+15:26:59 PASS [2.9-1] pad A picks the Haymaker with the arrows
+15:26:59 PASS [2.9-1] landscape join fits 844x390 without scrolling, Join visible ({"scroll":0,"join":true,"overflowX":0})
+15:27:00 screenshot /tmp/claude-0/e2e-c4/c4-padA-join-landscape.png
+15:27:06 PASS [2.9-1] pad B swipes twice to the Haymaker (Brazen Haymaker)
+15:27:06 PASS [2.9-1] pad B's card says who else drives it ("Also: Sara")
+15:27:06 PASS [2.9-1] red (Inferno) is disabled on pad B
+15:27:07 screenshot /tmp/claude-0/e2e-c4/c4-padB-join-landscape.png
+15:27:08 PASS [2.9-1] portrait join: Join visible (sticky), no sideways overflow ({"scroll":39,"join":true,"overflowX":0})
+15:27:08 screenshot /tmp/claude-0/e2e-c4/c4-padB-join-portrait.png
+15:27:09 screenshot /tmp/claude-0/e2e-c4/c4-padB-join-portrait-scrolled.png
+15:27:10 TV slots: [{"name":"Sara","car":"Brazen Haymaker","paint":"#ff3b3b","colour":"#ff3b3b","thumb":true,"connected":true},{"name":"Ben","car":"Brazen Haymaker","paint":"#2f7bff","colour":"#2f7bff","thumb":true,"connected":true}]
+15:27:10 PASS [2.9-1] TV: Sara in a red Haymaker
+15:27:10 PASS [2.9-1] TV: Ben in a blue Haymaker
+15:27:15 screenshot tv lobby
+15:27:15 screenshot /tmp/claude-0/e2e-c4/c4-padA-lobby-landscape.png
+15:27:15 screenshot /tmp/claude-0/e2e-c4/c4-padB-lobby-landscape.png
+15:27:17 screenshot /tmp/claude-0/e2e-c4/c4-padB-lobby-portrait.png
+15:27:17 PASS [2.9-2] edit opens on the current car (Brazen Haymaker)
+15:27:18 PASS [2.9-2] previous arrow goes to the Scree
+15:27:19 PASS [2.9-2] TV slot shows Ben's Scree in blue ({"name":"Ben","car":"Mudlark Scree","paint":"#2f7bff","colour":"#2f7bff","thumb":true,"connected":true})
+15:27:22 PASS [2.9-3] pad B rejoins after a reload without a tap (2745 ms, sawJoin false)
+15:27:24 PASS [2.9-3] after the reload: still Scree, blue, two players ({"name":"Ben","car":"Mudlark Scree","paint":"#2f7bff","colour":"#2f7bff","thumb":true,"connected":true})
+15:27:24 PASS [2.9-3] pad B's lobby card shows the Scree (Scree)
+15:28:28 TV game loaded in 64 s
+15:28:28 race lobby message cars: {"Sara":"haymaker/red","Ben":"scree/blue"}
+15:28:28 PASS [2.9-4] race: lobby message has Sara haymaker/red, Ben scree/blue
+15:31:32 PASS [2.9-4] race went green
+15:31:33 overlay mentions car ids: haymaker false, scree false (informational until C5)
+15:31:33 huds before reload: [{"name":"Sara","colour":"#ff3b3b","gear":false,"hint":"","lapTime":"0:00.1","fade":0},{"name":"Ben","colour":"#2f7bff","gear":false,"hint":"","lapTime":"0:00.1","fade":0}]
+15:31:36 PASS [2.9-5] pad A back on its controller after a mid-race reload (3587 ms)
+15:31:36 PASS [2.9-5] same viewport and colour (0/#ff3b3b, was 0/#ff3b3b)
+15:31:36 PASS [2.9-5] after reload the TV still has Sara as haymaker/red (haymaker/red)
+15:31:36 PASS [2.9-5] pad A's seat keeps the car ({"room":"TLTL","name":"Sara","colour":"red","car":"haymaker","mode":"drag","seatKey":"wziysmiropd2qioi9l1xmv48"})
+15:32:13 PASS [2.9-5] pad A drives again: Sara 0.46 1.00 0.00 - - 13 7° 1ms 1 0 0
+15:32:39 screenshot /tmp/claude-0/e2e-c4/c4-padA-race-after-reload.png
+15:32:39 total 351 s
+15:32:39 PASS [2.9-7] c4 select.cjs: no pageerror on the TV or any pad (0)
+15:32:39 console errors (informational): 0
+15:32:39 SUMMARY c4 select.cjs: 22 PASS, 0 FAIL

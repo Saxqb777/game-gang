@@ -50,3 +50,17 @@
   color: var(--muted);
   font-size: 14px;
 }
+
+/* A second grid row, so the footer never covers the choices on a short phone screen. */
+.landing {
+  grid-template-rows: 1fr auto;
+}
+
+.landing-footer {
+  padding-top: 24px;
+  font-size: 14px;
+}
+
+.landing-footer a {
+  color: var(--muted);
+}

@@ -1,5 +1,6 @@
 import './tv.css';
-import { Suspense, useEffect, useSyncExternalStore } from 'react';
+import { Suspense, useEffect, useState, useSyncExternalStore } from 'react';
+import { TvCredits } from '../credits/Credits';
 import type { Hub, HubState } from '../hub/hub';
 import { readBenchFlags } from '../games/splitways/debug/benchFlags';
 import { useSoundOn } from './audio';
@@ -23,7 +24,15 @@ const BOT_PLAYERS = [
 const BOTS = readBenchFlags(window.location.search).bots;
 const LOCAL_PLAYERS = BOTS ? [...KEYBOARD_PLAYERS, ...BOT_PLAYERS] : KEYBOARD_PLAYERS;
 
-function handleTvKey(hub: Hub, state: HubState, event: KeyboardEvent): void {
+/** Opens, closes or toggles the credits panel. */
+type SetCredits = (update: (open: boolean) => boolean) => void;
+
+function handleTvKey(
+  hub: Hub,
+  state: HubState,
+  event: KeyboardEvent,
+  setCredits: SetCredits,
+): void {
   if (event.target instanceof HTMLInputElement) return;
   switch (event.code) {
     case 'KeyF':
@@ -31,6 +40,7 @@ function handleTvKey(hub: Hub, state: HubState, event: KeyboardEvent): void {
       else void document.documentElement.requestFullscreen().catch(() => undefined);
       return;
     case 'Escape':
+      setCredits(() => false);
       hub.returnToLobby();
       return;
   }
@@ -49,6 +59,9 @@ function handleTvKey(hub: Hub, state: HubState, event: KeyboardEvent): void {
     }
     case 'Enter':
       for (const player of localPlayers) hub.toggleLocalReady(player.id);
+      return;
+    case 'KeyC':
+      setCredits((open) => !open);
       return;
   }
 }
@@ -81,7 +94,7 @@ function KeyHints({
       {phase === 'lobby' ? (
         <>
           <kbd>K</kbd> keyboard player{BOTS ? ' (then bots)' : ''} · <kbd>Enter</kbd> ready ·{' '}
-          <kbd>F</kbd> fullscreen
+          <kbd>F</kbd> fullscreen · <kbd>C</kbd> credits
         </>
       ) : (
         <>
@@ -98,13 +111,24 @@ export default function TvApp() {
   const state = useSyncExternalStore(hub.subscribe, hub.getState);
   const Stage = GAME_STAGES[hub.game];
   const soundOn = useSoundOn();
+  const [creditsOpen, setCreditsOpen] = useState(false);
+  const inLobby = state.phase === 'lobby';
+  // Credits belong to the lobby: a race that starts while they are open closes them for good
+  // (adjusted during render, React's pattern for state that follows a prop).
+  const [lobbyShown, setLobbyShown] = useState(inLobby);
+  if (lobbyShown !== inLobby) {
+    setLobbyShown(inLobby);
+    if (!inLobby) setCreditsOpen(false);
+  }
 
   useEffect(() => {
     document.title = 'Gamer Gang · TV';
   }, []);
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => handleTvKey(hub, hub.getState(), event);
+    const onKey = (event: KeyboardEvent) => {
+      handleTvKey(hub, hub.getState(), event, setCreditsOpen);
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [hub]);
@@ -122,6 +146,7 @@ export default function TvApp() {
         phase={state.phase}
         keyboardPlayers={state.players.filter((p) => p.local && p.inGame).length}
       />
+      {creditsOpen && inLobby ? <TvCredits /> : null}
       {soundOn ? null : <div className="tv-sound">Sound is off · click or press any key</div>}
     </div>
   );

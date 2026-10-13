@@ -20,6 +20,9 @@ export default function Landing() {
           </a>
         </div>
       </div>
+      <footer className="landing-footer">
+        <a href="/credits">Credits</a>
+      </footer>
     </main>
   );
 }

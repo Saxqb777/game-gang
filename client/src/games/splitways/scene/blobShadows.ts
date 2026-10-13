@@ -91,17 +91,25 @@ export class BlobShadows {
 
   /** Each frame: under each car, lying along its body, at the average of its wheel contacts. */
   update(cars: readonly Car[], alpha: number): void {
-    cars.forEach((car, i) => {
+    for (let i = 0; i < cars.length; i++) {
+      const car = cars[i] as Car;
       position.lerpVectors(car.prevPosition, car.position, alpha);
       quaternion.slerpQuaternions(car.prevQuaternion, car.quaternion, alpha);
+      // Only grounded wheels have fresh contacts; the others keep stale ones (zero at spawn).
+      // With none grounded the blob is invisible anyway, so its height does not matter.
       let y = 0;
-      for (const contact of car.wheelContact) y += contact.y;
-      position.y = y / car.wheelContact.length + LIFT;
+      let grounded = 0;
+      for (let k = 0; k < car.wheelContact.length; k++) {
+        if (!car.wheelInContact[k]) continue;
+        y += (car.wheelContact[k] as Vector3).y;
+        grounded++;
+      }
+      if (grounded) position.y = y / grounded + LIFT;
       scale.set(1, 1, 1);
       matrix.compose(position, quaternion, scale);
       this.mesh.setMatrixAt(i, matrix);
-      this.opacity.setX(i, car.groundedWheels / 4);
-    });
+      this.opacity.setX(i, grounded ? car.groundedWheels / 4 : 0);
+    }
     this.mesh.instanceMatrix.needsUpdate = true;
     this.opacity.needsUpdate = true;
   }

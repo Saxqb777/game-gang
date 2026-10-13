@@ -1,4 +1,4 @@
-import type { ColourId, PadMessage, TvMessage } from '@gamergang/shared';
+import type { CarId, ColourId, PadMessage, TvMessage } from '@gamergang/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { HostTransportEvents, HostTransportPort } from '../net/hostTransport';
 import { Hub, type GameSessionHandlers } from './hub';
@@ -41,22 +41,35 @@ function send(peerId: string, message: PadMessage): void {
   transport.events.onPeerMessage(peerId, message);
 }
 
-/** Joins like a real pad: with the seat key from the last `joined` this peer id received. */
-function join(peerId: string, name: string, colour: ColourId, rejoin?: boolean): void {
+/**
+ * Joins like a real pad: with the seat key from the last `joined` this peer id received.
+ * Without `car` it joins like an older pad that sends none.
+ */
+function join(peerId: string, name: string, colour: ColourId, rejoin?: boolean, car?: CarId): void {
   const seatKey = transport.joined(peerId)?.seatKey;
   send(peerId, {
     type: 'join',
     room: 'ABCD',
     name,
     colour,
+    ...(car ? { car } : {}),
     ...(rejoin ? { rejoin } : {}),
     ...(seatKey ? { seatKey } : {}),
   });
 }
 
-function connectAndJoin(peerId: string, name: string, colour: ColourId): void {
+function connectAndJoin(peerId: string, name: string, colour: ColourId, car?: CarId): void {
   transport.events.onPeerOpen(peerId);
-  join(peerId, name, colour);
+  join(peerId, name, colour, false, car);
+}
+
+/** The players as the last lobby message to this peer listed them. */
+function lastLobby(peerId: string): Extract<TvMessage, { type: 'lobby' }> | undefined {
+  return transport.sent
+    .filter((s) => s.peerId === peerId)
+    .map((s) => s.message)
+    .filter((m) => m.type === 'lobby')
+    .at(-1);
 }
 
 /** What a page reload looks like to the hub: the old link closes, a new one opens. */
@@ -89,19 +102,20 @@ afterEach(() => {
 describe('hub rejoin', () => {
   it('gives a pad that reloads mid-race its own seat, car and colour back', () => {
     connectAndJoin(A, 'Ana', 'red');
-    connectAndJoin(B, 'Bo', 'blue');
+    connectAndJoin(B, 'Bo', 'blue', 'haymaker');
     startRace(A, B);
 
     reload(B);
     expect(hub.player(B)?.connected).toBe(false);
     expect(onPlayerConnection).toHaveBeenLastCalledWith(B, false);
 
-    // The pad's stored colour is stale here on purpose: the TV's paint must still win.
-    join(B, 'Bo', 'lime', true);
+    // The pad's stored colour and car are stale here on purpose: the TV's must still win.
+    join(B, 'Bo', 'lime', true, 'zanna');
     expect(hub.getState().players).toHaveLength(2);
     expect(hub.player(B)).toMatchObject({
       name: 'Bo',
       colour: 'blue',
+      car: 'haymaker',
       slot: 1,
       connected: true,
       inGame: true,
@@ -111,6 +125,7 @@ describe('hub rejoin', () => {
       type: 'joined',
       playerId: B,
       colour: 'blue',
+      car: 'haymaker',
       slot: 1,
     });
 
@@ -312,5 +327,84 @@ describe('hub leave', () => {
     expect(hub.getState().players.map((p) => p.id)).toEqual([A]);
     send(A, { type: 'ready', ready: true });
     expect(hub.getState().phase).toBe('playing');
+  });
+});
+
+describe('hub cars', () => {
+  it('keeps the car of a pad that reloads in the lobby', () => {
+    connectAndJoin(A, 'Ana', 'red', 'scree');
+    reload(A);
+    // A reloaded pad that lost its stored car joins without one: the TV's car stays.
+    join(A, 'Ana', 'red', true);
+    expect(hub.player(A)).toMatchObject({ car: 'scree', colour: 'red', connected: true });
+    expect(transport.joined(A)?.car).toBe('scree');
+    expect(lastLobby(A)?.players).toEqual([expect.objectContaining({ id: A, car: 'scree' })]);
+  });
+
+  it('ignores a different car in a rejoin', () => {
+    connectAndJoin(A, 'Ana', 'red', 'scree');
+    reload(A);
+    join(A, 'Ana', 'red', true, 'sagitta');
+    expect(hub.player(A)?.car).toBe('scree');
+    expect(transport.joined(A)?.car).toBe('scree');
+  });
+
+  it('gives a join without a car (an old pad) the default car', () => {
+    connectAndJoin(A, 'Ana', 'red');
+    expect(hub.player(A)?.car).toBe('nightjar');
+    expect(transport.joined(A)).toMatchObject({ colour: 'red', car: 'nightjar' });
+    expect(lastLobby(A)?.players[0]).toMatchObject({ id: A, car: 'nightjar' });
+  });
+
+  it('lets a lobby edit change the car but never mid-race', () => {
+    connectAndJoin(A, 'Ana', 'red', 'nightjar');
+    join(A, 'Ana', 'red', false, 'zanna');
+    expect(hub.player(A)?.car).toBe('zanna');
+    expect(transport.joined(A)?.car).toBe('zanna');
+    // An edit without a car (an old pad changing its name) keeps the car it had.
+    join(A, 'Anna', 'red');
+    expect(hub.player(A)).toMatchObject({ name: 'Anna', car: 'zanna' });
+
+    startRace(A);
+    join(A, 'Anna', 'red', false, 'sagitta');
+    expect(hub.player(A)?.car).toBe('zanna');
+    hub.finishGame();
+    join(A, 'Anna', 'red', false, 'sagitta');
+    expect(hub.player(A)?.car).toBe('zanna');
+  });
+
+  it('lets two seats share a car but not a paint', () => {
+    connectAndJoin(A, 'Ana', 'red', 'haymaker');
+    connectAndJoin(B, 'Bo', 'red', 'haymaker');
+    expect(hub.player(A)).toMatchObject({ car: 'haymaker', colour: 'red' });
+    expect(hub.player(B)?.car).toBe('haymaker');
+    expect(hub.player(B)?.colour).not.toBe('red');
+    // A lobby edit to a taken paint keeps the old paint but still takes the new car.
+    const paintB = hub.player(B)?.colour;
+    join(B, 'Bo', 'red', false, 'scree');
+    expect(hub.player(B)).toMatchObject({ car: 'scree', colour: paintB });
+  });
+
+  it('gives keyboard players and bots the fixed car order', () => {
+    connectAndJoin(A, 'Ana', 'red', 'sagitta');
+    for (let i = 1; i <= 3; i++) hub.addLocalPlayer(`localkeys${String(i)}`, `Keys ${String(i)}`);
+    expect(hub.getState().players.map((p) => [p.local, p.car])).toEqual([
+      [false, 'sagitta'],
+      [true, 'nightjar'],
+      [true, 'scree'],
+      [true, 'haymaker'],
+    ]);
+
+    // With four local seats (no phone), the fourth gets the fourth car of the order.
+    hub.stop();
+    hub = new Hub('splitways', (events) => (transport = new FakeTransport(events)));
+    hub.start();
+    for (let i = 1; i <= 4; i++) hub.addLocalPlayer(`localkeys${String(i)}`, `Keys ${String(i)}`);
+    expect(hub.getState().players.map((p) => p.car)).toEqual([
+      'nightjar',
+      'scree',
+      'haymaker',
+      'zanna',
+    ]);
   });
 });

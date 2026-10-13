@@ -9,6 +9,7 @@
  *  - Game messages: currently Split Ways (input, race, results). A future game adds its own.
  */
 import { z } from 'zod';
+import { carIdSchema } from './cars';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -80,9 +81,11 @@ const timestamp = z.number().nonnegative();
 // ---------------------------------------------------------------------------
 
 /**
- * Join (or update name/colour after joining). `rejoin` is set by a pad that reloaded and is
- * claiming back the seat it already had (matched by its peer id): the TV keeps that player's
- * name, colour and car. For a peer id the TV does not know it is an ordinary join.
+ * Join (or update name, car and paint after joining). `colour` is the player's paint and identity
+ * colour. `car` is optional so an older cached pad still joins (it gets the default car).
+ * `rejoin` is set by a pad that reloaded and is claiming back the seat it already had (matched by
+ * its peer id): the TV keeps that player's name, colour and car. For a peer id the TV does not
+ * know it is an ordinary join.
  * `seatKey` is the key from `joined`; the TV refuses a join for an existing seat without it.
  */
 export const joinSchema = z.object({
@@ -90,6 +93,7 @@ export const joinSchema = z.object({
   room: roomCodeSchema,
   name: playerNameSchema,
   colour: colourSchema,
+  car: carIdSchema.optional(),
   rejoin: z.boolean().optional(),
   seatKey: seatKeySchema.optional(),
 });
@@ -164,6 +168,7 @@ export const joinedSchema = z.object({
   /** Proves this pad owns the seat on later joins (reconnect, reload, name edit). */
   seatKey: seatKeySchema,
   colour: colourSchema,
+  car: carIdSchema,
   slot: z
     .number()
     .int()
@@ -175,6 +180,7 @@ export const lobbyPlayerSchema = z.object({
   id: playerIdSchema,
   name: playerNameSchema,
   colour: colourSchema,
+  car: carIdSchema,
   ready: z.boolean(),
   connected: z.boolean(),
   /** Has a role in the game currently being played (late joiners wait for the next round). */
@@ -224,6 +230,7 @@ export const standingSchema = z.object({
   id: playerIdSchema,
   name: playerNameSchema,
   colour: colourSchema,
+  car: carIdSchema,
   place: z.number().int().min(1).max(MAX_PLAYERS),
   totalMs: z.number().int().nonnegative().nullable(),
   bestLapMs: z.number().int().nonnegative().nullable(),

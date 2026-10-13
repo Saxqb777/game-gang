@@ -78,6 +78,7 @@ function joinedTab(colourFromTv: 'red' | 'blue' = 'blue') {
     playerId: link.clientId,
     seatKey: KEY,
     colour: colourFromTv,
+    car: 'nightjar',
     slot: 1,
   });
   return { store, link };
@@ -128,7 +129,14 @@ describe('pad rejoin after a reload', () => {
     expect(link.joins()).toEqual([
       { type: 'join', room: ROOM, name: 'Bo', colour: 'blue', rejoin: true, seatKey: KEY },
     ]);
-    link.receive({ type: 'joined', playerId: clientId, seatKey: KEY, colour: 'blue', slot: 1 });
+    link.receive({
+      type: 'joined',
+      playerId: clientId,
+      seatKey: KEY,
+      colour: 'blue',
+      car: 'nightjar',
+      slot: 1,
+    });
     expect(store.getState()).toMatchObject({ rejoining: false, me: { colour: 'blue', slot: 1 } });
   });
 
@@ -220,6 +228,7 @@ describe('pad rejoin after a reload', () => {
       playerId: link.clientId,
       seatKey: KEY,
       colour: 'blue',
+      car: 'nightjar',
       slot: 1,
     });
     expect(store.getState().me).toBeNull();

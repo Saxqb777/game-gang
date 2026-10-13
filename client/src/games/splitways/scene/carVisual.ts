@@ -1,7 +1,11 @@
 /**
  * The car you see: the CC0 sports car model (see assets/ASSETS.md) with our own PBR materials.
  * Paint and tail lights are per car (player colour, brake lights); everything else is shared.
+ *
+ * The API already takes a car id and a paint, and has the level-of-detail hooks, but every id still
+ * draws the one placeholder model with a single level until the per-car models land.
  */
+import { colourHex, type CarId, type ColourId } from '@gamergang/shared';
 import {
   Color,
   Group,
@@ -13,6 +17,7 @@ import {
   MeshStandardMaterial,
   type Material,
   type Object3D,
+  type PerspectiveCamera,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -89,7 +94,7 @@ function createSharedMaterials(): SharedMaterials {
   };
 }
 
-/** Loads the model once and hands out per-player cars. */
+/** Loads the models of the cars in the race once and hands out per-player cars. */
 export class CarModelLibrary {
   private readonly silhouette: BufferGeometry;
   /**
@@ -105,17 +110,21 @@ export class CarModelLibrary {
   private constructor(
     private readonly template: Object3D,
     private readonly shared: SharedMaterials,
+    private readonly carIds: readonly CarId[],
   ) {
     this.silhouette = mergedSilhouette(template);
   }
 
-  static async load(): Promise<CarModelLibrary> {
+  /** Only the given cars are loaded; for now they all share the one placeholder model. */
+  static async load(carIds: readonly CarId[]): Promise<CarModelLibrary> {
     const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
-    return new CarModelLibrary(gltf.scene, createSharedMaterials());
+    return new CarModelLibrary(gltf.scene, createSharedMaterials(), carIds);
   }
 
-  create(colourHex: string): CarVisual {
-    const visual = new CarVisual(this.template.clone(true), this.shared, colourHex);
+  /** A car that was not loaded is a bug in the caller: per-car models will not exist for it. */
+  create(carId: CarId, paint: ColourId): CarVisual {
+    if (!this.carIds.includes(carId)) throw new Error(`Car ${carId} was not loaded`);
+    const visual = new CarVisual(carId, this.template.clone(true), this.shared, paint);
     const proxy = new Mesh(this.silhouette, this.silhouetteMaterial);
     proxy.castShadow = true;
     visual.root.add(proxy);
@@ -135,6 +144,8 @@ export class CarModelLibrary {
 
 export class CarVisual {
   readonly root = new Group();
+  /** The level of detail on show: 0 is the most detailed. One level until per-car models land. */
+  lod: 0 | 1 | 2 = 0;
   readonly paint: MeshPhysicalMaterial;
   private readonly tailLight: MeshStandardMaterial;
   /** Steering pivots (rotate around Y) holding the spinning wheel meshes (rotate around X). */
@@ -142,10 +153,16 @@ export class CarVisual {
   private readonly wheelMeshes: Object3D[] = [];
   private spin = 0;
 
-  constructor(model: Object3D, shared: SharedMaterials, colourHex: string) {
+  constructor(
+    readonly carId: CarId,
+    model: Object3D,
+    shared: SharedMaterials,
+    paint: ColourId,
+  ) {
     this.paint = new MeshPhysicalMaterial({
       name: 'paint',
-      color: new Color(colourHex),
+      // Today's look: the identity colour itself (the per-paint finishes in PAINTS come later).
+      color: new Color(colourHex(paint)),
       metalness: 0.55,
       roughness: 0.34,
       clearcoat: 1,
@@ -208,6 +225,26 @@ export class CarVisual {
     const braking = car.input.brake > 0.05 && car.forwardSpeed > 0.5;
     this.tailLight.emissiveIntensity = braking || car.input.handbrake ? 5 : 1.2;
   }
+
+  /**
+   * Picks the level of detail for one viewport from the car's projected size. With a single level
+   * there is nothing to choose yet, so the arguments are unused for now.
+   */
+  /* eslint-disable @typescript-eslint/no-unused-vars -- the API shape ahead of the LOD models */
+  selectLod(
+    _camera: PerspectiveCamera,
+    _viewHeightPx: number,
+    _floor: 0 | 1,
+    _viewIndex: number,
+  ): void {
+    this.lod = 0;
+  }
+
+  /** Shows every level so the renderer can compile them all; returns the restore function. */
+  showAllForCompile(_floor: 0 | 1): () => void {
+    return () => undefined;
+  }
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 
   dispose(): void {
     this.paint.dispose();

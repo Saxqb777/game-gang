@@ -7,14 +7,15 @@ Out of scope for v1. Written down so the v1 code leaves room for them, not built
 - **M8:** Track 1 Kestrel Pines, the performance foundation (render path, presets, profiling,
   telemetry) and the minimum touch controller. Built; done once the owner's M1 run passes. See
   PROGRESS.md.
+- **Cars update (next, owner 2026-10-12):** the car part of M12 pulled forward: five debranded
+  cars, a car select and paint. Pushed live when green.
 - **M9:** Track 1 polish: visuals (impostor forests, baked light, KTX2 textures, grade), car
-  feel and sound on Kestrel Pines, each pushed live when green, then the owner's playtest.
+  feel and sound on Kestrel Pines, each pushed live when green. The owner tests once at the end.
 - **M10:** Dropped for now (owner, 2026-10-10: one track only). More tracks come later through
   the generator.
 - **M11:** Feel: tyre model and assists ladder, controller v2 (60 Hz input, 250 ms failsafe,
   handbrake slide), HUD v2, engine audio v1.
-- **M12:** Cars and cameras: new car models with fictional brands, paint, chase-cam rewrite. Needs
-  the car sourcing task (an owner/art task that started in M8) finished first.
+- **M12:** Cameras: chase-cam rewrite (the cars and paint moved up into the cars update).
 - **M13:** Premium TV and site UI.
 - **M14:** On hold until the owner says it is ready.
 - **M15 and after:** new tracks and car packs through the generator; the WebGPU gate.

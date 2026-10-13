@@ -8,9 +8,11 @@ import { createRoot } from 'react-dom/client';
 const TvApp = lazy(() => import('./tv/TvApp'));
 const PadApp = lazy(() => import('./pad/PadApp'));
 const Landing = lazy(() => import('./landing/Landing'));
+const CreditsPage = lazy(() => import('./credits/Credits'));
 
 function Route() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (path === '/credits') return <CreditsPage />;
   if (path === '/tv') return <TvApp />;
   if (path === '/pad') return <PadApp />;
   return <Landing />;

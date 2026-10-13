@@ -2,11 +2,13 @@ import {
   NAME_MAX_LENGTH,
   PLAYER_COLOURS,
   colourHex,
+  type CarId,
   type ColourId,
   type LobbyMessage,
 } from '@gamergang/shared';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { STEERING_MODES, type Profile, type SteeringMode } from '../profile';
+import { CarPicker } from './CarPicker';
 import { Brand } from './Simple';
 
 const MODE_INFO: Record<SteeringMode, { label: string; hint: string; icon: ReactNode }> = {
@@ -69,6 +71,7 @@ export function JoinScreen({
   profile,
   submitLabel,
   onSubmit,
+  onCancel,
 }: {
   room: string;
   lobby: LobbyMessage;
@@ -77,17 +80,24 @@ export function JoinScreen({
   submitLabel: string;
   /** Runs inside the tap, which fullscreen needs. */
   onSubmit: (profile: Profile) => void;
+  /** Editing from the lobby: back without changes. */
+  onCancel?: () => void;
 }) {
-  const taken = new Set(lobby.players.filter((p) => p.id !== myId).map((p) => p.colour));
+  const others = lobby.players.filter((p) => p.id !== myId);
+  const taken = new Set(others.map((p) => p.colour));
   const firstFree = PLAYER_COLOURS.find((c) => !taken.has(c.id))?.id ?? profile.colour;
   const [name, setName] = useState(profile.name);
   const [colour, setColour] = useState<ColourId>(
     taken.has(profile.colour) ? firstFree : profile.colour,
   );
+  const [car, setCar] = useState<CarId>(profile.car);
   const [mode, setMode] = useState<SteeringMode>(profile.mode);
   const trimmed = name.trim();
   const effectiveColour = taken.has(colour) ? firstFree : colour;
+  const paintLabel = PLAYER_COLOURS.find((c) => c.id === effectiveColour)?.label ?? '';
   const style = { '--accent': colourHex(effectiveColour) } as CSSProperties;
+  const byCar = new Map<CarId, string[]>();
+  for (const p of others) byCar.set(p.car, [...(byCar.get(p.car) ?? []), p.name]);
 
   return (
     <main className="pad-screen pad-join" style={style}>
@@ -96,10 +106,10 @@ export function JoinScreen({
         className="pad-join-grid"
         onSubmit={(event) => {
           event.preventDefault();
-          if (trimmed) onSubmit({ name: trimmed, colour: effectiveColour, mode });
+          if (trimmed) onSubmit({ name: trimmed, colour: effectiveColour, car, mode });
         }}
       >
-        <section className="pad-join-col">
+        <section className="pad-join-area pad-join-name">
           <label className="pad-label" htmlFor="pad-name">
             Your name
           </label>
@@ -114,12 +124,22 @@ export function JoinScreen({
             autoCapitalize="words"
             enterKeyHint="done"
           />
-          <span className="pad-label">Car colour</span>
-          <div className="pad-colours">
+        </section>
+        <section className="pad-join-area pad-join-car">
+          <span className="pad-label">Car</span>
+          <CarPicker car={car} colour={effectiveColour} others={byCar} onChange={setCar} />
+        </section>
+        <section className="pad-join-area pad-join-paint">
+          <span className="pad-label">
+            Paint <b className="pad-paint-name">{paintLabel}</b>
+          </span>
+          <div className="pad-colours" role="radiogroup" aria-label="Paint">
             {PLAYER_COLOURS.map((c) => (
               <button
                 key={c.id}
                 type="button"
+                role="radio"
+                aria-checked={c.id === effectiveColour}
                 className={`pad-colour ${c.id === effectiveColour ? 'is-on' : ''}`}
                 style={{ '--swatch': c.hex } as CSSProperties}
                 disabled={taken.has(c.id)}
@@ -129,13 +149,20 @@ export function JoinScreen({
             ))}
           </div>
         </section>
-        <section className="pad-join-col">
+        <section className="pad-join-area pad-join-steer">
           <span className="pad-label">Steering</span>
           <ModePicker mode={mode} onChange={setMode} />
+        </section>
+        <div className="pad-join-area pad-join-submit">
+          {onCancel ? (
+            <button type="button" className="pad-btn pad-btn--ghost" onClick={onCancel}>
+              Back
+            </button>
+          ) : null}
           <button className="pad-btn pad-btn--big" disabled={!trimmed}>
             {submitLabel}
           </button>
-        </section>
+        </div>
       </form>
     </main>
   );

@@ -1,4 +1,4 @@
-import type { PadMessage, TvMessage } from '@gamergang/shared';
+import type { CarId, PadMessage, TvMessage } from '@gamergang/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PadLinkStatus, PadTransportEvents } from '../net/padTransport';
 
@@ -67,18 +67,18 @@ function latest(): FakePadTransport {
 }
 
 /** A tab that joins room ABCD and gets the TV's answer. */
-function joinedTab(colourFromTv: 'red' | 'blue' = 'blue') {
+function joinedTab(colourFromTv: 'red' | 'blue' = 'blue', carFromTv: CarId = 'nightjar') {
   const store = new PadStore();
   store.connect(ROOM);
   const link = latest();
   link.status('open');
-  store.join('Bo', 'red', 'buttons');
+  store.join({ name: 'Bo', colour: 'red', car: carFromTv, mode: 'buttons' });
   link.receive({
     type: 'joined',
     playerId: link.clientId,
     seatKey: KEY,
     colour: colourFromTv,
-    car: 'nightjar',
+    car: carFromTv,
     slot: 1,
   });
   return { store, link };
@@ -110,6 +110,7 @@ describe('pad rejoin after a reload', () => {
       room: ROOM,
       name: 'Bo',
       colour: 'blue',
+      car: 'nightjar',
       mode: 'buttons',
       seatKey: KEY,
     });
@@ -127,7 +128,15 @@ describe('pad rejoin after a reload', () => {
     expect(store.getState().rejoining).toBe(true);
     link.status('open');
     expect(link.joins()).toEqual([
-      { type: 'join', room: ROOM, name: 'Bo', colour: 'blue', rejoin: true, seatKey: KEY },
+      {
+        type: 'join',
+        room: ROOM,
+        name: 'Bo',
+        colour: 'blue',
+        car: 'nightjar',
+        rejoin: true,
+        seatKey: KEY,
+      },
     ]);
     link.receive({
       type: 'joined',
@@ -149,6 +158,7 @@ describe('pad rejoin after a reload', () => {
       room: ROOM,
       name: 'Bo',
       colour: 'blue',
+      car: 'nightjar',
       rejoin: true,
       seatKey: KEY,
     });
@@ -156,12 +166,13 @@ describe('pad rejoin after a reload', () => {
 
   it('keeps the seat key when the player edits their name', () => {
     const { store, link } = joinedTab('blue');
-    store.join('Bobby', 'blue', 'buttons');
+    store.join({ name: 'Bobby', colour: 'blue', car: 'nightjar', mode: 'buttons' });
     expect(link.joins().at(-1)).toEqual({
       type: 'join',
       room: ROOM,
       name: 'Bobby',
       colour: 'blue',
+      car: 'nightjar',
       seatKey: KEY,
     });
   });
@@ -243,5 +254,96 @@ describe('pad rejoin after a reload', () => {
     joinedTab();
     latest().status('room-not-found');
     expect(loadSeat(ROOM)).toBeNull();
+  });
+});
+
+describe('pad car and paint', () => {
+  it('remembers the seat with the car and paint the TV gave', () => {
+    const store = new PadStore();
+    store.connect(ROOM);
+    const link = latest();
+    link.status('open');
+    store.join({ name: 'Sara', colour: 'red', car: 'haymaker', mode: 'drag' });
+    expect(link.joins().at(-1)).toMatchObject({ colour: 'red', car: 'haymaker' });
+    // Red went to someone else a moment earlier: the TV hands out blue.
+    link.receive({
+      type: 'joined',
+      playerId: link.clientId,
+      seatKey: KEY,
+      colour: 'blue',
+      car: 'haymaker',
+      slot: 0,
+    });
+    expect(loadSeat(ROOM)).toMatchObject({ name: 'Sara', colour: 'blue', car: 'haymaker' });
+  });
+
+  it('rejoins on its own after a reload with the same car and paint', () => {
+    joinedTab('blue', 'scree');
+    const store = new PadStore();
+    store.connect(ROOM);
+    const link = latest();
+    link.status('open');
+    expect(link.joins()).toEqual([
+      {
+        type: 'join',
+        room: ROOM,
+        name: 'Bo',
+        colour: 'blue',
+        car: 'scree',
+        rejoin: true,
+        seatKey: KEY,
+      },
+    ]);
+  });
+
+  it('claims the same car again after a plain link reconnect', () => {
+    const { link } = joinedTab('blue', 'zanna');
+    link.status('reconnecting');
+    link.status('open');
+    expect(link.joins().at(-1)).toMatchObject({ car: 'zanna', colour: 'blue', rejoin: true });
+  });
+
+  it('keeps a steering change without losing the car', () => {
+    const { store } = joinedTab('blue', 'sagitta');
+    store.setMode('drag');
+    expect(loadSeat(ROOM)).toMatchObject({ mode: 'drag', car: 'sagitta', colour: 'blue' });
+  });
+
+  it("an edit changes the car and the TV's answer is saved", () => {
+    const { store, link } = joinedTab('blue', 'haymaker');
+    store.join({ name: 'Bo', colour: 'blue', car: 'scree', mode: 'buttons' });
+    expect(link.joins().at(-1)).toEqual({
+      type: 'join',
+      room: ROOM,
+      name: 'Bo',
+      colour: 'blue',
+      car: 'scree',
+      seatKey: KEY,
+    });
+    link.receive({
+      type: 'joined',
+      playerId: link.clientId,
+      seatKey: KEY,
+      colour: 'blue',
+      car: 'scree',
+      slot: 1,
+    });
+    expect(loadSeat(ROOM)).toMatchObject({ car: 'scree', colour: 'blue' });
+    expect(store.getState().me).toMatchObject({ car: 'scree' });
+  });
+
+  it('saves the car the TV holds, not the one asked for', () => {
+    // Mid-race edits are refused: the TV answers with the car it already holds.
+    const { store, link } = joinedTab('blue', 'haymaker');
+    store.join({ name: 'Bo', colour: 'blue', car: 'zanna', mode: 'buttons' });
+    link.receive({
+      type: 'joined',
+      playerId: link.clientId,
+      seatKey: KEY,
+      colour: 'blue',
+      car: 'haymaker',
+      slot: 1,
+    });
+    expect(loadSeat(ROOM)?.car).toBe('haymaker');
   });
 });

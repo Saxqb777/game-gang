@@ -1,0 +1,129 @@
+/* The car picture on the phone card, the phone lobby and the TV lobby slots. */
+
+.car-thumb {
+  --paint: var(--accent);
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+}
+
+.car-thumb.is-from-next {
+  animation: car-in-next 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.car-thumb.is-from-prev {
+  animation: car-in-prev 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes car-in-next {
+  from {
+    transform: translateX(22%);
+    opacity: 0;
+  }
+}
+
+@keyframes car-in-prev {
+  from {
+    transform: translateX(-22%);
+    opacity: 0;
+  }
+}
+
+.car-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.car-thumb.has-image img {
+  opacity: 1;
+}
+
+.car-sil {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.car-sil-shadow {
+  fill: rgba(0, 0, 0, 0.6);
+  filter: blur(2px);
+}
+
+.car-sil-body {
+  fill: color-mix(in srgb, var(--paint) 80%, #000);
+  stroke: color-mix(in srgb, var(--paint) 60%, #fff);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+}
+
+.car-sil-glass {
+  fill: #0a0d15;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 0.6;
+}
+
+.car-sil-tyre {
+  fill: #050608;
+}
+
+.car-sil-rim {
+  fill: #2c3240;
+  stroke: #7a8294;
+  stroke-width: 0.8;
+}
+
+/* One equal column per steering mode, so a single mode spans the full width. */
+.pad-modes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.pad-mode {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  border: 2px solid var(--line);
+  background: #10131b;
+  text-align: center;
+}
+
+.pad-mode svg {
+  width: 48px;
+  height: 32px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pad-mode strong {
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pad-mode small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pad-mode.is-on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, #10131b);
+}
+
+.pad-mode.is-on svg {
+  stroke: var(--accent);
+}

@@ -87,11 +87,14 @@ export function SettingsSheet({
   mode,
   onMode,
   onEditProfile,
+  onLeave,
   onClose,
 }: {
   mode: SteeringMode;
   onMode: (mode: SteeringMode) => void;
   onEditProfile: (() => void) | null;
+  /** Gives the seat up for good: the TV frees it and a reload shows the join screen. */
+  onLeave: () => void;
   onClose: () => void;
 }) {
   return (
@@ -105,6 +108,9 @@ export function SettingsSheet({
               Change name / colour
             </button>
           ) : null}
+          <button className="pad-btn pad-btn--ghost" onClick={onLeave}>
+            Leave room
+          </button>
           <button className="pad-btn" onClick={onClose}>
             Done
           </button>

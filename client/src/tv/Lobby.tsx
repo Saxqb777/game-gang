@@ -8,6 +8,9 @@ function lobbyHint(players: readonly HubPlayer[]): string {
   const present = players.filter((p) => p.connected);
   if (present.length === 0) return 'Scan the code with your phone camera to grab a controller';
   const waiting = present.filter((p) => !p.ready).map((p) => p.name);
+  // The hub holds the start for a phone that dropped (usually a reload) until it is back.
+  const away = players.filter((p) => !p.connected).map((p) => p.name);
+  if (waiting.length === 0 && away.length > 0) return `Waiting for ${away.join(', ')} to reconnect`;
   if (waiting.length === 0) return 'Everyone is ready. Starting...';
   return `Waiting for ${waiting.join(', ')} to hit READY`;
 }

@@ -189,6 +189,8 @@ export class SplitWaysGame {
   private readonly carColours: string[];
   private mode: 'race' | 'podium' = 'race';
   private podium: Podium | null = null;
+  /** Final standings once the podium is up, re-sent to a pad that reloads after the race. */
+  private finalStandings: RaceResult[] | null = null;
   private raceEndedAt: number | null = null;
   private autopilotOn = false;
   /** Seconds since the game started, for shader animation. */
@@ -675,8 +677,17 @@ export class SplitWaysGame {
   }
 
   setConnected(playerId: string, connected: boolean): void {
-    const driver = this.drivers.find((d) => d.player.id === playerId);
-    if (driver) driver.connected = connected;
+    const index = this.drivers.findIndex((d) => d.player.id === playerId);
+    const driver = this.drivers[index];
+    if (!driver) return;
+    driver.connected = connected;
+    if (!connected) return;
+    // A reloaded pad starts with no race status or results: send them now, not on the next tick.
+    if (this.finalStandings) {
+      this.hooks.send(playerId, { type: 'results', standings: this.finalStandings });
+    } else if (this.started) {
+      this.sendRaceStatusTo(index);
+    }
   }
 
   dispose(): void {
@@ -875,6 +886,7 @@ export class SplitWaysGame {
     this.hudLayer.hidden = true;
     this.audio?.podium();
     this.layout();
+    this.finalStandings = results;
     this.broadcast({ type: 'results', standings: results });
     this.hooks.onResults(results);
   }

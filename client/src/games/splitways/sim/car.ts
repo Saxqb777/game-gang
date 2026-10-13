@@ -13,19 +13,17 @@ import type {
 import { MathUtils, Quaternion, Vector3 } from 'three';
 import {
   ASSISTS,
-  BRAKES,
   CAR,
   DRIFT,
-  ENGINE,
   PHYSICS,
   RESPAWN,
   REVERSE,
   SLIPSTREAM,
   STEERING,
   SURFACES,
-  TYRES,
   WHEELS,
 } from '../config';
+import { REFERENCE_SPEC, type CarSpec, type WheelSpec } from './carSpec';
 import { NEUTRAL_INPUT, copyInput, type DriveInput } from './input';
 import type { Rapier } from './rapier';
 import { SURFACE, SURFACE_NAMES, type SurfaceId } from '../track/surfaces';
@@ -42,6 +40,17 @@ const LOCAL_UP = new Vector3(0, 1, 0);
 
 /** Lateral sliding speed (m/s) at a tyre contact above which it counts as skidding. */
 const SKID_SLIDE_SPEED = 2.2;
+
+/** Suspension mount above the car origin for a hub that sits `centreHeight` up at rest. */
+function mountHeightFor(centreHeight: number): number {
+  return (
+    centreHeight +
+    WHEELS.suspensionRestLength -
+    // Static sag: springs compress by g / (4 * stiffness) under the car's own weight. Rapier scales
+    // the spring force by the chassis mass, so the sag is the same for every car.
+    PHYSICS.gravity / (4 * WHEELS.suspensionStiffness)
+  );
+}
 
 export interface Spawn {
   x: number;
@@ -115,35 +124,35 @@ export class Car {
   /** Ground surface under each wheel (SurfaceId); keeps the last value while the wheel is in the air. */
   readonly wheelSurface = new Uint8Array(WHEEL_COUNT);
 
-  /** Wheel hub positions relative to the car origin when the suspension is at rest under load. */
-  static readonly wheelOffsets: readonly Vector3[] = [
-    new Vector3(WHEELS.halfTrack, WHEELS.centreHeight, WHEELS.wheelbaseHalf),
-    new Vector3(-WHEELS.halfTrack, WHEELS.centreHeight, WHEELS.wheelbaseHalf),
-    new Vector3(WHEELS.halfTrack, WHEELS.centreHeight, -WHEELS.wheelbaseHalf),
-    new Vector3(-WHEELS.halfTrack, WHEELS.centreHeight, -WHEELS.wheelbaseHalf),
-  ];
-  /** Height of the suspension mount above the car origin. Wheel centre = mount - suspension length. */
-  static readonly mountHeight =
-    WHEELS.centreHeight +
-    WHEELS.suspensionRestLength -
-    // Static sag: springs compress by g / (4 * stiffness) under the car's own weight.
-    PHYSICS.gravity / (4 * WHEELS.suspensionStiffness);
+  /**
+   * Suspension mount height of the reference car only. The scene still reads it until its per-car
+   * rewrite (C5) switches to `mountHeights`; physics never uses it.
+   */
+  static readonly mountHeight = mountHeightFor(WHEELS.centreHeight);
+
+  /** Wheel hub positions relative to the car origin when the suspension is at rest under load (FL, FR, RL, RR). */
+  readonly wheelOffsets: readonly Vector3[];
+  /** Height of each wheel's suspension mount above the car origin. Wheel centre = mount - suspension length. */
+  readonly mountHeights: Float32Array;
 
   constructor(
     rapier: Rapier,
     private readonly world: World,
     spawn: Spawn,
     private readonly surfaceOf: (collider: Collider | null) => SurfaceId = () => SURFACE.asphalt,
+    readonly spec: CarSpec = REFERENCE_SPEC,
   ) {
+    this.wheelOffsets = spec.wheels.map((w) => new Vector3(w.x, w.centreHeight, w.z));
+    this.mountHeights = Float32Array.from(spec.wheels, (w) => mountHeightFor(w.centreHeight));
     const yawQuat = tmpQuat.setFromAxisAngle(WORLD_UP, spawn.yaw);
     this.body = world.createRigidBody(
       rapier.RigidBodyDesc.dynamic()
         .setTranslation(spawn.x, spawn.y, spawn.z)
         .setRotation({ x: yawQuat.x, y: yawQuat.y, z: yawQuat.z, w: yawQuat.w })
         .setAdditionalMassProperties(
-          CAR.mass,
-          { x: 0, y: CAR.centreOfMassHeight, z: CAR.centreOfMassForward },
-          { x: CAR.inertia.pitch, y: CAR.inertia.yaw, z: CAR.inertia.roll },
+          spec.mass,
+          { x: 0, y: spec.com.height, z: spec.com.forward },
+          { x: spec.inertia.pitch, y: spec.inertia.yaw, z: spec.inertia.roll },
           { x: 0, y: 0, z: 0, w: 1 },
         )
         .setCcdEnabled(true)
@@ -151,16 +160,16 @@ export class Car {
     );
     this.collider = world.createCollider(
       rapier.ColliderDesc.cuboid(
-        CAR.chassisHalfExtents.x,
-        CAR.chassisHalfExtents.y,
-        CAR.chassisHalfExtents.z,
+        spec.chassis.halfExtents.x,
+        spec.chassis.halfExtents.y,
+        spec.chassis.halfExtents.z,
       )
-        .setTranslation(0, CAR.chassisCentreHeight, 0)
+        .setTranslation(0, spec.chassis.centreHeight, 0)
         .setDensity(0)
         .setRestitution(CAR.bodyRestitution)
         .setFriction(CAR.bodyFriction)
         .setActiveEvents(rapier.ActiveEvents.CONTACT_FORCE_EVENTS)
-        .setContactForceEventThreshold(CAR.mass * 25),
+        .setContactForceEventThreshold(spec.mass * 25),
       this.body,
     );
 
@@ -168,20 +177,20 @@ export class Car {
     this.vehicle.indexUpAxis = 1;
     this.vehicle.setIndexForwardAxis = 2;
     for (let i = 0; i < WHEEL_COUNT; i++) {
-      const offset = Car.wheelOffsets[i] as Vector3;
+      const offset = this.wheelOffsets[i] as Vector3;
       this.vehicle.addWheel(
-        { x: offset.x, y: Car.mountHeight, z: offset.z },
+        { x: offset.x, y: this.mountHeights[i] as number, z: offset.z },
         { x: 0, y: -1, z: 0 },
         { x: -1, y: 0, z: 0 },
         WHEELS.suspensionRestLength,
-        WHEELS.radius,
+        (spec.wheels[i] as WheelSpec).radius,
       );
       this.vehicle.setWheelSuspensionStiffness(i, WHEELS.suspensionStiffness);
       this.vehicle.setWheelSuspensionCompression(i, WHEELS.suspensionCompression);
       this.vehicle.setWheelSuspensionRelaxation(i, WHEELS.suspensionRelaxation);
       this.vehicle.setWheelMaxSuspensionForce(i, WHEELS.maxSuspensionForce);
       this.vehicle.setWheelMaxSuspensionTravel(i, WHEELS.maxSuspensionTravel);
-      this.vehicle.setWheelSideFrictionStiffness(i, TYRES.sideStiffness);
+      this.vehicle.setWheelSideFrictionStiffness(i, spec.tyres.sideStiffness);
     }
     this.readPose();
     this.prevPosition.copy(this.position);
@@ -249,13 +258,13 @@ export class Car {
       this.addGroundAssists(dt, speed, forwardSpeed, lateralSpeed, grounded);
     } else {
       // Airborne: rotate the car's up axis back towards the sky so jumps land on the wheels.
-      scratch.crossVectors(up, WORLD_UP).multiplyScalar(ASSISTS.airLevelling);
+      scratch.crossVectors(up, WORLD_UP).multiplyScalar(ASSISTS.airLevelling * this.spec.massScale);
       torque.add(scratch);
       const yawRate = angularVelocity.dot(WORLD_UP);
       scratch
         .copy(angularVelocity)
         .addScaledVector(WORLD_UP, -yawRate)
-        .multiplyScalar(-ASSISTS.airDamping);
+        .multiplyScalar(-ASSISTS.airDamping * this.spec.massScale);
       torque.add(scratch);
     }
     body.applyImpulse(impulse.multiplyScalar(dt), true);
@@ -356,6 +365,7 @@ export class Car {
    */
   private applyDrive(forwardSpeed: number, dt: number): boolean {
     const { input, vehicle } = this;
+    const { engine: spec, brakes } = this.spec;
     const gas = input.throttle >= REVERSE.gasThreshold;
     if (this.inReverse) {
       if (gas || input.brake <= REVERSE.releaseBrake) this.inReverse = false;
@@ -375,21 +385,21 @@ export class Car {
     let brake = 0;
     if (this.inReverse) {
       const falloff =
-        forwardSpeed < 0 ? Math.max(0, 1 - (-forwardSpeed / ENGINE.reverseTopSpeed) ** 2) : 1;
-      engine = -input.brake * ENGINE.reverseForce * falloff;
+        forwardSpeed < 0 ? Math.max(0, 1 - (-forwardSpeed / spec.reverseTopSpeed) ** 2) : 1;
+      engine = -input.brake * spec.reverseForce * falloff;
     } else {
       if (input.throttle > 0) {
         const falloff =
-          forwardSpeed > 0 ? Math.max(0, 1 - (forwardSpeed / ENGINE.topSpeed) ** 2) : 1;
-        engine = input.throttle * ENGINE.force * falloff;
+          forwardSpeed > 0 ? Math.max(0, 1 - (forwardSpeed / spec.topSpeed) ** spec.curve) : 1;
+        engine = input.throttle * spec.force * falloff;
       }
-      if (input.brake > 0) brake = input.brake * BRAKES.impulse;
+      if (input.brake > 0) brake = input.brake * brakes.impulse;
     }
-    const frontEngine = (engine * ENGINE.frontShare) / 2;
-    const rearEngine = (engine * (1 - ENGINE.frontShare)) / 2;
-    const frontBrake = brake * BRAKES.frontBias * 2;
-    let rearBrake = brake * (1 - BRAKES.frontBias) * 2;
-    if (input.handbrake) rearBrake = Math.max(rearBrake, DRIFT.handbrakeImpulse);
+    const frontEngine = (engine * spec.frontShare) / 2;
+    const rearEngine = (engine * (1 - spec.frontShare)) / 2;
+    const frontBrake = brake * brakes.frontBias * 2;
+    let rearBrake = brake * (1 - brakes.frontBias) * 2;
+    if (input.handbrake) rearBrake = Math.max(rearBrake, brakes.handbrakeImpulse);
     for (const i of FRONT_WHEELS) {
       vehicle.setWheelEngineForce(i, frontEngine);
       vehicle.setWheelBrake(i, frontBrake);
@@ -403,8 +413,9 @@ export class Car {
 
   private applyGrip(absForwardSpeed: number, reversing: boolean): void {
     const { input, vehicle } = this;
-    let rearGrip: number = TYRES.rearGrip;
-    let rearSide: number = TYRES.sideStiffness;
+    const { tyres } = this.spec;
+    let rearGrip = tyres.rearGrip;
+    let rearSide = tyres.sideStiffness;
     if (input.handbrake) {
       rearGrip *= DRIFT.handbrakeRearGrip;
       rearSide *= DRIFT.handbrakeRearSide;
@@ -419,7 +430,7 @@ export class Car {
     }
     // Tyre grip times the grip of whatever each wheel is rolling on, set every step.
     for (let i = 0; i < WHEEL_COUNT; i++) {
-      const base = i < 2 ? TYRES.frontGrip : rearGrip;
+      const base = i < 2 ? tyres.frontGrip : rearGrip;
       const surface = SURFACES[SURFACE_NAMES[this.wheelSurface[i] as number] ?? 'asphalt'];
       vehicle.setWheelFrictionSlip(i, base * surface.grip);
     }
@@ -434,14 +445,16 @@ export class Car {
     grounded: number,
   ): void {
     const contactShare = grounded / WHEEL_COUNT;
+    const { spec } = this;
+    const massScale = spec.massScale;
 
     // Downforce: grip grows with speed.
-    impulse.addScaledVector(up, -ASSISTS.downforce * speed * speed * contactShare);
+    impulse.addScaledVector(up, -spec.downforce * speed * speed * contactShare);
 
     // Air drag and rolling resistance, against the direction of travel.
     if (speed > 0.05) {
       // Slipstream is pure aero: the car in front takes some of the air drag.
-      const drag = ENGINE.drag * (1 - SLIPSTREAM.dragCut * this.draft);
+      const drag = spec.engine.drag * (1 - SLIPSTREAM.dragCut * this.draft);
       // Grass and gravel drag at the wheels on top of the tyres' own rolling resistance.
       let surfaceRolling = 0;
       for (let i = 0; i < WHEEL_COUNT; i++) {
@@ -449,7 +462,9 @@ export class Car {
         const surface = SURFACES[SURFACE_NAMES[this.wheelSurface[i] as number] ?? 'asphalt'];
         surfaceRolling += surface.rolling / WHEEL_COUNT;
       }
-      const rolling = (ENGINE.rollingResistance + surfaceRolling) * Math.min(1, speed / 2);
+      // Rolling resistance pushes back in proportion to weight, so it scales with mass like the tyres'.
+      const rolling =
+        (spec.engine.rollingResistance + surfaceRolling * massScale) * Math.min(1, speed / 2);
       const resistance = drag * speed * speed + rolling;
       impulse.addScaledVector(velocity, -resistance / speed);
     }
@@ -458,9 +473,12 @@ export class Car {
     const rollRate = angularVelocity.dot(forward);
     torque.addScaledVector(
       forward,
-      ASSISTS.antiRoll * right.y - ASSISTS.antiRollDamping * rollRate,
+      (ASSISTS.antiRoll * right.y - ASSISTS.antiRollDamping * rollRate) * massScale,
     );
-    torque.addScaledVector(right, -ASSISTS.antiPitchDamping * angularVelocity.dot(right));
+    torque.addScaledVector(
+      right,
+      -ASSISTS.antiPitchDamping * massScale * angularVelocity.dot(right),
+    );
 
     // Yaw limiter: each step removes a share of any spin faster than the limit, so spins stay recoverable.
     const yawRate = angularVelocity.dot(up);
@@ -468,7 +486,7 @@ export class Car {
     if (excess > 0) {
       torque.addScaledVector(
         up,
-        (-Math.sign(yawRate) * excess * CAR.inertia.yaw * ASSISTS.yawLimitStrength) / dt,
+        (-Math.sign(yawRate) * excess * spec.inertia.yaw * ASSISTS.yawLimitStrength) / dt,
       );
     }
 
@@ -482,7 +500,7 @@ export class Car {
         const counterSteer = Math.max(0, this.input.steer * slideSide);
         const strength = ASSISTS.slideAlignStrength * (1 + DRIFT.counterSteerAssist * counterSteer);
         // Yawing right is a negative rotation around up.
-        torque.addScaledVector(up, -slideSide * over * strength * CAR.inertia.yaw * 4);
+        torque.addScaledVector(up, -slideSide * over * strength * spec.inertia.yaw * 4);
       }
     }
   }

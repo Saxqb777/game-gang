@@ -180,7 +180,7 @@ export const CARS = {
     /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
     comForward: 0,
     /** Peak engine force at a standstill (N). */
-    force: 11_250,
+    force: 11_700,
     /** Speed (m/s) where the engine runs out of push. */
     topSpeed: 49,
     /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
@@ -188,8 +188,8 @@ export const CARS = {
     /** Share of engine force on the front wheels. */
     frontShare: 0.5,
     /** Tyre grip (friction coefficient), front and rear. */
-    frontGrip: 1.98,
-    rearGrip: 1.92,
+    frontGrip: 2.059,
+    rearGrip: 1.996,
     /** x reference braking deceleration. */
     brake: 1,
     /** x reference downforce per kg. */
@@ -264,7 +264,7 @@ export const CARS = {
     /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
     comForward: -0.15,
     /** Peak engine force at a standstill (N). */
-    force: 12_900,
+    force: 12_384,
     /** Speed (m/s) where the engine runs out of push. */
     topSpeed: 54,
     /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
@@ -272,8 +272,8 @@ export const CARS = {
     /** Share of engine force on the front wheels. */
     frontShare: 0.25,
     /** Tyre grip (friction coefficient), front and rear. */
-    frontGrip: 1.92,
-    rearGrip: 1.76,
+    frontGrip: 1.843,
+    rearGrip: 1.69,
     /** x reference braking deceleration. */
     brake: 1.05,
     /** x reference downforce per kg. */
@@ -306,7 +306,7 @@ export const CARS = {
     /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
     comForward: -0.08,
     /** Peak engine force at a standstill (N). */
-    force: 13_900,
+    force: 14_450,
     /** Speed (m/s) where the engine runs out of push. */
     topSpeed: 50.5,
     /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
@@ -314,8 +314,8 @@ export const CARS = {
     /** Share of engine force on the front wheels. */
     frontShare: 0.45,
     /** Tyre grip (friction coefficient), front and rear. */
-    frontGrip: 1.9,
-    rearGrip: 1.86,
+    frontGrip: 1.966,
+    rearGrip: 1.925,
     /** x reference braking deceleration. */
     brake: 1.05,
     /** x reference downforce per kg. */
@@ -353,6 +353,28 @@ export const PAINTS = {
   blue: { hex: 0x1746c9, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 },
   purple: { hex: 0x5a2bb8, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 },
   pink: { hex: 0xd22a86, metalness: 0.5, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.05 },
+} as const;
+
+/** How a car's physics spec and autopilot speed profile are derived from `CARS` (C3). */
+export const CAR_DERIVE = {
+  /** Collision box half sizes as shares of the body size (narrower than the arches, so it never pokes out). */
+  colliderHalfWidth: 0.46,
+  colliderHalfLength: 0.49,
+  colliderHalfHeight: 0.27,
+  /** Collision box centre above the ground as a share of the body height. */
+  colliderCentreHeight: 0.55,
+  /** Body size (m) the reference inertia (`CAR.inertia`) belongs to; others scale with size squared. */
+  inertiaLength: 4.4,
+  inertiaWidth: 1.84,
+  /**
+   * Speed profile (autopilot): how much of each car's top speed, grip, braking and acceleration ratio
+   * against the reference car the plan follows, as an exponent on that ratio. 1 = all of it, 0 = plan
+   * every car like the reference car. Lower damps the differences for all cars at once.
+   */
+  profileTopSpeed: 1,
+  profileGrip: 1,
+  profileBrake: 1,
+  profileAccel: 1,
 } as const;
 
 export const ASSISTS = {

@@ -1,6 +1,7 @@
 import type { TempContactForceEvent } from '@dimforge/rapier3d-compat';
 import { PHYSICS } from '../config';
 import { Car, type Spawn } from './car';
+import { REFERENCE_SPEC, type CarSpec } from './carSpec';
 import type { PhysicsWorld } from './world';
 
 export interface Impact {
@@ -22,9 +23,13 @@ export class Simulation {
 
   constructor(readonly physics: PhysicsWorld) {}
 
-  addCar(spawn: Spawn): Car {
-    const car = new Car(this.physics.rapier, this.physics.world, spawn, (c) =>
-      this.physics.surfaceOf(c),
+  addCar(spawn: Spawn, spec: CarSpec = REFERENCE_SPEC): Car {
+    const car = new Car(
+      this.physics.rapier,
+      this.physics.world,
+      spawn,
+      (c) => this.physics.surfaceOf(c),
+      spec,
     );
     this.cars.push(car);
     this.carByCollider.set(car.collider.handle, car);

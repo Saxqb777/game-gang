@@ -50,7 +50,7 @@ export const CAR_INFO: Record<CarId, CarInfo> = {
     body: 'Rally coupe',
     drive: 'AWD',
     tagline: 'Clean cars are slow cars.',
-    stats: { speed: 4, acceleration: 7, handling: 9, braking: 6, ease: 8 },
+    stats: { speed: 4, acceleration: 6, handling: 9, braking: 6, ease: 8 },
   },
   haymaker: {
     make: 'Brazen',
@@ -58,7 +58,7 @@ export const CAR_INFO: Record<CarId, CarInfo> = {
     body: 'Muscle restomod',
     drive: 'RWD',
     tagline: 'Subtle is for other people.',
-    stats: { speed: 9, acceleration: 7, handling: 4, braking: 5, ease: 5 },
+    stats: { speed: 9, acceleration: 9, handling: 4, braking: 5, ease: 5 },
   },
   zanna: {
     make: 'Briganti',
@@ -74,7 +74,7 @@ export const CAR_INFO: Record<CarId, CarInfo> = {
     body: 'Electric hypercar concept',
     drive: 'AWD',
     tagline: 'The future, pending update.',
-    stats: { speed: 5, acceleration: 9, handling: 7, braking: 7, ease: 6 },
+    stats: { speed: 5, acceleration: 7, handling: 7, braking: 7, ease: 6 },
   },
 };
 

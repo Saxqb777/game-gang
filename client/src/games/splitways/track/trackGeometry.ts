@@ -1,10 +1,23 @@
 /**
- * Geometry derived from a Track: the drivable surface (asphalt + sand shoulders), wall segments
- * along both edges, and a height lookup for the terrain around the road. Node-safe (no WebGL), so
- * the physics tests build exactly what the game drives on.
+ * Geometry derived from a Track. The corridor meshes, the physics surface and the wall hulls are
+ * implemented in `gen/corridor.ts` and re-exported here, so scene and physics code import them from
+ * one place. `buildStrip` stays for the interim road visuals; `TrackProximity` for nearest-station
+ * queries. Node-safe (no WebGL), so the physics tests build exactly what the game drives on.
  */
 import { Vector3 } from 'three';
+import { TRACKGEN } from '../config';
 import type { Track } from './track';
+
+export {
+  corridorChunks,
+  corridorPhysicsMesh,
+  wallHulls,
+  type BandMesh,
+  type BandName,
+  type CorridorChunk,
+  type PhysicsSurfaceMesh,
+  type PropInstance,
+} from './gen/corridor';
 
 export interface Strip {
   /** xyz per vertex. */
@@ -14,17 +27,10 @@ export interface Strip {
   indices: Uint32Array;
 }
 
-export interface WallSegment {
-  centre: Vector3;
-  /** Half extents: thickness/2, height/2, length/2 (local x, y, z with z along the road). */
-  half: Vector3;
-  yaw: number;
-}
+/** Wall height above the wall foot (invisible collision walls; the visible barrier is lower). */
+export const WALL_HEIGHT = TRACKGEN.wallHeight;
 
-/** Wall height above the road (invisible collision walls; the visible barrier is lower). */
-export const WALL_HEIGHT = 2.6;
-const WALL_THICKNESS = 1;
-const WALL_SEGMENT = 4;
+const point = new Vector3();
 
 /**
  * A strip of quads following the track between two lateral offsets (negative = left of centre).
@@ -44,14 +50,15 @@ export function buildStrip(
   const positions = new Float32Array(rings * 2 * 3);
   const uvs = new Float32Array(rings * 2 * 2);
   for (let i = 0; i < rings; i++) {
-    const s = track.sample(i);
-    const v = (i === n ? track.length : s.distance) / tile;
+    const v = (i === n ? track.length : track.sample(i).distance) / tile;
     for (let side = 0; side < 2; side++) {
       const lateral = side === 0 ? fromLateral : toLateral;
       const o = (i * 2 + side) * 3;
-      positions[o] = s.position.x + s.right.x * lateral;
-      positions[o + 1] = s.position.y + lift;
-      positions[o + 2] = s.position.z + s.right.z * lateral;
+      // On the banked cross-section, so the interim visuals follow the generated surface.
+      track.lateralPoint(i, lateral, point, lift);
+      positions[o] = point.x;
+      positions[o + 1] = point.y;
+      positions[o + 2] = point.z;
       const t = (i * 2 + side) * 2;
       uvs[t] = lateral / tile;
       uvs[t + 1] = v;
@@ -67,36 +74,6 @@ export function buildStrip(
     indices.set([a, b, c, b, d, c], i * 6);
   }
   return { positions, uvs, indices };
-}
-
-/** The full drivable surface (shoulder to shoulder) as one strip, for the physics trimesh. */
-export function drivableSurface(track: Track): Strip {
-  return buildStrip(track, -track.halfDrivable, track.halfDrivable, 10);
-}
-
-/** Thick invisible walls along both edges, one box every few metres. */
-export function wallSegments(track: Track): WallSegment[] {
-  const segments: WallSegment[] = [];
-  const n = track.samples.length;
-  const offset = track.halfDrivable + WALL_THICKNESS / 2;
-  for (let i = 0; i < n; i += WALL_SEGMENT) {
-    const a = track.sample(i);
-    const b = track.sample(i + WALL_SEGMENT);
-    for (const side of [-1, 1]) {
-      const start = new Vector3().copy(a.position).addScaledVector(a.right, side * offset);
-      const end = new Vector3().copy(b.position).addScaledVector(b.right, side * offset);
-      const length = Math.hypot(end.x - start.x, end.z - start.z);
-      const centre = start.add(end).multiplyScalar(0.5);
-      centre.y += WALL_HEIGHT / 2 - 0.5;
-      segments.push({
-        centre,
-        // Slightly longer than the gap so neighbouring boxes overlap (no cracks on curves).
-        half: new Vector3(WALL_THICKNESS / 2, WALL_HEIGHT / 2 + 0.5, length / 2 + 0.6),
-        yaw: Math.atan2(end.x - start.x, end.z - start.z),
-      });
-    }
-  }
-  return segments;
 }
 
 /**

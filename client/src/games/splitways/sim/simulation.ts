@@ -23,7 +23,9 @@ export class Simulation {
   constructor(readonly physics: PhysicsWorld) {}
 
   addCar(spawn: Spawn): Car {
-    const car = new Car(this.physics.rapier, this.physics.world, spawn);
+    const car = new Car(this.physics.rapier, this.physics.world, spawn, (c) =>
+      this.physics.surfaceOf(c),
+    );
     this.cars.push(car);
     this.carByCollider.set(car.collider.handle, car);
     return car;

@@ -12,7 +12,15 @@ import type {
 } from '@gamergang/shared';
 import { PadTransport, type PadLinkStatus } from '../net/padTransport';
 import { vibrate } from './device';
-import { clientId } from './profile';
+import {
+  clearSeat,
+  clientId,
+  loadSeat,
+  resetClientId,
+  saveSeat,
+  type Profile,
+  type SteeringMode,
+} from './profile';
 
 export interface PadState {
   room: string | null;
@@ -22,7 +30,12 @@ export interface PadState {
   kicked: KickReason | null;
   race: RaceMessage | null;
   results: ResultsMessage | null;
+  /** This tab held a seat in the room before a reload and is claiming it back, with no tap. */
+  rejoining: boolean;
 }
+
+/** How long a leaving pad keeps its link open so the TV receives the leave message. */
+const LEAVE_FLUSH_MS = 300;
 
 const INITIAL: PadState = {
   room: null,
@@ -32,13 +45,18 @@ const INITIAL: PadState = {
   kicked: null,
   race: null,
   results: null,
+  rejoining: false,
 };
 
 export class PadStore {
   private state: PadState = INITIAL;
   private readonly listeners = new Set<() => void>();
   private transport: PadTransport | null = null;
-  private joinRequest: { name: string; colour: ColourId } | null = null;
+  private joinRequest: { name: string; colour: ColourId; rejoin?: boolean } | null = null;
+  /** From `joined`: proves to the TV that this tab owns its seat when it joins again. */
+  private seatKey: string | null = null;
+  /** Steering layout, remembered with the seat so a reload keeps it in this tab. */
+  private mode: SteeringMode = 'drag';
 
   readonly subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
@@ -50,25 +68,54 @@ export class PadStore {
   connect(room: string): void {
     if (this.state.room === room && this.transport) return;
     this.transport?.stop();
-    this.joinRequest = null;
-    this.update({ ...INITIAL, room, status: 'connecting' });
-    this.transport = new PadTransport(room, clientId(), {
-      onStatus: (status) => this.handleStatus(status),
-      onMessage: (message) => this.handleMessage(message),
+    // A seat saved by this tab means a reload: join again on open, as the same player.
+    const seat = loadSeat(room);
+    this.joinRequest = seat ? { name: seat.name, colour: seat.colour, rejoin: true } : null;
+    this.seatKey = seat?.seatKey ?? null;
+    if (seat) this.mode = seat.mode;
+    this.update({ ...INITIAL, room, status: 'connecting', rejoining: seat !== null });
+    // Events from a transport this store already let go of (see leaveRoom) are ignored.
+    const transport: PadTransport = new PadTransport(room, clientId(), {
+      onStatus: (status) => {
+        if (this.transport === transport) this.handleStatus(status);
+      },
+      onMessage: (message) => {
+        if (this.transport === transport) this.handleMessage(message);
+      },
     });
-    this.transport.start();
+    this.transport = transport;
+    transport.start();
   }
 
+  /** Explicit leave: the TV frees the seat now and a reload no longer rejoins. */
   leaveRoom(): void {
-    this.transport?.stop();
+    clearSeat();
+    // Coming back later is a new player, not a claim on the seat just given up.
+    resetClientId();
+    const transport = this.transport;
     this.transport = null;
+    if (transport) {
+      transport.send({ type: 'leave' });
+      // Closing the peer at once can drop the message still queued on the data channel.
+      setTimeout(() => {
+        transport.stop();
+      }, LEAVE_FLUSH_MS);
+    }
     this.joinRequest = null;
+    this.seatKey = null;
     this.update(INITIAL);
   }
 
-  join(name: string, colour: ColourId): void {
+  join(name: string, colour: ColourId, mode: SteeringMode): void {
     this.joinRequest = { name, colour };
+    this.mode = mode;
     this.sendJoin();
+  }
+
+  setMode(mode: SteeringMode): void {
+    this.mode = mode;
+    const { room, me } = this.state;
+    if (room && me) this.saveSeat(room, me.colour);
   }
 
   setReady(ready: boolean): void {
@@ -90,10 +137,25 @@ export class PadStore {
 
   private sendJoin(): void {
     const { room } = this.state;
-    if (room && this.joinRequest) this.transport?.send({ type: 'join', room, ...this.joinRequest });
+    if (!room || !this.joinRequest) return;
+    const seatKey = this.seatKey ? { seatKey: this.seatKey } : {};
+    this.transport?.send({ type: 'join', room, ...this.joinRequest, ...seatKey });
+  }
+
+  private saveSeat(room: string, colour: ColourId): void {
+    if (!this.joinRequest || !this.seatKey) return;
+    const profile: Profile = { name: this.joinRequest.name, colour, mode: this.mode };
+    saveSeat({ room, ...profile, seatKey: this.seatKey });
   }
 
   private handleStatus(status: PadLinkStatus): void {
+    if (status === 'room-not-found') {
+      clearSeat();
+      this.joinRequest = null;
+      this.seatKey = null;
+      this.update({ status, rejoining: false });
+      return;
+    }
     this.update({ status });
     // After a reconnect the TV only knows us again once we re-send join (same id, same car).
     if (status === 'open') this.sendJoin();
@@ -101,9 +163,17 @@ export class PadStore {
 
   private handleMessage(message: TvMessage): void {
     switch (message.type) {
-      case 'joined':
-        this.update({ me: message, kicked: null });
+      case 'joined': {
+        const { room } = this.state;
+        if (room && this.joinRequest) {
+          // The TV's colour wins. Later reconnects and reloads claim this exact seat back.
+          this.joinRequest = { name: this.joinRequest.name, colour: message.colour, rejoin: true };
+          this.seatKey = message.seatKey;
+          this.saveSeat(room, message.colour);
+        }
+        this.update({ me: message, kicked: null, rejoining: false });
         return;
+      }
       case 'lobby':
         this.update(
           message.state === 'lobby'
@@ -120,10 +190,22 @@ export class PadStore {
       case 'haptic':
         vibrate(message.pattern);
         return;
-      case 'kicked':
+      case 'kicked': {
         this.joinRequest = null;
-        this.update({ kicked: message.reason, me: null });
+        this.seatKey = null;
+        clearSeat();
+        const { room } = this.state;
+        if (message.reason === 'taken' && room) {
+          // Our id names a seat we cannot prove is ours: start over as a new player.
+          resetClientId();
+          this.transport?.stop();
+          this.transport = null;
+          this.connect(room);
+          return;
+        }
+        this.update({ kicked: message.reason, me: null, rejoining: false });
         return;
+      }
       case 'ping':
         return; // Answered by the transport.
     }

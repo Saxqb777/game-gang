@@ -59,6 +59,9 @@ import { NAME_TAG_HEIGHT, createNameTag, disposeNameTag } from './scene/nameTag'
 import { Podium, type PodiumEntry } from './scene/podium';
 import { SkidMarks } from './scene/skidMarks';
 import { WorldVisual } from './scene/world';
+import { BlobShadows } from './scene/blobShadows';
+import { SURFACE, type SurfaceId } from './track/surfaces';
+import { SCENERY, SURFACES } from './config';
 import type { Car } from './sim/car';
 import { NEUTRAL_INPUT, copyInput, mergeInputs, type DriveInput } from './sim/input';
 import { Simulation, type Impact } from './sim/simulation';
@@ -130,8 +133,10 @@ interface Driver {
   /** What the player is pressing, even while the race holds the car (engines rev on the grid). */
   wantThrottle: number;
   wantHorn: boolean;
-  /** On the sand shoulder (dust, ruts, rumble). */
-  onSand: boolean;
+  /** Ground under the car (most wheels): rumble, camera shake. */
+  surface: SurfaceId;
+  /** When the last kerb shake was given (performance.now()), so a kerb run shakes at a steady rate. */
+  lastKerbShakeAt: number;
   /** "LAST 0:41.23" shows for a few seconds after each lap. */
   lastLapSeen: number | null;
   lastLapUntil: number;
@@ -178,11 +183,14 @@ export class SplitWaysGame {
   private readonly skids = new SkidMarks();
   private readonly audio: RaceAudio | null;
   private readonly dust = new Dust();
+  private readonly blobs: BlobShadows;
   private readonly overviewBadge = document.createElement('div');
   private readonly carPositions: Vector3[];
   private readonly carColours: string[];
   private mode: 'race' | 'podium' = 'race';
   private podium: Podium | null = null;
+  /** Final standings once the podium is up, re-sent to a pad that reloads after the race. */
+  private finalStandings: RaceResult[] | null = null;
   private raceEndedAt: number | null = null;
   private autopilotOn = false;
   /** Seconds since the game started, for shader animation. */
@@ -223,7 +231,7 @@ export class SplitWaysGame {
       const terrain = new Terrain(track);
       const [models, world, skyTexture] = await Promise.all([
         CarModelLibrary.load(),
-        WorldVisual.create(track, terrain, preset.anisotropy),
+        WorldVisual.create(track, terrain, preset),
         Sky.loadTexture(),
       ]);
       return new SplitWaysGame(
@@ -265,10 +273,11 @@ export class SplitWaysGame {
     this.sky.apply(this.scene);
     // White fog: the haze shader supplies the colour (the sky's, per direction).
     installHaze(this.sky.hazeColours);
-    this.scene.fog = new FogExp2(0xffffff, LIGHTING.fogDensity);
+    this.scene.fog = new FogExp2(LIGHTING.fogTint, LIGHTING.fogDensity);
     this.shadows = this.createShadows(preset);
     world.setQuality(preset);
     this.scene.add(world.group, this.skids.mesh, this.dust.mesh);
+    world.setEnvironment(this.sky.environment, this.sky.rotation);
 
     buildTrackPhysics(physics, track);
     this.sim = new Simulation(physics);
@@ -279,6 +288,8 @@ export class SplitWaysGame {
       this.skids.addCar(car);
       this.dust.addCar(car);
     }
+    this.blobs = new BlobShadows(cars.length);
+    this.scene.add(this.blobs.mesh);
     this.race = new Race(track, cars, options.bench === 'soak' ? SOAK_LAPS : undefined);
     this.race.onGo = () => {
       this.broadcast({ type: 'haptic', pattern: 'start' });
@@ -319,7 +330,8 @@ export class SplitWaysGame {
         lastHapticAt: 0,
         wantThrottle: 0,
         wantHorn: false,
-        onSand: false,
+        surface: SURFACE.asphalt,
+        lastKerbShakeAt: -Infinity,
         lastLapSeen: null,
         lastLapUntil: 0,
         lastLapText: '',
@@ -665,8 +677,17 @@ export class SplitWaysGame {
   }
 
   setConnected(playerId: string, connected: boolean): void {
-    const driver = this.drivers.find((d) => d.player.id === playerId);
-    if (driver) driver.connected = connected;
+    const index = this.drivers.findIndex((d) => d.player.id === playerId);
+    const driver = this.drivers[index];
+    if (!driver) return;
+    driver.connected = connected;
+    if (!connected) return;
+    // A reloaded pad starts with no race status or results: send them now, not on the next tick.
+    if (this.finalStandings) {
+      this.hooks.send(playerId, { type: 'results', standings: this.finalStandings });
+    } else if (this.started) {
+      this.sendRaceStatusTo(index);
+    }
   }
 
   dispose(): void {
@@ -690,6 +711,7 @@ export class SplitWaysGame {
     this.audio?.dispose();
     this.skids.dispose();
     this.dust.dispose();
+    this.blobs.dispose();
     this.world.dispose();
     this.sky.dispose();
     this.sim.dispose();
@@ -802,10 +824,21 @@ export class SplitWaysGame {
     this.pushStatusOnChange(now);
     this.slipstream.update(this.sim.dt, this.race.phase === 'racing');
     for (const driver of this.drivers) {
-      const { car, racer } = driver;
-      driver.onSand = Math.abs(racer.projection.lateral) > this.track.halfRoad + 0.3;
-      this.skids.update(car, driver.onSand);
-      this.dust.emit(car, driver.onSand, this.sim.dt);
+      const { car } = driver;
+      driver.surface = car.dominantSurface;
+      this.skids.update(car);
+      this.dust.emit(car, this.sim.dt);
+      // Kerbs rattle the camera at a steady rate; above 160 km/h a faint buffeting hum.
+      if (
+        driver.surface === SURFACE.kerb &&
+        Math.abs(car.forwardSpeed) > SCENERY.kerbShakeMinSpeed &&
+        now - driver.lastKerbShakeAt > SCENERY.kerbShakeEvery * 1000
+      ) {
+        driver.camera.addShake(SCENERY.kerbShake * SURFACES.kerb.rumble);
+        driver.lastKerbShakeAt = now;
+      }
+      const buffet = (car.speedKph - SCENERY.buffetFromKph) / SCENERY.buffetRampKph;
+      if (buffet > 0) driver.camera.addShake(SCENERY.buffetShake * Math.min(1, buffet));
     }
 
     if (this.race.phase === 'finished' && this.raceEndedAt === null) this.raceEndedAt = now;
@@ -853,6 +886,7 @@ export class SplitWaysGame {
     this.hudLayer.hidden = true;
     this.audio?.podium();
     this.layout();
+    this.finalStandings = results;
     this.broadcast({ type: 'results', standings: results });
     this.hooks.onResults(results);
   }
@@ -862,6 +896,7 @@ export class SplitWaysGame {
     this.clock += seconds;
     this.dust.update(seconds);
     this.skids.flush();
+    this.blobs.update(this.sim.cars, alpha);
     const renderer = this.renderer;
     renderer.beginFrame(now, this.loop.lastDeltaMs);
     if (this.flight) {
@@ -940,7 +975,7 @@ export class SplitWaysGame {
           i,
           driver.wantThrottle,
           driver.wantHorn,
-          driver.onSand,
+          driver.surface,
           driver.car.draft,
         );
       }

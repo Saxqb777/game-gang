@@ -20,7 +20,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
-    "assets:car": "node client/scripts/build-car-model.mjs"
+    "assets:car": "node client/scripts/build-car-model.mjs",
+    "assets:track": "tsx client/scripts/check-track.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

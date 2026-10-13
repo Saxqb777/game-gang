@@ -1,15 +1,20 @@
 import { describe, expect, it } from 'vitest';
+import base from '../../../../../assets/tracks/kestrel-pines/base.layout.json';
+import overrides from '../../../../../assets/tracks/kestrel-pines/overrides.json';
 import { RACE, RESPAWN } from '../config';
 import { autopilot } from '../debug/autopilot';
 import { NEUTRAL_INPUT, copyInput, type DriveInput } from '../sim/input';
 import { Simulation } from '../sim/simulation';
 import { PhysicsWorld } from '../sim/world';
+import { SURFACE } from '../track/surfaces';
 import { buildTrackPhysics } from '../track/trackPhysics';
-import { createPlaceholderTrack } from '../track/tracks';
+import { buildTrack } from '../track/tracks';
 import { Race, type Racer } from './race';
 
+const kestrelPines = buildTrack(base, overrides);
+
 async function setup(cars: number, laps?: number) {
-  const track = createPlaceholderTrack();
+  const track = kestrelPines;
   const physics = await PhysicsWorld.create();
   buildTrackPhysics(physics, track);
   const sim = new Simulation(physics);
@@ -37,7 +42,7 @@ function skipCountdown(race: Race, step: () => void): void {
   for (const racer of race.racers) copyInput(racer.car.input, NEUTRAL_INPUT);
 }
 
-describe('race (placeholder loop)', () => {
+describe('race (Kestrel Pines)', () => {
   it('holds cars during the countdown, then goes green', async () => {
     const { sim, race } = await setup(2);
     let wentGreen = false;
@@ -58,15 +63,20 @@ describe('race (placeholder loop)', () => {
     }
     expect(wentGreen).toBe(true);
     expect(race.phase).toBe('racing');
-  });
+  }, 30_000);
 
-  it('runs a full 3-lap race with 4 cars end to end', async () => {
+  // The track's own 3 laps: the run takes about 10 s here (measured alone, P2.11 allows up to 40 s).
+  it('runs a full 3-lap race with 4 autopilot cars end to end', async () => {
     const { track, sim, race } = await setup(4);
     const finishOrder: number[] = [];
     race.onFinish = (racer) => finishOrder.push(racer.slot);
     let steps = 0;
-    while (race.phase !== 'finished' && steps < 60 * 400) {
-      for (const racer of race.racers) autopilot(track, racer, racer.car.input);
+    let respawns = 0;
+    while (race.phase !== 'finished' && steps < 60 * 900) {
+      for (const racer of race.racers) {
+        autopilot(track, racer, racer.car.input);
+        if (racer.respawn === 'out' && racer.respawnTimer === 0) respawns++;
+      }
       race.holdInputs();
       sim.step();
       race.update(sim.dt);
@@ -79,13 +89,16 @@ describe('race (placeholder loop)', () => {
     for (const racer of standings) {
       expect(racer.lap).toBe(race.totalLaps + 1);
       expect(racer.finishedMs).not.toBeNull();
-      // A placeholder-loop lap at racing speed takes roughly 30-75 s.
-      expect(racer.bestLapMs).toBeGreaterThan(25_000);
-      expect(racer.bestLapMs).toBeLessThan(75_000);
+      // A Kestrel Pines lap on autopilot takes about 1.5 minutes.
+      expect(racer.bestLapMs).toBeGreaterThan(55_000);
+      expect(racer.bestLapMs).toBeLessThan(160_000);
     }
     // Finishing order matches the ranking.
     expect(standings.map((r) => r.slot)).toEqual(finishOrder);
-  }, 60_000);
+    console.info(
+      `[race] ${race.totalLaps} laps in ${(steps / 60).toFixed(0)} s of race time, best laps ${standings.map((r) => r.bestLapMs).join(', ')} ms, ${respawns} respawns`,
+    );
+  }, 120_000);
 
   it('does not count a lap that skips checkpoints', async () => {
     const { track, sim, race } = await setup(1);
@@ -160,7 +173,7 @@ describe('manual reset', () => {
     expect(race.requestRespawn(racer)).toBe(false);
   });
 
-  it('a reset puts the car back at its last gate, never further round the lap', async () => {
+  it('a reset puts the car back behind its last safe spot, never further round the lap', async () => {
     const { track, race, step } = await setup(1);
     const racer = race.racers[0] as Racer;
     skipCountdown(race, step);
@@ -174,11 +187,53 @@ describe('manual reset', () => {
     expect(race.requestRespawn(racer)).toBe(true);
     untilBack(racer, step);
     expect(racer.gatesPassed).toBe(gates);
-    // Signed distance gained along the lap: at most the 3 m the respawn sits past the gate.
+    // Signed distance gained along the lap: the respawn sits 10 m behind the last safe spot, which
+    // is never ahead of where the reset was asked for.
     let gained = track.ahead(before, racer.projection.distance);
     if (gained > track.length / 2) gained -= track.length;
-    expect(gained).toBeLessThan(3.5);
-  });
+    expect(gained).toBeLessThan(0);
+  }, 30_000);
+});
+
+describe('safe respawn', () => {
+  it('puts a car that went onto the run-off back behind its last clean spot, on the asphalt', async () => {
+    const { track, race, step } = await setup(1);
+    const racer = race.racers[0] as Racer;
+    const car = racer.car;
+    skipCountdown(race, step);
+    for (let t = 0; t < 10; t += 1 / 60) {
+      autopilot(track, racer, car.input);
+      step();
+    }
+    expect(racer.gatesPassed).toBeGreaterThan(0);
+    const safe = racer.safeDistance;
+    expect(track.ahead(safe, racer.projection.distance)).toBeLessThan(5);
+
+    // Off onto the grass 40 m further on, and keep going there.
+    const index = track.indexAt(racer.projection.distance + 40);
+    const p = track.side(index, -1);
+    car.placeAt(track.spawnAt(index * track.spacing, -(p.road + p.kerb + 4)));
+    for (let t = 0; t < 1; t += 1 / 60) {
+      copyInput(car.input, NEUTRAL_INPUT);
+      car.input.throttle = 0.4;
+      step();
+    }
+    expect(Math.abs(racer.projection.lateral)).toBeGreaterThan(p.road);
+    expect(racer.safeDistance).toBe(safe);
+
+    copyInput(car.input, NEUTRAL_INPUT);
+    expect(race.requestRespawn(racer)).toBe(true);
+    untilBack(racer, step);
+    for (let i = 0; i < 30; i++) step();
+    // Behind the safe spot (10 m back), in its lane on the asphalt.
+    let back = track.ahead(racer.projection.distance, safe);
+    if (back > track.length / 2) back -= track.length;
+    expect(back).toBeGreaterThan(8);
+    expect(back).toBeLessThan(12);
+    const side = track.side(racer.projection.index, racer.projection.lateral < 0 ? -1 : 1);
+    expect(Math.abs(racer.projection.lateral)).toBeLessThan(side.road);
+    expect(car.dominantSurface).toBe(SURFACE.asphalt);
+  }, 30_000);
 });
 
 describe('stuck on gas', () => {

@@ -1,0 +1,11 @@
+{
+  "lod0": { "triangles": 90000, "draws": 18, "gpuBytes": 50331648, "maxImagePx": 2048 },
+  "lod1": { "triangles": 24000, "draws": 8, "gpuBytes": 24117248, "kitPx": 1024 },
+  "lod2": { "triangles": 4000, "draws": 2, "palettePx": 64 },
+  "shadow": { "triangles": 2500 },
+  "fileBytes": 6291456,
+  "thumbBytes": 40960,
+  "thumbWidth": 512,
+  "thumbHeight": 288,
+  "totalBytes": 33554432
+}

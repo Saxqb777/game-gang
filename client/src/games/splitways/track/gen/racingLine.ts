@@ -9,9 +9,43 @@ import { movingAverage } from './corridor';
 export interface RacingLine {
   /** Lateral offset per station (m, + = right). */
   lateral: Float32Array;
-  /** Speed profile along the line (m/s). */
+  /** Speed profile along the line (m/s), planned with the reference car. */
   speed: Float32Array;
+  /**
+   * The line's own plan curvature per station (1/m, unsigned), for per-car speed profiles. Double
+   * precision, so the reference limits reproduce `speed` bit for bit.
+   */
+  curvature: Float64Array;
 }
+
+/** What a speed profile plans with: the line's limits plus the car's engine curve. */
+export interface SpeedLimits {
+  /** Top speed the plan allows (m/s). */
+  vMax: number;
+  /** Cornering grip (m/s^2). */
+  lateralAccel: number;
+  /** Braking (m/s^2). */
+  brakeDecel: number;
+  /** Acceleration cap of the forward pass (m/s^2); the engine curve takes over above it. */
+  accelCap: number;
+  /** Engine: peak force (N), top speed (m/s), fall-off exponent and the car's mass (kg). */
+  force: number;
+  topSpeed: number;
+  curve: number;
+  mass: number;
+}
+
+/** The reference car's limits: the plan the generator stores and the tyre walls come from. */
+export const REFERENCE_LIMITS: SpeedLimits = {
+  vMax: RACING_LINE.vMax,
+  lateralAccel: RACING_LINE.lateralAccel,
+  brakeDecel: RACING_LINE.brakeDecel,
+  accelCap: RACING_LINE.accelCap,
+  force: ENGINE.force,
+  topSpeed: ENGINE.topSpeed,
+  curve: 2,
+  mass: CAR.mass,
+};
 
 /** Stations either side used to measure the line's curvature. */
 const CURVATURE_SPAN = RACING_LINE.span;
@@ -86,7 +120,7 @@ export function buildRacingLine(
     px[i] = (x[i] as number) + (rx[i] as number) * (lateral[i] as number);
     pz[i] = (z[i] as number) + (rz[i] as number) * (lateral[i] as number);
   }
-  const speed = new Float32Array(n);
+  const curvature = new Float64Array(n);
   for (let i = 0; i < n; i++) {
     const a = at(i - CURVATURE_SPAN);
     const b = at(i + CURVATURE_SPAN);
@@ -95,8 +129,26 @@ export function buildRacingLine(
     const bx = (px[b] as number) - (px[i] as number);
     const bz = (pz[b] as number) - (pz[i] as number);
     const turn = wrapAngle(Math.atan2(bx, bz) - Math.atan2(ax, az));
-    const k = Math.abs(turn) / Math.max(1e-6, (Math.hypot(ax, az) + Math.hypot(bx, bz)) / 2);
-    speed[i] = Math.min(RACING_LINE.vMax, Math.sqrt(RACING_LINE.lateralAccel / Math.max(k, 1e-9)));
+    curvature[i] = Math.abs(turn) / Math.max(1e-6, (Math.hypot(ax, az) + Math.hypot(bx, bz)) / 2);
+  }
+  return { lateral, speed: speedProfile(curvature, spacing, REFERENCE_LIMITS), curvature };
+}
+
+/**
+ * The speed a car with these limits could carry along a line of this curvature: the cornering
+ * limit, then a braking pass backwards and an acceleration pass forwards, both periodic.
+ */
+export function speedProfile(
+  curvature: ArrayLike<number>,
+  spacing: number,
+  limits: SpeedLimits,
+): Float32Array {
+  const n = curvature.length;
+  const at = (i: number) => ((i % n) + n) % n;
+  const speed = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const k = curvature[i] as number;
+    speed[i] = Math.min(limits.vMax, Math.sqrt(limits.lateralAccel / Math.max(k, 1e-9)));
   }
   // Braking backwards, then accelerating forwards; twice round so the lap seam is settled.
   for (let pass = 0; pass < 2 * n; pass++) {
@@ -104,20 +156,20 @@ export function buildRacingLine(
     const next = speed[at(i + 1)] as number;
     speed[i] = Math.min(
       speed[i] as number,
-      Math.sqrt(next * next + 2 * RACING_LINE.brakeDecel * spacing),
+      Math.sqrt(next * next + 2 * limits.brakeDecel * spacing),
     );
   }
   for (let pass = 0; pass < 2 * n; pass++) {
     const i = at(pass);
     const v = speed[i] as number;
     const accel = Math.min(
-      RACING_LINE.accelCap,
-      (ENGINE.force * Math.max(0, 1 - (v / ENGINE.topSpeed) ** 2)) / CAR.mass,
+      limits.accelCap,
+      (limits.force * Math.max(0, 1 - (v / limits.topSpeed) ** limits.curve)) / limits.mass,
     );
     const j = at(i + 1);
     speed[j] = Math.min(speed[j] as number, Math.sqrt(v * v + 2 * accel * spacing));
   }
-  return { lateral, speed };
+  return speed;
 }
 
 export interface BrakingZone {

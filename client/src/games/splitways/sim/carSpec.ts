@@ -4,7 +4,7 @@
  * Node-safe: no DOM, canvas or WebGL.
  */
 import type { CarId } from '@gamergang/shared';
-import { ASSISTS, BRAKES, CAR, DRIFT, ENGINE, TYRES, WHEELS } from '../config';
+import { ASSISTS, BRAKES, CAR, CAR_DERIVE, CARS, DRIFT, ENGINE, TYRES, WHEELS } from '../config';
 
 export interface WheelSpec {
   /** Hub position in car space: +X is the car's left, +Z forward (m). */
@@ -111,11 +111,68 @@ export const REFERENCE_SPEC: CarSpec = {
   },
 };
 
+function wheel(x: number, z: number, radius: number): WheelSpec {
+  // Real cars sit with the hub one tyre radius above the ground, so the car origin is at road level.
+  return { x, z, radius, centreHeight: radius };
+}
+
 /**
- * The spec a car drives with. Every car is still the reference car here; the per-car derivation
- * from `CARS` replaces this body (C3).
+ * The spec a car drives with: the reference car plus `CARS.<id>`. Geometry places the wheels and
+ * sizes the collider and inertia; the brake impulse, downforce, rolling resistance, reverse force and
+ * the assist torques scale with mass so every car decelerates and steadies like the reference; the
+ * per-car factors sit on top.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- every id is the reference car for now
-export function resolveCarSpec(_id: CarId): CarSpec {
-  return REFERENCE_SPEC;
+export function resolveCarSpec(id: CarId): CarSpec {
+  const c = CARS[id];
+  const g = c.geometry;
+  const massScale = c.mass / CAR.mass;
+  const lengthSq = g.length * g.length;
+  const widthSq = g.width * g.width;
+  const refLengthSq = CAR_DERIVE.inertiaLength * CAR_DERIVE.inertiaLength;
+  const refWidthSq = CAR_DERIVE.inertiaWidth * CAR_DERIVE.inertiaWidth;
+  // A box's inertia grows with mass times size squared: pitch with length, roll with width, yaw both.
+  const inertia = massScale * c.inertia;
+  return {
+    id,
+    mass: c.mass,
+    inertia: {
+      pitch: CAR.inertia.pitch * inertia * (lengthSq / refLengthSq),
+      yaw: CAR.inertia.yaw * inertia * ((lengthSq + widthSq) / (refLengthSq + refWidthSq)),
+      roll: CAR.inertia.roll * inertia * (widthSq / refWidthSq),
+    },
+    com: { height: c.comHeight, forward: c.comForward },
+    chassis: {
+      halfExtents: {
+        x: g.width * CAR_DERIVE.colliderHalfWidth,
+        y: g.height * CAR_DERIVE.colliderHalfHeight,
+        z: g.length * CAR_DERIVE.colliderHalfLength,
+      },
+      centreHeight: g.height * CAR_DERIVE.colliderCentreHeight,
+    },
+    wheels: [
+      wheel(g.halfTrackFront, g.wheelbaseHalf, g.radiusFront),
+      wheel(-g.halfTrackFront, g.wheelbaseHalf, g.radiusFront),
+      wheel(g.halfTrackRear, -g.wheelbaseHalf, g.radiusRear),
+      wheel(-g.halfTrackRear, -g.wheelbaseHalf, g.radiusRear),
+    ],
+    engine: {
+      force: c.force,
+      topSpeed: c.topSpeed,
+      curve: c.curve,
+      frontShare: c.frontShare,
+      reverseForce: ENGINE.reverseForce * massScale,
+      reverseTopSpeed: ENGINE.reverseTopSpeed,
+      drag: ENGINE.drag * c.drag,
+      rollingResistance: ENGINE.rollingResistance * massScale,
+    },
+    tyres: { frontGrip: c.frontGrip, rearGrip: c.rearGrip, sideStiffness: TYRES.sideStiffness },
+    brakes: {
+      impulse: BRAKES.impulse * massScale * c.brake,
+      frontBias: BRAKES.frontBias,
+      handbrakeImpulse: DRIFT.handbrakeImpulse * massScale,
+    },
+    massScale,
+    downforce: ASSISTS.downforce * massScale * c.downforce,
+    geometry: { ...g },
+  };
 }

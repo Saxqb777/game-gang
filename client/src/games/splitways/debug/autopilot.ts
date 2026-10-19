@@ -1,6 +1,6 @@
 /**
  * Debug-only autopilot: drives a car along the track's racing line (pure pursuit, with braking
- * from the generated speed profile). It exists so whole races can be tested without four humans;
+ * from the generated speed profile, or the car's own one). It exists so whole races can be tested without four humans;
  * it is not an AI opponent. Toggle it from the TV's debug overlay (backtick, then P).
  */
 import { Vector3 } from 'three';
@@ -19,7 +19,16 @@ const toTarget = new Vector3();
 const target = new Vector3();
 const LOCAL_FORWARD = new Vector3(0, 0, 1);
 
-export function autopilot(track: Track, racer: Racer, out: DriveInput): DriveInput {
+/**
+ * `speeds`: this car's own target speed per track station (`carSpeedProfile`); null drives to the
+ * track's reference-car plan.
+ */
+export function autopilot(
+  track: Track,
+  racer: Racer,
+  out: DriveInput,
+  speeds: Float32Array | null = null,
+): DriveInput {
   const { car } = racer;
   const speed = Math.max(0, car.forwardSpeed);
   const here = racer.projection.distance;
@@ -48,7 +57,10 @@ export function autopilot(track: Track, racer: Racer, out: DriveInput): DriveInp
   let slowest = Infinity;
   const horizon = Math.max(25, speed * 2.4);
   for (let d = 0; d <= horizon; d += 1) {
-    slowest = Math.min(slowest, track.sampleAt(here + d).targetSpeed);
+    const target = speeds
+      ? (speeds[track.indexAt(here + d)] as number)
+      : track.sampleAt(here + d).targetSpeed;
+    slowest = Math.min(slowest, target);
   }
   const goal = SPEED_SHARE * slowest;
   if (speed > goal + BRAKE_OVER) {

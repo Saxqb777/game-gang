@@ -1,7 +1,8 @@
-import { colourHex, type LobbyMessage } from '@gamergang/shared';
+import { CAR_INFO, colourHex, type LobbyMessage } from '@gamergang/shared';
 import type { CSSProperties } from 'react';
 import { GAMES } from '../../games/registry';
 import type { SteeringMode } from '../profile';
+import { CarThumb } from './CarPicker';
 import { ModePicker } from './JoinScreen';
 
 export function TopBar({
@@ -35,12 +36,15 @@ export function LobbyScreen({
   room,
   onReady,
   onSettings,
+  onChangeCar,
 }: {
   lobby: LobbyMessage;
   myId: string;
   room: string;
   onReady: (ready: boolean) => void;
   onSettings: () => void;
+  /** Opens the join screen in edit mode. */
+  onChangeCar: () => void;
 }) {
   const me = lobby.players.find((p) => p.id === myId);
   const ready = me?.ready ?? false;
@@ -51,11 +55,26 @@ export function LobbyScreen({
     <main className="pad-screen pad-lobby" style={style}>
       <TopBar name={me?.name ?? ''} room={room} onSettings={onSettings} />
       <section className="pad-lobby-grid">
-        <div className="pad-game-card" style={{ background: game.art }}>
-          <small>Up next</small>
-          <strong>{game.title}</strong>
-          <span>{game.subtitle}</span>
-          <p>{game.details}</p>
+        <div className="pad-lobby-left">
+          <div className="pad-game-card" style={{ background: game.art }}>
+            <small>Up next</small>
+            <strong>{game.title}</strong>
+            <span>{game.subtitle}</span>
+            <p>{game.details}</p>
+          </div>
+          {me ? (
+            <div className="pad-mycar">
+              <CarThumb car={me.car} colour={me.colour} className="pad-mycar-thumb" />
+              <div className="pad-mycar-text">
+                <small>Your car</small>
+                <strong>{CAR_INFO[me.car].model}</strong>
+                <span>{CAR_INFO[me.car].make}</span>
+              </div>
+              <button className="pad-btn pad-btn--ghost pad-btn--small" onClick={onChangeCar}>
+                Change car
+              </button>
+            </div>
+          ) : null}
         </div>
         <ul className="pad-players">
           {lobby.players.map((p) => (
@@ -65,7 +84,10 @@ export function LobbyScreen({
               style={{ '--swatch': colourHex(p.colour) } as CSSProperties}
             >
               <i />
-              <span>{p.name}</span>
+              <span>
+                {p.name}
+                <small>{CAR_INFO[p.car].model}</small>
+              </span>
               <em>{p.connected ? (p.ready ? 'ready' : '...') : 'away'}</em>
             </li>
           ))}
@@ -105,7 +127,7 @@ export function SettingsSheet({
         <div className="pad-sheet-actions">
           {onEditProfile ? (
             <button className="pad-btn pad-btn--ghost" onClick={onEditProfile}>
-              Change name / colour
+              Change name / car
             </button>
           ) : null}
           <button className="pad-btn pad-btn--ghost" onClick={onLeave}>

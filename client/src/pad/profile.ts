@@ -1,4 +1,12 @@
-import { PLAYER_COLOURS, playerNameSchema, seatKeySchema, type ColourId } from '@gamergang/shared';
+import {
+  DEFAULT_CAR_ID,
+  PLAYER_COLOURS,
+  carIdSchema,
+  playerNameSchema,
+  seatKeySchema,
+  type CarId,
+  type ColourId,
+} from '@gamergang/shared';
 import { randomId } from '../net/rtc';
 
 /** Pad steering layouts, the first being the default: drag a thumb, or hold arrow buttons. */
@@ -7,7 +15,9 @@ export type SteeringMode = (typeof STEERING_MODES)[number];
 
 export interface Profile {
   name: string;
+  /** The paint, which is also the player's identity colour on the TV (D-C1). */
   colour: ColourId;
+  car: CarId;
   mode: SteeringMode;
 }
 
@@ -26,14 +36,26 @@ function isColour(value: unknown): value is ColourId {
   return PLAYER_COLOURS.some((c) => c.id === value);
 }
 
+/** A stored car that is missing or no longer in the line-up becomes the default car. */
+export function storedCar(value: unknown): CarId {
+  const parsed = carIdSchema.safeParse(value);
+  return parsed.success ? parsed.data : DEFAULT_CAR_ID;
+}
+
 export function loadProfile(): Profile {
-  const fallback: Profile = { name: '', colour: 'red', mode: STEERING_MODES[0] };
+  const fallback: Profile = {
+    name: '',
+    colour: 'red',
+    car: DEFAULT_CAR_ID,
+    mode: STEERING_MODES[0],
+  };
   try {
     const raw = JSON.parse(localStorage.getItem(PROFILE_KEY) ?? 'null') as Partial<Profile> | null;
     if (!raw) return fallback;
     return {
       name: playerNameSchema.safeParse(raw.name).success ? String(raw.name) : '',
       colour: isColour(raw.colour) ? raw.colour : fallback.colour,
+      car: storedCar(raw.car),
       // Any other stored value becomes drag.
       mode: raw.mode === 'buttons' ? 'buttons' : 'drag',
     };
@@ -84,6 +106,8 @@ export function loadSeat(room: string): Seat | null {
       room,
       name: String(raw.name),
       colour: raw.colour,
+      // A seat saved before cars existed still rejoins; the TV keeps the car it already holds.
+      car: storedCar(raw.car),
       mode: raw.mode === 'buttons' ? 'buttons' : 'drag',
       seatKey: seatKey.data,
     };

@@ -1,0 +1,55 @@
+.thumb-studio {
+  min-height: 100vh;
+  padding: 24px;
+  background: #1b1f27;
+  color: #e8eaf0;
+}
+
+.thumb-studio header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.thumb-studio h1,
+.thumb-studio h2 {
+  margin: 0;
+}
+
+.thumb-studio h2 {
+  margin: 16px 0 8px;
+  font-size: 18px;
+}
+
+.thumb-studio [data-state='error'] {
+  color: #ff6b6b;
+}
+
+.thumb-studio button {
+  padding: 8px 16px;
+  font: inherit;
+}
+
+.thumb-studio-hint {
+  opacity: 0.7;
+}
+
+.thumb-studio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.thumb-studio figure {
+  margin: 0;
+  /* A checkerboard shows the transparent background. */
+  background: repeating-conic-gradient(#3a3f4a 0% 25%, #2a2e37 0% 50%) 0 0 / 16px 16px;
+}
+
+.thumb-studio figcaption {
+  padding: 2px 4px;
+  font-size: 12px;
+  background: #1b1f27;
+}

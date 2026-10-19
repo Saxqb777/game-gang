@@ -473,6 +473,15 @@
   text-overflow: ellipsis;
 }
 
+.sw-results-car {
+  display: block;
+  font-size: 1vw;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .sw-results-time {
   font-size: 1.7vw;
   font-variant-numeric: tabular-nums;

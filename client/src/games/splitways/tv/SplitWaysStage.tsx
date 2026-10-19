@@ -1,5 +1,11 @@
 import './stage.css';
-import { MAX_LAP_MS, MIN_LAP_MS, colourHex, type LeaderboardEntry } from '@gamergang/shared';
+import {
+  CAR_INFO,
+  MAX_LAP_MS,
+  MIN_LAP_MS,
+  colourHex,
+  type LeaderboardEntry,
+} from '@gamergang/shared';
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import type { Hub } from '../../../hub/hub';
 import { api } from '../../../net/api';
@@ -53,7 +59,10 @@ function ResultsPanel({
           {results.map((r) => (
             <li key={r.id} style={{ '--player': colourHex(r.colour) } as CSSProperties}>
               <span className={`sw-results-place p${r.place}`}>{r.place}</span>
-              <span className="sw-results-name">{r.name}</span>
+              <span className="sw-results-name">
+                {r.name}
+                <span className="sw-results-car">{CAR_INFO[r.car].model}</span>
+              </span>
               <span className="sw-results-time">
                 {r.totalMs === null ? 'DNF' : formatTime(r.totalMs)}
               </span>

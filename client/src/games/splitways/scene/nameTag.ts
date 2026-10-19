@@ -2,9 +2,10 @@ import { CanvasTexture, SRGBColorSpace, Sprite, SpriteMaterial } from 'three';
 
 const WIDTH = 512;
 const HEIGHT = 128;
-/** Size of the tag in the world (metres) and its height above the car's origin. */
+/** Size of the tag in the world (metres). */
 const WORLD_WIDTH = 3.4;
-export const NAME_TAG_HEIGHT = 2.4;
+/** Height of the tag's centre above the car's roof (its body height, `spec.geometry.height`). */
+export const NAME_TAG_CLEARANCE = 1.05;
 
 /**
  * Floating name above each car so you can tell opponents apart in split screen. Drawn on top of

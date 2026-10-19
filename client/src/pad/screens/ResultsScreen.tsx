@@ -1,4 +1,4 @@
-import { colourHex, type LobbyMessage, type ResultsMessage } from '@gamergang/shared';
+import { CAR_INFO, colourHex, type LobbyMessage, type ResultsMessage } from '@gamergang/shared';
 import type { CSSProperties } from 'react';
 import { TopBar } from './LobbyScreen';
 
@@ -58,7 +58,10 @@ export function ResultsScreen({
             <li key={s.id} style={{ '--swatch': colourHex(s.colour) } as CSSProperties}>
               <b>{s.place}</b>
               <i />
-              <span>{s.name}</span>
+              <span>
+                {s.name}
+                <small>{CAR_INFO[s.car].model}</small>
+              </span>
               <em>{time(s.totalMs)}</em>
             </li>
           ))}

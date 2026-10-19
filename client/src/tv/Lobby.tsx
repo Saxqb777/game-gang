@@ -1,7 +1,8 @@
-import { MAX_PLAYERS, colourHex } from '@gamergang/shared';
+import { CAR_INFO, MAX_PLAYERS, colourHex } from '@gamergang/shared';
 import type { CSSProperties } from 'react';
 import { GAME_LIST } from '../games/registry';
 import type { HubPlayer, HubState } from '../hub/hub';
+import { CarThumb } from '../pad/screens/CarPicker';
 import { QrCode } from './QrCode';
 
 function lobbyHint(players: readonly HubPlayer[]): string {
@@ -25,14 +26,19 @@ function PlayerSlot({ slot, player }: { slot: number; player: HubPlayer | null }
     );
   }
   const style = { '--slot-colour': colourHex(player.colour) } as CSSProperties;
+  const car = CAR_INFO[player.car];
   return (
-    <div className={`slot ${player.ready ? 'is-ready' : ''}`} style={style}>
+    <div className={`slot slot--car ${player.ready ? 'is-ready' : ''}`} style={style}>
+      <CarThumb car={player.car} colour={player.colour} className="slot-thumb" />
       <span className="slot-number">P{slot + 1}</span>
       <span
         className={`slot-dot ${player.connected ? 'is-connected' : ''}`}
         title={player.connected ? 'Connected' : 'Reconnecting'}
       />
       <span className="slot-name">{player.name}</span>
+      <span className="slot-car">
+        <small>{car.make}</small> {car.model}
+      </span>
       <span className="slot-status">
         {player.connected ? (player.ready ? 'Ready' : 'Not ready') : 'Reconnecting...'}
         {player.local ? ' · keyboard' : ''}

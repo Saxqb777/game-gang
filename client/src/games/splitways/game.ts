@@ -16,6 +16,8 @@ import { Color, FogExp2, Scene, type DataTexture, type Sprite, type Vector3 } fr
 import { RaceAudio } from './audio/raceAudio';
 import { BENCH, CAR, INPUT, LIGHTING, POST, RACE, RESOLUTION } from './config';
 import { autopilot } from './debug/autopilot';
+import { carSpeedProfile } from './race/speedProfile';
+import { resolveCarSpec } from './sim/carSpec';
 import { DebugOverlay } from './debug/debugOverlay';
 import {
   BenchPanel,
@@ -126,6 +128,8 @@ interface Driver {
   keyboardSet: number | null;
   /** TV-side steering processing for every input device (dead zone, curve, low-pass). */
   steerFilter: SteerProcessor;
+  /** This car's own autopilot target speed per track station (debug P and the soak). */
+  speeds: Float32Array;
   /** Reverse gear, stuck hint and reset availability last sent to the pad, to push changes. */
   sentReverse: RaceMessage['reverse'];
   sentHint: StuckHint | null;
@@ -286,7 +290,9 @@ export class SplitWaysGame {
     this.sim = new Simulation(physics);
 
     const ordered = [...players].sort((a, b) => a.slot - b.slot);
-    const cars = track.gridSpawns(ordered.length).map((spawn) => this.sim.addCar(spawn));
+    const cars = track
+      .gridSpawns(ordered.length)
+      .map((spawn, i) => this.sim.addCar(spawn, resolveCarSpec((ordered[i] as GamePlayer).car)));
     for (const car of cars) {
       this.skids.addCar(car);
       this.dust.addCar(car);
@@ -326,6 +332,7 @@ export class SplitWaysGame {
         connected: true,
         keyboardSet,
         steerFilter: new SteerProcessor(),
+        speeds: carSpeedProfile(track, car.spec),
         sentReverse: 'off',
         sentHint: null,
         sentResetReady: false,
@@ -798,7 +805,7 @@ export class SplitWaysGame {
         this.race.requestRespawn(driver.racer);
       }
       if (this.autopilotOn) {
-        autopilot(this.track, driver.racer, driver.car.input);
+        autopilot(this.track, driver.racer, driver.car.input, driver.speeds);
         driver.wantThrottle = driver.car.input.throttle;
         driver.wantHorn = false;
         continue;

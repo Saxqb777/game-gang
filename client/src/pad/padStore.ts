@@ -1,5 +1,6 @@
 /** Pad-side state: link status plus the latest hub/game messages from the TV. */
 import type {
+  CarId,
   ColourId,
   GameAction,
   InputMessage,
@@ -52,7 +53,8 @@ export class PadStore {
   private state: PadState = INITIAL;
   private readonly listeners = new Set<() => void>();
   private transport: PadTransport | null = null;
-  private joinRequest: { name: string; colour: ColourId; rejoin?: boolean } | null = null;
+  private joinRequest: { name: string; colour: ColourId; car: CarId; rejoin?: boolean } | null =
+    null;
   /** From `joined`: proves to the TV that this tab owns its seat when it joins again. */
   private seatKey: string | null = null;
   /** Steering layout, remembered with the seat so a reload keeps it in this tab. */
@@ -70,7 +72,9 @@ export class PadStore {
     this.transport?.stop();
     // A seat saved by this tab means a reload: join again on open, as the same player.
     const seat = loadSeat(room);
-    this.joinRequest = seat ? { name: seat.name, colour: seat.colour, rejoin: true } : null;
+    this.joinRequest = seat
+      ? { name: seat.name, colour: seat.colour, car: seat.car, rejoin: true }
+      : null;
     this.seatKey = seat?.seatKey ?? null;
     if (seat) this.mode = seat.mode;
     this.update({ ...INITIAL, room, status: 'connecting', rejoining: seat !== null });
@@ -106,8 +110,10 @@ export class PadStore {
     this.update(INITIAL);
   }
 
-  join(name: string, colour: ColourId, mode: SteeringMode): void {
-    this.joinRequest = { name, colour };
+  /** A first join, or an edit from the lobby (name, paint, car): the TV answers with `joined`. */
+  join(profile: Profile): void {
+    const { name, colour, car, mode } = profile;
+    this.joinRequest = { name, colour, car };
     this.mode = mode;
     this.sendJoin();
   }
@@ -115,7 +121,7 @@ export class PadStore {
   setMode(mode: SteeringMode): void {
     this.mode = mode;
     const { room, me } = this.state;
-    if (room && me) this.saveSeat(room, me.colour);
+    if (room && me) this.saveSeat(room, me.colour, me.car);
   }
 
   setReady(ready: boolean): void {
@@ -142,9 +148,9 @@ export class PadStore {
     this.transport?.send({ type: 'join', room, ...this.joinRequest, ...seatKey });
   }
 
-  private saveSeat(room: string, colour: ColourId): void {
+  private saveSeat(room: string, colour: ColourId, car: CarId): void {
     if (!this.joinRequest || !this.seatKey) return;
-    const profile: Profile = { name: this.joinRequest.name, colour, mode: this.mode };
+    const profile: Profile = { name: this.joinRequest.name, colour, car, mode: this.mode };
     saveSeat({ room, ...profile, seatKey: this.seatKey });
   }
 
@@ -166,10 +172,15 @@ export class PadStore {
       case 'joined': {
         const { room } = this.state;
         if (room && this.joinRequest) {
-          // The TV's colour wins. Later reconnects and reloads claim this exact seat back.
-          this.joinRequest = { name: this.joinRequest.name, colour: message.colour, rejoin: true };
+          // The TV's paint and car win. Later reconnects and reloads claim this exact seat back.
+          this.joinRequest = {
+            name: this.joinRequest.name,
+            colour: message.colour,
+            car: message.car,
+            rejoin: true,
+          };
           this.seatKey = message.seatKey;
-          this.saveSeat(room, message.colour);
+          this.saveSeat(room, message.colour, message.car);
         }
         this.update({ me: message, kicked: null, rejoining: false });
         return;

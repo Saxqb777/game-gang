@@ -25,11 +25,13 @@ function roomFromUrl(): string | null {
 export default function PadApp() {
   const store = getPadStore();
   const state = useSyncExternalStore(store.subscribe, store.getState);
-  // A tab that reloads inside a room keeps the name, colour and steering it joined with.
+  // A tab that reloads inside a room keeps the name, paint, car and steering it joined with.
   const [profile, setProfile] = useState<Profile>(() => {
     const room = roomFromUrl();
     const seat = room ? loadSeat(room) : null;
-    return seat ? { name: seat.name, colour: seat.colour, mode: seat.mode } : loadProfile();
+    return seat
+      ? { name: seat.name, colour: seat.colour, car: seat.car, mode: seat.mode }
+      : loadProfile();
   });
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -56,7 +58,7 @@ export default function PadApp() {
     enterFullscreen();
     keepScreenAwake();
     commitProfile(next);
-    store.join(next.name, next.colour, next.mode);
+    store.join(next);
     setEditing(false);
   };
 
@@ -116,9 +118,11 @@ export default function PadApp() {
         lobby={lobby}
         // Before `joined` our id is still known: the TV uses this tab's client id as player id.
         myId={me?.playerId ?? clientId()}
-        profile={profile}
+        // Editing starts from what the TV holds: it may have refused a paint or kept a car.
+        profile={myPlayer ? { ...profile, colour: myPlayer.colour, car: myPlayer.car } : profile}
         submitLabel={me ? 'Save' : 'Join'}
         onSubmit={submitJoin}
+        onCancel={me && myPlayer ? () => setEditing(false) : undefined}
       />
     );
   } else if (lobby.state === 'lobby') {
@@ -129,6 +133,7 @@ export default function PadApp() {
         room={room}
         onReady={(ready) => store.setReady(ready)}
         onSettings={() => setSettingsOpen(true)}
+        onChangeCar={() => setEditing(true)}
       />
     );
   } else if (lobby.state === 'playing' && myPlayer.inGame) {

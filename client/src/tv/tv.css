@@ -291,6 +291,48 @@
   color: var(--good);
 }
 
+.slot--car {
+  /* Room on the right for the car picture. */
+  padding-right: 9.2vw;
+}
+
+/* The car in the player's paint, 16:9, about 120 px wide at 1080p. */
+.slot .slot-thumb {
+  position: absolute;
+  right: 1.2vw;
+  bottom: 1vw;
+  width: 6.4vw;
+  border-radius: 0.5vw;
+  background:
+    radial-gradient(
+      60% 60% at 50% 35%,
+      color-mix(in srgb, var(--slot-colour) 22%, #1d2333),
+      transparent
+    ),
+    linear-gradient(180deg, #151a27 0 66%, #0c0f17 66%);
+  border: 1px solid var(--line);
+}
+
+.slot-car {
+  margin-top: 0.2vw;
+  font-size: 1.15vw;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slot-car small {
+  font-size: 0.85vw;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
 .slot-waiting {
   margin: auto;
   font-size: 1.1vw;

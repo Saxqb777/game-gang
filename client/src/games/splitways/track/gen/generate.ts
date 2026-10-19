@@ -34,7 +34,8 @@ export interface GeneratedTrack {
   left: StationSides;
   right: StationSides;
   racingLine: Float32Array; // lateral offset of the racing line (m, + = right)
-  speed: Float32Array; // speed profile on the racing line (m/s)
+  speed: Float32Array; // speed profile on the racing line (m/s), planned with the reference car
+  lineCurvature: Float64Array; // the racing line's own curvature (1/m, unsigned), for per-car profiles
   licence: string;
   credits: readonly string[];
 }
@@ -186,6 +187,7 @@ export function generateTrackWithReport(
     right,
     racingLine: line.lateral,
     speed: line.speed,
+    lineCurvature: line.curvature,
     licence: base.licence,
     credits,
   };

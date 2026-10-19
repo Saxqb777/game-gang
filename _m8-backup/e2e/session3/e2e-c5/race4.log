@@ -1,0 +1,7 @@
+09:50:22 loaded in 36 s
+09:50:23 cars nightjar/red scree/orange
+09:52:20 screenshot /tmp/claude-0/e2e-c5/c5-views4-grid.png
+09:52:36 start line: preset MEDIUM draws 322 -> 322 without cars (cars 0); tris 2.1M -> 2.1M; programs 43 late 0
+09:52:36 car         lod  paint | nightjar      0  red | scree         0  orange
+page.waitForFunction: Target page, context or browser has been closed
+    at /tmp/claude-0/e2e-c5/race4.cjs:49:12

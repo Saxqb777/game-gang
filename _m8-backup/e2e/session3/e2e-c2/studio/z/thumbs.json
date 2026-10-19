@@ -1,0 +1,17 @@
+{
+  "nightjar": {
+    "glbSha256": "6741616f1325045d896a9168c431743f216c81fa0b027b7ac3bf28a55e3915e5"
+  },
+  "scree": {
+    "glbSha256": "f6f2fc7e97df41c751e97a9c14a6157dc5a54cb4c8f6567bd4d772f669438263"
+  },
+  "haymaker": {
+    "glbSha256": "f5ccef2ed0e9a4e53019171d19f18edb059ab5168925d153d51066c3381d5fa3"
+  },
+  "zanna": {
+    "glbSha256": "cea19758f144543a5be5b492b366130a1b6b5ec816868fe638ae44697a8e6127"
+  },
+  "sagitta": {
+    "glbSha256": "b557300a53a7e9cba6527d2864546b853bc7e3cd8a0be6a79da355c7d15925e4"
+  }
+}

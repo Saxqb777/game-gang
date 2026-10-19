@@ -1,0 +1,19 @@
+09:32:46 hooks installed /src/games/splitways/game.ts?t=1792401533346 /src/games/splitways/render/renderer.ts
+09:33:20 loaded in 34 s
+09:34:24 racing
+09:34:24 extras 4
+09:34:24 {"preset":"high","car":"nightjar","paint":"red","spawns":[{"x":-27.156492370967246,"y":0.041017524898052216,"z":504.7475830078125,"yaw":1.5707963705062866},{"x":-30.15641770898881,"y":0.055315181612968445,"z":511.0475830078125,"yaw":1.5707963705062866},{"x":-36.15626539647994,"y":0.082163505256176,"
+09:34:59 screenshot /tmp/claude-0/e2e-c5/c5-grid-five.png
+09:36:12 screenshot /tmp/claude-0/e2e-c5/c5-grid-side.png
+09:37:02 screenshot /tmp/claude-0/e2e-c5/c5-chase-nightjar.png
+09:37:55 screenshot /tmp/claude-0/e2e-c5/c5-chase-scree.png
+09:38:50 screenshot /tmp/claude-0/e2e-c5/c5-chase-haymaker.png
+09:39:42 screenshot /tmp/claude-0/e2e-c5/c5-chase-zanna.png
+09:40:20 screenshot /tmp/claude-0/e2e-c5/c5-chase-sagitta.png
+09:41:20 screenshot /tmp/claude-0/e2e-c5/c5-close-nightjar.png
+09:42:14 screenshot /tmp/claude-0/e2e-c5/c5-close-scree.png
+09:43:09 screenshot /tmp/claude-0/e2e-c5/c5-close-haymaker.png
+09:43:58 screenshot /tmp/claude-0/e2e-c5/c5-close-zanna.png
+09:44:56 screenshot /tmp/claude-0/e2e-c5/c5-close-sagitta.png
+09:44:56 PASS no pageerror 
+09:44:56 console errors []

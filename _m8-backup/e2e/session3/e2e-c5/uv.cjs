@@ -1,0 +1,4 @@
+const fs=require('fs');const b=fs.readFileSync(process.argv[2]);const len=b.readUInt32LE(12);const j=JSON.parse(b.slice(20,20+len).toString());const bin=20+len+8;
+const want=process.argv[3];
+j.nodes.forEach(n=>{ if(n.mesh===undefined) return; const parentName = j.nodes.find(p=>(p.children||[]).includes(j.nodes.indexOf(n)))?.name; if(!(parentName||'').includes(want)) return;
+ for(const p of j.meshes[n.mesh].primitives){ const a=j.accessors[p.attributes.TEXCOORD_0]; if(!a){console.log(parentName,n.name,'no uv');continue;} const bv=j.bufferViews[a.bufferView]; const st=bv.byteStride||8; const off=bin+(bv.byteOffset||0)+(a.byteOffset||0); const cells={}; for(let i=0;i<a.count;i++){const u=b.readFloatLE(off+i*st),v=b.readFloatLE(off+i*st+4); const k=Math.floor(u*4)+','+Math.floor(v*4); cells[k]=(cells[k]||0)+1;} console.log(parentName,n.name,j.materials[p.material].name,a.componentType,a.min,a.max,JSON.stringify(cells)); }});

@@ -1,0 +1,25 @@
+<!doctype html><html><body style="margin:0;background:#777">
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const W = 1600, H = 700;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(W, H); renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x8a9099);
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(3, 6, 4); scene.add(sun);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color: 0x55585e, roughness: 0.9 }));
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+const ids = ['nightjar', 'scree', 'haymaker', 'zanna', 'sagitta'];
+const colours = [0xb3121a, 0xd9560f, 0xe8b90c, 0x11a9b5, 0x5a2bb8];
+for (const [i, id] of ids.entries()) {
+  const car = (await new GLTFLoader().loadAsync(`/cars/${id}/${id}.glb`)).scene;
+  car.traverse(o => { if (/_lod[12]$/.test(o.name) || o.name === 'shadow') o.visible = false; if (o.material?.name === 'paint') { o.material.color.setHex(colours[i]); } });
+  car.rotation.y = -Math.PI / 2; car.position.x = (i - 2) * 5.3; scene.add(car);
+}
+const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 100); cam.position.set(0, 4, 33); cam.lookAt(0, 0.7, 0);
+renderer.render(scene, cam); window.__done = true;
+</script></body></html>

@@ -1,0 +1,8 @@
+09:47:23 hooks installed /src/games/splitways/game.ts?t=1792403213171 /src/games/splitways/render/renderer.ts?t=1792403213171
+09:47:55 loaded in 32 s
+09:48:55 racing
+09:48:56 extras 8
+09:48:56 {"preset":"high","car":"nightjar","paint":"red","spawns":[{"x":-27.156492370967246,"y":0.041017524898052216,"z":504.7475830078125,"yaw":1.5707963705062866},{"x":-30.15641770898881,"y":0.055315181612968445,"z":511.0475830078125,"yaw":1.5707963705062866},{"x":-36.15626539647994,"y":0.082163505256176,"
+09:49:28 screenshot /tmp/claude-0/e2e-c5/c5-paints-nightjar.png
+09:49:28 PASS no pageerror 
+09:49:28 console errors []

@@ -67,3 +67,11 @@ Branch tips (all reachable from this branch through the "ours" merge):
 
 Next: finish C2a, C3, C4 → merge; C5 visuals; C2b real cars; C7 balance; C6 docs; §2.11; M8 §2.9; Track 1 polish; then ONE live push of everything (owner wants the finished game live at once; production = claude/gracious-bell-2pgra5).
 Agent prompt template: plan/cars-common.txt; gate: plan/cars-gate.sh. Browser scripts from this session: e2e/session2/.
+
+## Update 2026-10-19 (paused again by owner)
+
+- `cars/integration` bc7028d: M8 + C1, C2a, C3, C4, C6 code merged. Cars gate green, 309 tests.
+- `cars/c5-visuals` f2e48f5: C5 (TV car visuals, LODs, paint, podium) work in progress, last note "rewrite the flake function into a combined LOD0 paint shader".
+- Real V2 car GLBs were built by `pnpm assets:cars` into /tmp/claude-0/cars-v2-out (not committed; rebuild from _m8-backup/cars-v2 with the pipeline).
+- C2b notes: Scree and Sagitta wheel geometry differs from CARS; Sagitta wheels 0.438 m; distinctiveness reshapes not done in V2.
+- Next: finish C5, C2b (real cars), C7 balance/perf, C6 docs, cars 2.11 + M8 2.9 acceptance, Track 1 polish, one live push.

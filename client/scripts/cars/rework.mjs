@@ -4,7 +4,8 @@
  * here, so every shipped file is rebuilt from V2 plus this table:
  *   - rims: the source rims (and any hub cap under the wheel node) are replaced by a generated rim,
  *     so iconic or simplifier-hostile rim designs never ship;
- *   - materials: per source material, new factors and optionally a new vocabulary name (family);
+ *   - materials: per source material, new factors, optionally a new vocabulary name (family) and a
+ *     roughness floor (a matte copy of its metal/roughness map; factors can only lower roughness);
  *   - plate: the blank plate texture gets the Split Ways plate (LINEUP.md section 4 rules);
  *   - grille: an alpha-cut grille texture is redrawn as horizontal slats.
  * Everything is computed, never sampled from the clock or the machine, so builds stay byte-identical.
@@ -87,7 +88,17 @@ export const REWORK = {
     rims: { style: 'flatSix', color: [0.045, 0.047, 0.05], metalness: 0.75, roughness: 0.38 },
     plate: false,
   },
-  haymaker: { plate: true },
+  haymaker: {
+    materials: {
+      // The cabin's atlas regions are largely fully metallic, so seats and dash read as mirrors:
+      // dark, non-metallic plastic and leather instead (a hint of metal left for the bezels).
+      interior: { color: [0.16, 0.16, 0.16], metalness: 0.05, roughnessMin: 0.7 },
+      'interior.2': { color: [0.16, 0.16, 0.16], metalness: 0.05, roughnessMin: 0.7 },
+      // The atlas paints the sidewalls a mid grey that reads light grey in sunlight: near-black rubber.
+      tyre: { color: [0.32, 0.32, 0.32], metalness: 0 },
+    },
+    plate: true,
+  },
   zanna: {
     rims: {
       style: 'twinFive',
@@ -292,6 +303,26 @@ function replaceRims(source, rims, log) {
   source.parts = kept;
 }
 
+/**
+ * Makes a material at least this rough. Its metal/roughness map is shared with other materials,
+ * so the material gets its own copy with the floor applied (roughness is the green channel).
+ */
+function roughnessFloor(source, material, floor) {
+  if (material.maps.mr === null) {
+    material.roughness = Math.max(material.roughness, floor);
+    return;
+  }
+  const image = decodeImage(source.images[material.maps.mr].bytes);
+  const min = Math.min(255, Math.round((floor / material.roughness) * 255));
+  for (let o = 1; o < image.data.length; o += 4) image.data[o] = Math.max(image.data[o], min);
+  source.images.push({
+    name: `${material.name.replace('.', '_')}_mr`,
+    mimeType: 'image/png',
+    bytes: encodeImage(image, { format: 'png' }),
+  });
+  material.maps = { ...material.maps, mr: source.images.length - 1 };
+}
+
 function applyMaterials(source, overrides, log) {
   for (const [name, change] of Object.entries(overrides)) {
     const targets = source.materials.filter((m) => m.name === name);
@@ -307,6 +338,7 @@ function applyMaterials(source, overrides, log) {
       for (const key of ['color', 'metalness', 'roughness', 'emissive', 'opacity']) {
         if (change[key] !== undefined) material[key] = change[key];
       }
+      if (change.roughnessMin !== undefined) roughnessFloor(source, material, change.roughnessMin);
     }
     log(`material ${name}: ${JSON.stringify(change)}`);
   }

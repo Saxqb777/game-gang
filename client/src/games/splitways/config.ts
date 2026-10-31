@@ -735,6 +735,12 @@ export const CAR_VISUAL = {
   /** Contact shadow under each car: darkness, and how far it fades out past the body (m). */
   contactOpacity: 0.85,
   contactSpread: 0.7,
+  /**
+   * Another car this close to a chase camera (m from its body box) starts to fade out in that
+   * view, and at `cameraFadeHidden` it is gone, so a pack-mate never fills the screen with its insides.
+   */
+  cameraFadeStart: 1.5,
+  cameraFadeHidden: 0.6,
 } as const;
 
 /** Scripted benchmarks: `?bench=auto|matrix` (camera fly-through) and `?bench=soak`. */
@@ -772,6 +778,19 @@ export const LIGHTING = {
    */
   skyLightCap: 8,
   skyVisibleCap: 14,
+  /**
+   * Visible sky only (see `tameSunGlow`): sky brighter than `skyGlowKnee` rolls off towards knee +
+   * `skyGlowRange`, and turns back towards the clear-sky colour `skyGlowTint` (linear RGB) by up
+   * to `skyGlowBlue` of what was taken off. The sun disc (at or above `sunDiscMin`) is left alone,
+   * and from `sunRimMin` up the roll-off eases out, so the disc gets a soft rim instead of a hard edge.
+   * The light the scene gets from the sky is unchanged.
+   */
+  skyGlowKnee: 0.2,
+  skyGlowRange: 0.25,
+  skyGlowBlue: 0.9,
+  skyGlowTint: [0.3, 0.46, 0.78],
+  sunDiscMin: 50,
+  sunRimMin: 6,
   /** Light bounced up from the ground (linear RGB): mixed grass, forest floor and asphalt. */
   groundBounce: [0.1, 0.12, 0.07],
   /**
@@ -789,9 +808,14 @@ export const POST = {
   /** Brightness before tone mapping (ACES). A forest is darker than sand, so this opens up a third of a stop. */
   exposure: 1.95,
   /** Bloom: only pixels brighter than `threshold` glow (with a soft `knee`); `strength` is how much. */
-  bloomThreshold: 1.9,
-  bloomKnee: 0.8,
-  bloomStrength: 0.055,
+  bloomThreshold: 2.4,
+  bloomKnee: 0.6,
+  bloomStrength: 0.045,
+  /**
+   * No scene pixel feeds the bloom brighter than this (the sky's sun cap, `LIGHTING.skyLightCap`),
+   * so a sun glint on glass or clear coat stays a crisp highlight instead of a blown-out halo.
+   */
+  bloomPeak: 8,
   /** Darkening at the edges of each viewport, plus extra at top speed (0 = none). */
   vignette: 0.12,
   vignetteAtSpeed: 0.08,

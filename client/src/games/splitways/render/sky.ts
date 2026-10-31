@@ -10,6 +10,7 @@ import {
   EquirectangularReflectionMapping,
   Euler,
   HalfFloatType,
+  MathUtils,
   PMREMGenerator,
   RGBAFormat,
   Vector3,
@@ -70,11 +71,12 @@ export class Sky {
       )
       .applyEuler(this.rotation)
       .normalize();
-    this.measureHaze(data, width, height, turn);
-
     // Lighting copy: forest-floor bounce below the horizon instead of mirrored sky, and the sun capped so it
     // doesn't double up with the directional light.
     const lightData = data.slice();
+    // What you see (and the haze, which fades to the visible sky) loses the white glare around the sun.
+    tameSunGlow(data);
+    this.measureHaze(data, width, height, turn);
     fillGround(lightData, width, height, LIGHTING.groundBounce);
     capBrightness(lightData, LIGHTING.skyLightCap);
     const lightTexture = new DataTexture(lightData, width, height, RGBAFormat, HalfFloatType);
@@ -150,6 +152,45 @@ function paintOutSmudge(data: Uint16Array, width: number, height: number): void 
         data[(y * width + x) * 4 + c] = DataUtils.toHalfFloat(left + (right - left) * t);
       }
     }
+  }
+}
+
+/**
+ * The file's sun sits in a wide, almost colourless glow (sky brightness 1-10 within 10 degrees),
+ * which after exposure and tone mapping reads as a white wash several sun widths across. Above
+ * `LIGHTING.skyGlowKnee` the brightness rolls off softly towards knee + range and the colour turns
+ * back towards the clear sky's blue, so the sky stays blue close to the sun. The disc itself is
+ * kept bright (it is then capped at `skyVisibleCap`) with a narrow soft rim, so it stays a crisp sun.
+ */
+function tameSunGlow(data: Uint16Array): void {
+  const {
+    skyGlowKnee: knee,
+    skyGlowRange: range,
+    skyGlowBlue: blue,
+    sunDiscMin,
+    sunRimMin,
+  } = LIGHTING;
+  const rimLow = Math.log(sunRimMin);
+  const rimHigh = Math.log(sunDiscMin);
+  const tint = LIGHTING.skyGlowTint;
+  const tintLuma = 0.2126 * tint[0] + 0.7152 * tint[1] + 0.0722 * tint[2];
+  for (let i = 0; i < data.length; i += 4) {
+    const r = DataUtils.fromHalfFloat(data[i] ?? 0);
+    const g = DataUtils.fromHalfFloat(data[i + 1] ?? 0);
+    const b = DataUtils.fromHalfFloat(data[i + 2] ?? 0);
+    const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    if (luma <= knee || luma >= sunDiscMin) continue;
+    const over = luma - knee;
+    // The rim around the disc keeps more of its own brightness the closer it is to the disc.
+    const rim = MathUtils.smoothstep(Math.log(luma), rimLow, rimHigh);
+    const target = MathUtils.lerp(knee + over / (1 + over / range), luma, rim);
+    // How much was taken away (0..1) sets how far the colour returns to blue.
+    const t = blue * (1 - target / luma);
+    const scale = target / luma;
+    const toBlue = target / tintLuma;
+    data[i] = DataUtils.toHalfFloat(r * scale * (1 - t) + tint[0] * toBlue * t);
+    data[i + 1] = DataUtils.toHalfFloat(g * scale * (1 - t) + tint[1] * toBlue * t);
+    data[i + 2] = DataUtils.toHalfFloat(b * scale * (1 - t) + tint[2] * toBlue * t);
   }
 }
 

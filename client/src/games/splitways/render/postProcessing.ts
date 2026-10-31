@@ -114,16 +114,29 @@ const DOWNSAMPLE = /* glsl */ `
 ${BLOOM_COMMON}
 uniform float threshold;
 uniform float knee;
+uniform float peak;
+#ifdef PREFILTER
+// A sun glint on glass or clear coat is a few pixels at hundreds of times the sky's brightness;
+// bloomed as it is, it becomes a white blob. Each full-resolution tap is capped first, so a glint
+// glows like any other bright pixel and the highlight itself stays crisp.
+vec3 src(vec2 uv, vec2 offset) {
+  vec3 c = tap(uv, offset);
+  float bright = max(c.r, max(c.g, c.b));
+  return c * min(1.0, peak / max(bright, 1e-4));
+}
+#else
+#define src tap
+#endif
 void main() {
   vec2 uv = gl_FragCoord.xy / uTargetSize;
   if (!beginTile(uv)) {
     gl_FragColor = vec4(0.0);
     return;
   }
-  vec3 c = tap(uv, vec2(0.0)) * 0.125;
-  c += (tap(uv, vec2(-1.0, 1.0)) + tap(uv, vec2(1.0, 1.0)) + tap(uv, vec2(-1.0, -1.0)) + tap(uv, vec2(1.0, -1.0))) * 0.125;
-  c += (tap(uv, vec2(-2.0, 2.0)) + tap(uv, vec2(2.0, 2.0)) + tap(uv, vec2(-2.0, -2.0)) + tap(uv, vec2(2.0, -2.0))) * 0.03125;
-  c += (tap(uv, vec2(0.0, 2.0)) + tap(uv, vec2(-2.0, 0.0)) + tap(uv, vec2(2.0, 0.0)) + tap(uv, vec2(0.0, -2.0))) * 0.0625;
+  vec3 c = src(uv, vec2(0.0)) * 0.125;
+  c += (src(uv, vec2(-1.0, 1.0)) + src(uv, vec2(1.0, 1.0)) + src(uv, vec2(-1.0, -1.0)) + src(uv, vec2(1.0, -1.0))) * 0.125;
+  c += (src(uv, vec2(-2.0, 2.0)) + src(uv, vec2(2.0, 2.0)) + src(uv, vec2(-2.0, -2.0)) + src(uv, vec2(2.0, -2.0))) * 0.03125;
+  c += (src(uv, vec2(0.0, 2.0)) + src(uv, vec2(-2.0, 0.0)) + src(uv, vec2(2.0, 0.0)) + src(uv, vec2(0.0, -2.0))) * 0.0625;
 #ifdef PREFILTER
   float bright = max(c.r, max(c.g, c.b));
   float soft = clamp(bright - threshold + knee, 0.0, 2.0 * knee);
@@ -359,6 +372,7 @@ function bloomUniforms(): Record<string, IUniform> {
     uSourceTexel: { value: new Vector2(1, 1) },
     threshold: { value: POST.bloomThreshold },
     knee: { value: POST.bloomKnee },
+    peak: { value: POST.bloomPeak },
   };
 }
 

@@ -991,6 +991,7 @@ export class SplitWaysGame {
       const carFloor = this.renderer.preset.carLodFloor;
       for (const other of this.drivers) {
         other.visual.selectLod(driver.camera.camera, rect.height, carFloor, i);
+        other.visual.setCameraFade(other === driver ? null : eye);
       }
       const { car } = driver;
       this.renderer.renderView(
@@ -1023,6 +1024,7 @@ export class SplitWaysGame {
       const carFloor = this.renderer.preset.carLodFloor;
       for (const driver of this.drivers) {
         driver.visual.selectLod(this.overview.camera, rect.height, carFloor, this.drivers.length);
+        driver.visual.setCameraFade(null);
       }
       this.renderer.renderView(this.drivers.length, this.scene, this.overview.camera, 0);
     }

@@ -11,6 +11,8 @@ import {
   Box3,
   Color,
   Group,
+  MathUtils,
+  Matrix4,
   Mesh,
   MeshBasicMaterial,
   MeshPhysicalMaterial,
@@ -69,6 +71,8 @@ interface CarTemplate {
   /** Car-space centre and half diagonal of the body's bounding box (LOD selection). */
   readonly centre: Vector3;
   readonly radius: number;
+  /** Car-space half size of that box (camera fade). */
+  readonly halfSize: Vector3;
   readonly shadow: BufferGeometry;
   /** Textures used at each level, so a preset can upload exactly the levels it may draw. */
   readonly texturesByLevel: readonly Set<Texture>[];
@@ -104,10 +108,12 @@ function prepareTemplate(carId: CarId, scene: Object3D): CarTemplate {
   });
   scene.updateMatrixWorld(true);
   const box = new Box3().setFromObject(body0);
+  const size = box.getSize(new Vector3());
   return {
     scene,
     centre: box.getCenter(new Vector3()),
-    radius: box.getSize(new Vector3()).length() / 2,
+    radius: size.length() / 2,
+    halfSize: size.multiplyScalar(0.5),
     shadow: shadowNode.geometry as BufferGeometry,
     texturesByLevel,
   };
@@ -358,7 +364,41 @@ function tailMaterial(template: Material): MeshStandardMaterial {
   return material;
 }
 
+/**
+ * A per-car copy of a material for the camera fade: blended, so the car fades smoothly (a dithered
+ * fade without temporal AA reads as noise). Opaque parts draw over the car's own depth pre-pass
+ * (`FADE_PREPASS`), so only its outer skin shows, never its insides through itself.
+ */
+function fadeMaterial(source: Material): Material {
+  const material = source.clone();
+  // `clone` leaves shader hooks behind, and the paint shader must come along.
+  material.onBeforeCompile = source.onBeforeCompile.bind(source);
+  material.customProgramCacheKey = source.customProgramCacheKey.bind(source);
+  if (!source.transparent) {
+    material.transparent = true;
+    material.depthWrite = false;
+  }
+  material.userData.baseOpacity = source.opacity;
+  return material;
+}
+
+/** Faded cars draw after everything opaque: first their depth, then their colour on top of it. */
+const FADE_PREPASS = 1;
+const FADE_COLOUR = 2;
+
+/** A drawn mesh with the materials it shows normally and while the camera fade is on. */
+interface FadeMesh {
+  readonly mesh: Mesh;
+  readonly level: CarLod;
+  readonly normal: Material | Material[];
+  readonly faded: Material | Material[];
+  /** Depth-only copy drawn first while faded; none for glass and cut-outs (they let light through). */
+  readonly prepass: Mesh | null;
+}
+
 const centre = new Vector3();
+const eyeLocal = new Vector3();
+const toWorld = new Matrix4();
 
 export class CarVisual {
   readonly root = new Group();
@@ -377,6 +417,17 @@ export class CarVisual {
   private readonly spin = new Float32Array(WHEEL_COUNT);
   /** The level last chosen in each viewport (LOD hysteresis is per view). */
   private readonly viewLevels: CarLod[] = [];
+  private readonly fadeMeshes: FadeMesh[] = [];
+  private readonly fadeMaterials: Material[] = [];
+  /** Writes only depth; transparent so it sorts after every opaque thing behind the car. */
+  private readonly fadeDepth = new MeshBasicMaterial({
+    name: 'fade_depth',
+    colorWrite: false,
+    transparent: true,
+  });
+  /** Camera fade state of the view being drawn: blended materials on, or the car hidden. */
+  private faded = false;
+  private hidden = false;
 
   constructor(
     readonly carId: CarId,
@@ -404,6 +455,18 @@ export class CarVisual {
       }
       return material;
     };
+    const fadeCopies = new Map<Material, Material>();
+    const fadeOf = (material: Material): Material => {
+      let faded = fadeCopies.get(material);
+      if (!faded) {
+        faded = fadeMaterial(material);
+        fadeCopies.set(material, faded);
+        this.own.push(faded);
+        this.fadeMaterials.push(faded);
+        if (isTailLamp(material)) this.tailLamps.push(faded as MeshStandardMaterial);
+      }
+      return faded;
+    };
     model.traverse((object) => {
       if (!(object instanceof Mesh)) return;
       if (object.name === 'shadow') {
@@ -414,7 +477,24 @@ export class CarVisual {
       }
       const level = levelOf(object) ?? 0;
       const swapped = materialsOf(object).map((m) => swap(m, level));
-      object.material = swapped.length === 1 ? (swapped[0] as Material) : swapped;
+      const normal = swapped.length === 1 ? (swapped[0] as Material) : swapped;
+      object.material = normal;
+      const faded = swapped.map(fadeOf);
+      let prepass: Mesh | null = null;
+      if (swapped.every((m) => !m.transparent && m.alphaTest === 0)) {
+        prepass = new Mesh(object.geometry as BufferGeometry, this.fadeDepth);
+        prepass.name = `${object.name}_fade_depth`;
+        prepass.visible = false;
+        prepass.renderOrder = FADE_PREPASS;
+        object.add(prepass);
+      }
+      this.fadeMeshes.push({
+        mesh: object as Mesh,
+        level,
+        normal,
+        faded: faded.length === 1 ? (faded[0] as Material) : faded,
+        prepass,
+      });
     });
 
     for (const [i, suffix] of WHEEL_SUFFIXES.entries()) {
@@ -507,6 +587,52 @@ export class CarVisual {
     if (level !== this.lod) this.show(level);
   }
 
+  /**
+   * Fades this car out of one chase view while that view's camera is at or inside its body (a
+   * pack-mate right on your bumper or alongside), and hides it once the camera is all but inside,
+   * as racing games do; its shadow stays. Call after `selectLod`, for every car before each view:
+   * `null` (your own car, the overview) shows it whole.
+   */
+  setCameraFade(eye: Vector3 | null): void {
+    let fade = 1;
+    if (eye) {
+      this.root.updateWorldMatrix(true, false);
+      eyeLocal.copy(eye).applyMatrix4(toWorld.copy(this.root.matrixWorld).invert());
+      eyeLocal.sub(this.template.centre);
+      const half = this.template.halfSize;
+      eyeLocal.set(
+        Math.max(Math.abs(eyeLocal.x) - half.x, 0),
+        Math.max(Math.abs(eyeLocal.y) - half.y, 0),
+        Math.max(Math.abs(eyeLocal.z) - half.z, 0),
+      );
+      fade = MathUtils.smoothstep(
+        eyeLocal.length(),
+        CAR_VISUAL.cameraFadeHidden,
+        CAR_VISUAL.cameraFadeStart,
+      );
+    }
+    const hidden = fade <= 0;
+    if (hidden !== this.hidden) {
+      this.hidden = hidden;
+      this.show(this.lod);
+    }
+    const faded = fade < 1 && !hidden;
+    if (faded !== this.faded) {
+      this.faded = faded;
+      for (const entry of this.fadeMeshes) {
+        entry.mesh.material = faded ? entry.faded : entry.normal;
+        entry.mesh.renderOrder = faded ? FADE_COLOUR : 0;
+        if (entry.prepass) entry.prepass.visible = faded;
+      }
+    }
+    if (faded) {
+      for (const material of this.fadeMaterials) {
+        // Squared: a car the camera is about to enter is mostly gone, not a half-opaque ghost.
+        material.opacity = (material.userData.baseOpacity as number) * fade * fade;
+      }
+    }
+  }
+
   /** The level this car last drew in a viewport (debug overlay). */
   lodInView(viewIndex: number): CarLod {
     return this.viewLevels[viewIndex] ?? this.lod;
@@ -517,12 +643,28 @@ export class CarVisual {
     for (const level of LEVELS) {
       for (const node of this.levelNodes[level] ?? []) node.visible = level >= floor;
     }
+    // The camera-fade variants compile now as well (three compiles hidden meshes too), not on the
+    // first pack moment.
+    const proxies = new Group();
+    for (const { mesh, level, faded } of this.fadeMeshes) {
+      if (level < floor) continue;
+      const proxy = new Mesh(mesh.geometry, faded);
+      proxy.visible = false;
+      proxy.receiveShadow = mesh.receiveShadow;
+      proxies.add(proxy);
+    }
+    const depthProxy = new Mesh(this.fadeMeshes[0]?.mesh.geometry, this.fadeDepth);
+    depthProxy.visible = false;
+    proxies.add(depthProxy);
+    this.root.add(proxies);
     return () => {
+      proxies.removeFromParent();
       this.show(this.lod);
     };
   }
 
   dispose(): void {
+    this.fadeDepth.dispose();
     for (const material of this.own) material.dispose();
     this.root.removeFromParent();
   }
@@ -530,7 +672,7 @@ export class CarVisual {
   private show(level: CarLod): void {
     this.lod = level;
     for (const l of LEVELS) {
-      for (const node of this.levelNodes[l] ?? []) node.visible = l === level;
+      for (const node of this.levelNodes[l] ?? []) node.visible = l === level && !this.hidden;
     }
   }
 }

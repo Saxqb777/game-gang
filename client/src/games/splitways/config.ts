@@ -749,6 +749,23 @@ export const CAR_VISUAL = {
   cameraFadeHidden: 0.6,
 } as const;
 
+/** Floating name tags over other cars, per split-screen view. */
+export const NAME_TAGS = {
+  /**
+   * Camera-to-car distance (m): hidden up to `nearHide` (right on your bumper), fading in until
+   * `nearFull`, fully shown to `farFull`, then fading out and gone from `farHide`, so a distant
+   * pack never stacks its labels into a smudge.
+   */
+  nearHide: 10,
+  nearFull: 14,
+  farFull: 38,
+  farHide: 55,
+  /** Tags closer together on screen than this gap (px) count as overlapping: the farther one fades out. */
+  overlapMargin: 4,
+  /** How fast a tag fades in or out (opacity per second). */
+  fadeRate: 6,
+} as const;
+
 /** Scripted benchmarks: `?bench=auto|matrix` (camera fly-through) and `?bench=soak`. */
 export const BENCH = {
   /** Each fly-through run warms up, then measures (s). */

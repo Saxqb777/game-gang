@@ -12,7 +12,7 @@ import {
   type TelemetrySample,
   type TvMessage,
 } from '@gamergang/shared';
-import { Color, FogExp2, Scene, type DataTexture, type Sprite, type Vector3 } from 'three';
+import { Color, FogExp2, Scene, Vector3, type DataTexture, type Sprite } from 'three';
 import { RaceAudio } from './audio/raceAudio';
 import { BENCH, CAR, INPUT, LIGHTING, POST, RACE, RESOLUTION } from './config';
 import { autopilot } from './debug/autopilot';
@@ -64,7 +64,8 @@ import { SkidMarks } from './scene/skidMarks';
 import { WorldVisual } from './scene/world';
 import { BlobShadows } from './scene/blobShadows';
 import { SURFACE, type SurfaceId } from './track/surfaces';
-import { SCENERY, SURFACES } from './config';
+import { NAME_TAGS, SCENERY, SURFACES } from './config';
+import { TagDeclutter, approachOpacity } from './scene/tagDeclutter';
 import type { Car } from './sim/car';
 import { NEUTRAL_INPUT, copyInput, mergeInputs, type DriveInput } from './sim/input';
 import { Simulation, type Impact } from './sim/simulation';
@@ -160,8 +161,6 @@ const COUNTDOWN_TEXT = ['GO', '1', '2', '3'];
 /** How long "GO" stays on screen after the lights turn green (s). */
 const GO_DISPLAY_SECONDS = 1;
 const LAST_LAP_SECONDS = 4;
-/** Name tags of cars closer than this to the camera are hidden (m). */
-const TAG_HIDE_DISTANCE = 10;
 /** The soak race: the protocol's lap maximum, about 2.6 h, far longer than the soak. */
 const SOAK_LAPS = 99;
 
@@ -204,6 +203,10 @@ export class SplitWaysGame {
   private autopilotOn = false;
   /** Seconds since the game started, for shader animation. */
   private clock = 0;
+  /** Name tag declutter scratch, and each view's current opacity of each car's tag (view * cars + car). */
+  private readonly tagLayout: TagDeclutter;
+  private readonly tagOpacity: Float32Array;
+  private readonly tagPoint = new Vector3();
   private stepTime = 0;
   private frames = 0;
   private benchPanel: BenchPanel | null = null;
@@ -311,6 +314,9 @@ export class SplitWaysGame {
       this.audio?.cheer(racer.place === 1);
     };
     this.slipstream = new Slipstream(cars);
+    this.tagLayout = new TagDeclutter(cars.length);
+    // One view per driver at most.
+    this.tagOpacity = new Float32Array(cars.length * cars.length);
 
     const hasLocalPlayers = ordered.some((p) => p.local);
     let nextKeySet = 0;
@@ -1018,14 +1024,8 @@ export class SplitWaysGame {
         rect.width / rect.height,
       );
       this.shadows.beforeView(root.position);
-      // Your own name tag would only hover over your roof; a car right next to the camera
-      // needs no tag (and it would fill the screen).
+      this.layoutTags(i, driver, rect, seconds);
       const eye = driver.camera.camera.position;
-      for (const other of this.drivers) {
-        other.tag.visible =
-          other !== driver &&
-          other.visual.root.position.distanceToSquared(eye) > TAG_HIDE_DISTANCE ** 2;
-      }
       const carFloor = this.renderer.preset.carLodFloor;
       for (const other of this.drivers) {
         other.visual.selectLod(driver.camera.camera, rect.height, carFloor, i);
@@ -1057,7 +1057,10 @@ export class SplitWaysGame {
     if (this.overviewRect) {
       const rect = this.overviewRect;
       this.overview.update(seconds, this.carPositions, rect.width / rect.height);
-      for (const driver of this.drivers) driver.tag.visible = true;
+      for (const driver of this.drivers) {
+        driver.tag.visible = true;
+        driver.tag.material.opacity = 1;
+      }
       this.shadows.beforeView(this.overview.focus);
       const carFloor = this.renderer.preset.carLodFloor;
       for (const driver of this.drivers) {
@@ -1065,6 +1068,60 @@ export class SplitWaysGame {
         driver.visual.setCameraFade(null);
       }
       this.renderer.renderView(this.drivers.length, this.scene, this.overview.camera, 0);
+    }
+  }
+
+  /**
+   * Shows the other cars' name tags in one view: none over your own car or one on your bumper,
+   * fading out with distance, and where tags would overlap on screen only the nearest car's
+   * stays (the others fade out). Each view renders separately, so this runs before each one.
+   */
+  private layoutTags(view: number, driver: Driver, rect: Rect, dt: number): void {
+    const camera = driver.camera.camera;
+    camera.updateMatrixWorld();
+    const eye = camera.position;
+    const layout = this.tagLayout;
+    const point = this.tagPoint;
+    const focal = camera.projectionMatrix.elements[5];
+    const drivers = this.drivers;
+    const count = drivers.length;
+    for (let k = 0; k < count; k++) {
+      const other = drivers[k] as Driver;
+      if (other === driver) {
+        layout.hide(k);
+        continue;
+      }
+      point.copy(other.tag.position).applyMatrix4(camera.matrixWorldInverse);
+      const depth = -point.z;
+      if (depth <= camera.near) {
+        layout.hide(k);
+        continue;
+      }
+      const pxPerMetre = (rect.height * 0.5 * focal) / depth;
+      point.applyMatrix4(camera.projectionMatrix);
+      layout.set(
+        k,
+        point.x * 0.5 * rect.width,
+        point.y * 0.5 * rect.height,
+        other.tag.scale.x * 0.5 * pxPerMetre,
+        other.tag.scale.y * 0.5 * pxPerMetre,
+        other.visual.root.position.distanceTo(eye),
+      );
+    }
+    layout.solve(count);
+    const opacities = this.tagOpacity;
+    for (let k = 0; k < count; k++) {
+      const tag = (drivers[k] as Driver).tag;
+      const slot = view * count + k;
+      const opacity = approachOpacity(
+        opacities[slot] as number,
+        layout.target[k] as number,
+        dt,
+        NAME_TAGS.fadeRate,
+      );
+      opacities[slot] = opacity;
+      tag.material.opacity = opacity;
+      tag.visible = opacity > 0.01;
     }
   }
 

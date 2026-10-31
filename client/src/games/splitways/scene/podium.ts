@@ -32,6 +32,13 @@ export interface PodiumEntry {
   paint: ColourId;
 }
 
+/** How the podium picks its cars' level of detail: the race preset's floor and the output height. */
+export interface PodiumLod {
+  floor: 0 | 1;
+  /** Height of the full-screen view (output px), read each frame. */
+  viewHeightPx: () => number;
+}
+
 const BLOCK = { width: 5.4, depth: 6 };
 const HEIGHTS: Record<1 | 2 | 3, number> = { 1: 1.5, 2: 1, 3: 0.6 };
 const X: Record<1 | 2 | 3, number> = { 1: 0, 2: -6, 3: 6 };
@@ -58,6 +65,7 @@ export class Podium {
     models: CarModelLibrary,
     entries: readonly PodiumEntry[],
     environment: Texture | null,
+    private readonly lod: PodiumLod = { floor: 0, viewHeightPx: () => 1080 },
   ) {
     const scene = this.scene;
     scene.background = new Color(0x07080d);
@@ -189,6 +197,9 @@ export class Podium {
     this.camera.lookAt(0, 2.2, 0);
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
+    // Same rule as the race views (spec 3.12), for this camera at full-screen height.
+    const height = this.lod.viewHeightPx();
+    for (const { visual } of this.cars) visual.selectLod(this.camera, height, this.lod.floor, 0);
   }
 
   dispose(): void {

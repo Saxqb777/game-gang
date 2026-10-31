@@ -15,6 +15,7 @@ import {
 } from 'three';
 import { SCENERY } from '../config';
 import type { Car } from '../sim/car';
+import { REFERENCE_SPEC } from '../sim/carSpec';
 import { canvasTexture } from './textures';
 
 /** Height above the averaged wheel contacts (m), on top of the polygon offset. */
@@ -105,7 +106,9 @@ export class BlobShadows {
         grounded++;
       }
       if (grounded) position.y = y / grounded + LIFT;
-      scale.set(1, 1, 1);
+      // The quad is sized for the reference car; each car's blob follows its own footprint.
+      const { length, width } = car.spec.geometry;
+      scale.set(width / REFERENCE_SPEC.geometry.width, 1, length / REFERENCE_SPEC.geometry.length);
       matrix.compose(position, quaternion, scale);
       this.mesh.setMatrixAt(i, matrix);
       this.opacity.setX(i, grounded ? car.groundedWheels / 4 : 0);

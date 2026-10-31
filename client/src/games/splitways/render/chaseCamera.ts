@@ -1,5 +1,23 @@
 import { MathUtils, PerspectiveCamera, Vector3, type Quaternion } from 'three';
 import { CAMERA, ENGINE } from '../config';
+import type { CarGeometry } from '../sim/carSpec';
+
+/** Where the camera sits for one car: distance behind, height above, and the height it looks at. */
+export interface ChaseFraming {
+  distance: number;
+  height: number;
+  lookHeight: number;
+}
+
+/** The camera block was framed for a 4.4 m long, 1.3 m tall car; longer and taller cars sit further back and higher. */
+export function chaseFraming(geometry: CarGeometry): ChaseFraming {
+  const taller = (geometry.height - 1.3) * CAMERA.heightPerMetre;
+  return {
+    distance: CAMERA.distance + (geometry.length - 4.4) * CAMERA.distancePerMetre,
+    height: CAMERA.height + taller,
+    lookHeight: CAMERA.lookHeight + taller,
+  };
+}
 
 const LOCAL_FORWARD = new Vector3(0, 0, 1);
 const carForward = new Vector3();
@@ -26,6 +44,14 @@ export class ChaseCamera {
   /** 0..1, set on impacts and decays by itself. */
   private shake = 0;
   private shakeTime = 0;
+
+  constructor(
+    private readonly framing: ChaseFraming = {
+      distance: CAMERA.distance,
+      height: CAMERA.height,
+      lookHeight: CAMERA.lookHeight,
+    },
+  ) {}
 
   addShake(amount: number): void {
     this.shake = Math.min(1, Math.max(this.shake, amount));
@@ -59,7 +85,7 @@ export class ChaseCamera {
     }
 
     const speed01 = Math.min(1, speed / ENGINE.topSpeed);
-    const distance = CAMERA.distance + speed01 * 1.6;
+    const distance = this.framing.distance + speed01 * 1.6;
     if (!this.initialised) {
       this.heading.copy(desiredHeading);
       this.smoothedHeight = carPosition.y;
@@ -69,7 +95,7 @@ export class ChaseCamera {
         (carPosition.y - this.smoothedHeight) * damp(CAMERA.followStiffness, dt);
     }
     desiredOffset.copy(this.heading).multiplyScalar(-distance);
-    desiredOffset.y = CAMERA.height - speed01 * 0.25;
+    desiredOffset.y = this.framing.height - speed01 * 0.25;
     if (!this.initialised) this.offset.copy(desiredOffset);
     else this.offset.lerp(desiredOffset, damp(CAMERA.followStiffness, dt));
     this.initialised = true;
@@ -88,7 +114,7 @@ export class ChaseCamera {
     }
 
     lookAt
-      .set(carPosition.x, this.smoothedHeight + CAMERA.lookHeight, carPosition.z)
+      .set(carPosition.x, this.smoothedHeight + this.framing.lookHeight, carPosition.z)
       .addScaledVector(this.heading, CAMERA.lookAhead);
     camera.lookAt(lookAt);
 

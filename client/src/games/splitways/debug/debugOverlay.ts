@@ -7,6 +7,8 @@ export interface DebugStats {
   autopilot: boolean;
   /** Players (the 3-player overview cell is a view, not a player). */
   viewports: number;
+  /** Debug key V: every car hidden, so draws and tris without cars can be read off. */
+  carsHidden: boolean;
 }
 
 export interface DebugDriver {
@@ -20,6 +22,10 @@ export interface DebugDriver {
   lap: number;
   nextGate: number;
   place: number;
+  car: string;
+  /** The car's level of detail in this driver's own view. */
+  lod: number;
+  paint: string;
 }
 
 const fmt = (n: number, digits = 2) => (n >= 0 ? ' ' : '') + n.toFixed(digits);
@@ -79,8 +85,9 @@ export class DebugOverlay {
       gpu,
       `preset ${r.preset.toUpperCase()} (auto, drops ${r.drops})  scale ${r.scale.toFixed(2)} (${r.resolutionAuto ? 'auto' : 'fixed'}, R toggles)  internal ${r.internalWidth}x${r.internalHeight} x${r.viewports} -> out ${r.outputWidth}x${r.outputHeight}  dpr ${r.devicePixelRatio.toFixed(2)}  sharpen ${r.sharpening ? 'on' : 'off'}`,
       `draws ${r.drawCalls}  tris ${count(r.triangles)}  programs ${r.programs} (late ${r.latePrograms})  viewports ${r.viewports}  refresh ${r.refreshHz} Hz`,
-      'B benchmark  P autopilot  N next checkpoint  R resolution',
+      'B benchmark  P autopilot  N next checkpoint  R resolution  V cars on/off',
       stats.autopilot ? 'AUTOPILOT ON (P to stop)' : '',
+      stats.carsHidden ? 'CARS HIDDEN (V to show): draws and tris above are without cars' : '',
       'driver        steer  gas   brake hb horn  km/h  slip   rtt   P lap gate',
       ...drivers.map((d) => {
         const i = d.input;
@@ -103,6 +110,8 @@ export class DebugOverlay {
           String(d.nextGate).padStart(4),
         ].join(' ');
       }),
+      'car         lod  paint',
+      ...drivers.map((d) => `${d.car.padEnd(11)} ${String(d.lod).padStart(3)}  ${d.paint}`),
     ];
     this.element.textContent = lines.join('\n');
   }

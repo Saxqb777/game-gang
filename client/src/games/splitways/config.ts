@@ -330,29 +330,74 @@ export const CARS = {
 /**
  * Car paint per player colour (D-C1; keys = `PLAYER_COLOURS` order, a test checks). The UI keeps the
  * bright identity hex; the paint is a deeper tone so it does not glow under ACES tone mapping and bloom.
- * `hex` is sRGB; metalness and roughness are the base coat, clearcoat sits on top.
+ * `hex` is sRGB; metalness and roughness are the base coat, clearcoat sits on top; `flake` (0..1)
+ * is the metallic flake under the clear coat, seen up close (0 = a solid paint).
  */
 export const PAINTS = {
-  red: { hex: 0xb3121a, metalness: 0.6, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.05 },
+  red: {
+    hex: 0xb3121a,
+    metalness: 0.6,
+    roughness: 0.32,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    flake: 0.8,
+  },
   orange: {
-    hex: 0xd9560f,
+    hex: 0xe8620f,
+    metalness: 0.4,
+    roughness: 0.34,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    flake: 0.6,
+  },
+  yellow: {
+    hex: 0xf5c518,
+    metalness: 0.05,
+    roughness: 0.36,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    flake: 0,
+  },
+  lime: {
+    hex: 0x6fc219,
+    metalness: 0.45,
+    roughness: 0.36,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    flake: 0.5,
+  },
+  cyan: {
+    hex: 0x11a9b5,
+    metalness: 0.55,
+    roughness: 0.32,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    flake: 0.7,
+  },
+  blue: {
+    hex: 0x1746c9,
+    metalness: 0.6,
+    roughness: 0.3,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    flake: 0.9,
+  },
+  purple: {
+    hex: 0x6a2fc8,
+    metalness: 0.6,
+    roughness: 0.3,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    flake: 0.9,
+  },
+  pink: {
+    hex: 0xd22a86,
     metalness: 0.5,
     roughness: 0.34,
     clearcoat: 1,
     clearcoatRoughness: 0.05,
+    flake: 0.6,
   },
-  yellow: {
-    hex: 0xe8b90c,
-    metalness: 0.2,
-    roughness: 0.38,
-    clearcoat: 1,
-    clearcoatRoughness: 0.05,
-  },
-  lime: { hex: 0x6fc219, metalness: 0.45, roughness: 0.36, clearcoat: 1, clearcoatRoughness: 0.05 },
-  cyan: { hex: 0x11a9b5, metalness: 0.55, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.05 },
-  blue: { hex: 0x1746c9, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 },
-  purple: { hex: 0x5a2bb8, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 },
-  pink: { hex: 0xd22a86, metalness: 0.5, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.05 },
 } as const;
 
 /** How a car's physics spec and autopilot speed profile are derived from `CARS` (C3). */
@@ -532,6 +577,12 @@ export const CAMERA = {
   speedFov: 10,
   /** Above this horizontal FOV (degrees) the vertical FOV shrinks, so wide split viewports don't fish-eye. */
   maxHorizontalFov: 100,
+  /**
+   * Per-car framing: distance grows by this much per metre of body length over 4.4 m, height and
+   * look height by `heightPerMetre` per metre of body height over 1.3 m (the car the above was set for).
+   */
+  distancePerMetre: 0.6,
+  heightPerMetre: 0.8,
 } as const;
 
 export const RENDER = {
@@ -571,6 +622,8 @@ export const PRESETS = {
     vegetationDensity: 1,
     pineShadows: true,
     cameraFar: 2400,
+    /** Most detailed car level this preset may draw (0 = all three; 1 never draws or uploads LOD0). */
+    carLodFloor: 0,
   },
   medium: {
     maxInternalPixels: 1920 * 1080,
@@ -584,6 +637,7 @@ export const PRESETS = {
     vegetationDensity: 0.75,
     pineShadows: true,
     cameraFar: 1800,
+    carLodFloor: 0,
   },
   low: {
     maxInternalPixels: 1920 * 1080,
@@ -598,6 +652,7 @@ export const PRESETS = {
     vegetationDensity: 0.5,
     pineShadows: false,
     cameraFar: 1400,
+    carLodFloor: 1,
   },
 } as const;
 
@@ -642,6 +697,31 @@ export const RESOLUTION = {
   dropIfFloorShare: 0.2,
   /** ...or missed this share of frames. */
   dropIfMissedShare: 0.01,
+} as const;
+
+/** Car level-of-detail switching per viewport (D-C5; `scene/carLod.ts`). */
+export const CAR_LOD = {
+  /** Projected bounding-sphere diameter (output px) at or above which a car draws LOD0, LOD1. */
+  lod0MinPx: 520,
+  lod1MinPx: 110,
+  /** A car changes level only once it is this share past a threshold, so it never flickers. */
+  hysteresis: 0.12,
+} as const;
+
+/** Car lamps and paint flake (`scene/carVisual.ts`). */
+export const CAR_VISUAL = {
+  /** Rear lamp glow (linear sRGB colour, emissive intensity) when rolling and when braking. */
+  tailColour: 0xff1810,
+  tailRunning: 0.6,
+  tailBrake: 6,
+  /** Brake lamps light above this brake input, and only while rolling forward faster than this (m/s). */
+  brakeThreshold: 0.05,
+  brakeMinSpeed: 0.5,
+  /** Metallic flake: cells per metre of body surface, and the most a flake tilts the base normal. */
+  flakeCellsPerMetre: 900,
+  flakeTilt: 0.35,
+  /** Most a paint's greyscale detail map is brightened towards white (see `mapGain`). */
+  paintMapMaxGain: 2.2,
 } as const;
 
 /** Scripted benchmarks: `?bench=auto|matrix` (camera fly-through) and `?bench=soak`. */

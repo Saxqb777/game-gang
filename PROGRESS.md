@@ -253,8 +253,21 @@ returns both screens to the lobby. 60 fps on the M1 is yours to confirm.
 
 - Unit tests, the gate and `pnpm build:vercel` pass on the release build (counts under the cars
   update below).
-- The M8 §2.9 integration acceptance (mixed controllers, lap records, reconnect, vote, perf smoke) on
-  the merged build: **pending**.
+- The M8 §2.9 integration acceptance on the release build (9869c4d, headless Chromium with
+  SwiftShader, dev server with in-memory Postgres), 2026-10-31: **pass**.
+  1. Gate (37 test files, 342 tests) and `pnpm build:vercel` green; `base.layout.json`, the
+     `telemetry` and `laps` functions are in `.vercel/output`.
+  2. Mixed controllers: pad A Drag steer, pad B Buttons, pad C Drag switched to Buttons in Settings
+     mid-race, plus a keyboard player. Each pad's steer and gas reach the TV overlay; inputs return
+     to zero on release; autopilot finishes the 3-lap race.
+  3. Lap records: `POST /api/laps` 200, `GET /api/laps?track=kestrel-pines` returns the four posted
+     laps, the results board lists them.
+  4. Reconnect: a pad reloaded mid-race (pad C in this run) comes back without a tap in the same
+     viewport and colour, still in Buttons, drives again; the R chip (hold BRAKE·R) and the stuck
+     hint (GAS against a barrier) show on the pad and on the TV HUD.
+  5. Vote: the play-again vote (2 of 3 pads) returns the TV and all pads to the lobby.
+  6. `?bench=auto` completes, telemetry POSTs (loading and fly-through) return 200.
+  7. No `pageerror` and no console errors on the TV or any pad.
 - Not verified: the owner's M1 run (spec §5.5: `?bench=auto`, the 30-minute soak, real races at
   4K and 1080p on 1, 2 and 4 players): **pending**.
 
@@ -302,7 +315,7 @@ The car part of M12, pulled forward after M8 (owner, 2026-10-12). Released toget
 
 **Verified here**
 
-- `pnpm check`: 35 test files, 329 tests passed (after the controller lag fixes).
+- `pnpm check`: 37 test files, 342 tests passed (release build 9869c4d).
   The cars gate (brand and stale-word greps) and `pnpm build:vercel` pass.
 - Balance (`race/balance.test.ts`, autopilot, Kestrel Pines, before the final balance pass): spread
   0.35% (limit 1.5%, target 1.0%).
@@ -315,8 +328,29 @@ The car part of M12, pulled forward after M8 (owner, 2026-10-12). Released toget
   | Zanna    | 94.17     | 91.10             | 175              |
   | Sagitta  | 93.95     | 90.90             | 164              |
 
-- The final balance and performance pass (C7) and the cars integration acceptance (four-car race,
-  paint refusal, reconnect, podium, lap records, credits, perf smoke): **pending**.
+- The final balance and performance pass (C7) is merged.
+- The cars §2.11 integration acceptance on the release build (9869c4d, headless Chromium with
+  SwiftShader), 2026-10-31: **pass**.
+  1. Cars gate and `pnpm build:vercel` green; `.vercel/output/static/cars/` holds 5 GLBs and 40
+     thumbnails, no `sports-car.glb`.
+  2. Mixed field: pad A Zanna/red (Drag), pad B Zanna/blue (Buttons), pad C Sagitta/yellow (Drag),
+     keyboard player Nightjar. Phone cards and TV lobby slots show the right thumbnails; the race
+     cars on the TV match; each pad drives by touch, autopilot finishes the race.
+  3. Paint refused: a fourth pad sees the three taken paints disabled; a join sent from its
+     console with a taken paint gets the first free paint (orange) from the TV, and the pad shows it.
+  4. Pad B reloaded in the lobby rejoins without a tap as Zanna/blue.
+  5. Pad C reloaded mid-race: same viewport, Sagitta/yellow on the TV, drives, R chip and stuck hint
+     update.
+  6. Results and podium show the right cars and paints (podium top three in race order), lap
+     records post (200) and the board lists them; the play-again vote returns everyone to the lobby
+     with cars and paints kept.
+  7. Key `C` opens and closes the TV credits panel; `/credits` loads on a phone.
+  8. `?bench=auto` completes; telemetry POSTs 200.
+  9. No `pageerror` on the TV or any pad. No late shader programs while racing (1 and 4 viewports);
+     the podium's programs compile at the finish, as designed.
+- Not testable here: frame rates on real hardware (SwiftShader's frames are slower than the
+  benchmark's 20 s windows, so two of the three fly-through rows read 0 here), real phones and
+  touch latency, real Neon.
 - Not verified: the owner's M1 numbers with four different cars (Low, Medium, High and the soak).
 
 **Known issues and open owner items**

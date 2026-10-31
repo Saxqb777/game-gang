@@ -59,7 +59,8 @@ export const CAR_CREDITS: Record<CarId, CarCredit> = {
     modified: MODIFIED,
   },
   sagitta: {
-    // The title and description dedicate it to CC0 (Sketchfab now labels it "Free Standard") to the public domain; credited as a courtesy (R-C3).
+    // The title and description dedicate it to the public domain (CC0); Sketchfab now labels it
+    // "Free Standard". Credited as a courtesy (R-C3).
     title: 'FREE Concept Car 039 - public domain (CC0)',
     author: 'unityfan777 (Unity Fan YouTube channel)',
     sourceUrl:

@@ -7,6 +7,17 @@ import { loadRapier, type Rapier } from './rapier';
 /** Friction for static scenery. Walls are slippery so cars slide along them instead of sticking. */
 export const SURFACE_FRICTION = { ground: 0.9, wall: 0.05 } as const;
 
+/**
+ * Collision groups (Rapier packs them as memberships << 16 | filter). Wall hulls get their own
+ * membership bit so the wheels' suspension rays can skip them: the hulls lean over the run-off, and a
+ * ray that lands on one lets the suspension climb the car up and over the wall in a glancing hit.
+ * The car bodies still collide with the walls as usual.
+ */
+const WALL_GROUP_BIT = 0x0002;
+const WALL_COLLISION_GROUPS = (WALL_GROUP_BIT << 16) | 0xffff;
+/** Query groups for the wheel ray-casts: hit everything except the wall hulls. */
+export const WHEEL_RAY_GROUPS = (0xffff << 16) | (0xffff & ~WALL_GROUP_BIT);
+
 const tmpQuat = new Quaternion();
 const AXIS_Y = new Vector3(0, 1, 0);
 
@@ -46,12 +57,18 @@ export class PhysicsWorld {
     );
   }
 
-  /** Static convex hull (the track walls). Min combine like `addBox`, so walls stay slippery. */
+  /**
+   * Static convex hull (the track walls). Min combine like `addBox`, so walls stay slippery. In the
+   * wall collision group, so wheel rays ignore it (see `WHEEL_RAY_GROUPS`).
+   */
   addConvexHull(points: Float32Array, friction: number = SURFACE_FRICTION.ground): Collider {
     const desc = this.rapier.ColliderDesc.convexHull(points);
     if (!desc) throw new Error('Degenerate convex hull');
     return this.track(
-      desc.setFriction(friction).setFrictionCombineRule(this.rapier.CoefficientCombineRule.Min),
+      desc
+        .setFriction(friction)
+        .setFrictionCombineRule(this.rapier.CoefficientCombineRule.Min)
+        .setCollisionGroups(WALL_COLLISION_GROUPS),
     );
   }
 

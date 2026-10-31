@@ -185,6 +185,9 @@ export class Race {
     racer.lap++;
     if (racer.lap > this.totalLaps) {
       racer.finishedMs = Math.round(this.clock * 1000);
+      // A reset that started just before the line must not teleport the finished car back behind it.
+      racer.respawn = 'none';
+      racer.fade = 0;
       this.finishers++;
       if (this.finishers === 1) this.finishDeadline = this.clock + RACE.finishTimeoutSeconds;
       this.onFinish?.(racer);

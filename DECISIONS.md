@@ -24,10 +24,15 @@ milestone changed is in `PROGRESS.md`. Tunable values live in `client/src/games/
     press would be a lost reset.
 - Signaling over `/api/room` and `/api/signal`, with Neon as the mailbox.
   - The pad makes the offer.
-  - Offer/answer go out after ICE gathering (max 1 s); late candidates trickle.
+  - Offer/answer go out after ICE gathering (max 250 ms); late candidates trickle. The pad holds
+    its late candidates until the offer is posted, because the TV drops candidates for an offer it
+    has not seen.
   - Each handshake attempt has a session id; stale messages are ignored.
 - Polling: pads every 500 ms during a handshake only. The TV every 500 ms during a handshake, otherwise
-  1 s in the lobby and 2 s in a race (to see new pads and keep the room alive).
+  every 1 s (lobby, race and results), to see new or reconnecting pads and keep the room alive.
+- Keepalive: the TV pings every pad every 1 s in every phase; a link silent for 5 s is dropped and
+  the pad reconnects. A TV watchdog tick that comes late (the page stalled, e.g. loading a race)
+  skips judging once, because no pings went out during the stall.
 - Keepalive: ping every 1 s. 5 s of silence = dead link; the pad re-handshakes with the same id and
   gets its slot back. A `bye` beacon on tab close frees the slot right away.
 - Pad id is random per tab (sessionStorage), so a reload keeps the same car. Two tabs = two players.
@@ -80,8 +85,10 @@ milestone changed is in `PROGRESS.md`. Tunable values live in `client/src/games/
     height. Overdragging moves the origin, so coming back steers at once. A ghost wheel shows it.
   - Buttons: the arrows ramp steering to full lock in 0.2 s and back in 0.1 s.
 - The pad sends raw steering. The TV processes every mode the same way (pad drag, pad buttons,
-  keyboard): dead zone 0.05, response curve (gamma 1.5), 0.04 s low-pass. Steering lock and the
-  deg/s rate limit stay in the car.
+  keyboard): dead zone 0.05, response curve (gamma 1.5), 0.025 s low-pass. Steering lock and the
+  deg/s rate limit stay in the car. The low-pass only has to hide wifi jitter between 60 Hz packets
+  (it was 0.04 s for 30 Hz packets, which were ~23 Hz in practice). At 0.025 s (1.5 frames) a step
+  reaches 63% in 25 ms and settles in ~125 ms instead of ~200 ms.
 - GAS is analog: sliding down the pedal feathers it (30% of the pedal height = off). Throttle goes
   out in 0.05 steps, so thumb wobble is not news.
 - Reverse is explicit: hold BRAKE·R (no gas) at a standstill for 0.35 s. The pad fills a ring, the
@@ -95,8 +102,13 @@ milestone changed is in `PROGRESS.md`. Tunable values live in `client/src/games/
   (arrows set).
 - Handbrake: a press strip next to the pedals.
 - The input failsafe stays 600 ms in M8: after that long without input the TV coasts the car. The
-  250 ms failsafe, 60 Hz binary input and the slide-from-GAS handbrake are M11 (D-10).
-- Inputs go out on change (max 30/s) plus a 100 ms heartbeat, because the input channel is lossy.
+  250 ms failsafe, binary input packets and the slide-from-GAS handbrake are M11 (D-10).
+- Inputs go out on change at up to 60/s (pulled forward from M11's controller v2; still JSON), plus
+  a 100 ms heartbeat, because the input channel is lossy. The limit has 4 ms of slack, so frame
+  jitter does not skip frames (the old strict 30/s limit sent on every third frame, ~23/s with 33-50
+  ms gaps). Presses and releases (gas on/off, brake, handbrake, horn) skip the limit and go out at
+  once; steering and gas feathering are limited. The TV keeps the newest `t`, so the pad never
+  sends two packets with the same `t`.
 
 ## Car and physics
 

@@ -65,6 +65,8 @@ interface Link {
 }
 
 const SAVED_ROOM_KEY = 'gamergang.tv.room';
+/** How often links are checked for silence or a stuck handshake. */
+const WATCHDOG_MS = 1000;
 
 function readSavedRoom(): { code: string; hostKey: string } | null {
   try {
@@ -85,6 +87,7 @@ export class HostTransport implements HostTransportPort {
   private idlePollMs = 1000;
   private pollTimer: ReturnType<typeof setTimeout> | undefined;
   private watchdog: ReturnType<typeof setInterval> | undefined;
+  private lastCheckAt = -Infinity;
   private failures = 0;
   private running = false;
 
@@ -93,7 +96,7 @@ export class HostTransport implements HostTransportPort {
   start(): void {
     if (this.running) return;
     this.running = true;
-    this.watchdog = setInterval(() => this.checkLinks(), 1000);
+    this.watchdog = setInterval(() => this.checkLinks(), WATCHDOG_MS);
     void this.openRoom().then(() => this.schedulePoll(0));
   }
 
@@ -299,6 +302,11 @@ export class HostTransport implements HostTransportPort {
   /** Drops links that never finished their handshake or went silent (pads answer pings every second). */
   private checkLinks(): void {
     const now = performance.now();
+    // A late tick means this page stalled (loading a race): it sent no pings, so it heard no pongs.
+    // Judge silence only once the pings have had a second to go round again.
+    const stalled = now - this.lastCheckAt > 2 * WATCHDOG_MS;
+    this.lastCheckAt = now;
+    if (stalled) return;
     for (const link of [...this.links.values()]) {
       const stale = link.open
         ? now - link.lastHeardAt > LINK_SILENCE_TIMEOUT_MS

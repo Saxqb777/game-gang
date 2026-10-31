@@ -541,7 +541,7 @@ export const STEER_INPUT = {
   /** Response curve exponent. Above 1 = finer control near the centre, same full lock. */
   gamma: 1.5,
   /** Low-pass time constant (s): smooths wifi jitter and digital keys; settles in about 5x this. */
-  lowPassSeconds: 0.04,
+  lowPassSeconds: 0.025,
 } as const;
 
 export const REVERSE = {

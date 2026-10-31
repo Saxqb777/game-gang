@@ -58,7 +58,7 @@ const LOBBY_GRACE_MS = 15_000;
 const SEAT_KEY_LENGTH = 24;
 /** If every player is gone for this long mid-game, the hub returns to the lobby. */
 const ABANDONED_GAME_MS = 30_000;
-const IDLE_POLL_MS: Record<HubPhase, number> = { lobby: 1000, playing: 2000, results: 1000 };
+const IDLE_POLL_MS: Record<HubPhase, number> = { lobby: 1000, playing: 1000, results: 1000 };
 
 export class Hub {
   private state: HubState;

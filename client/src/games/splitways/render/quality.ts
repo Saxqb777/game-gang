@@ -30,6 +30,8 @@ export interface QualityPreset {
   pineShadows: boolean;
   /** Chase and overview camera far plane (m). */
   cameraFar: number;
+  /** Most detailed car level drawn (D-C5): Low never draws LOD0, so it never uploads LOD0 textures. */
+  carLodFloor: 0 | 1;
 }
 
 export interface RaceRenderOutcome {

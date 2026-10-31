@@ -23,6 +23,8 @@ import {
   Vector3,
   type Texture,
 } from 'three';
+import { resolveCarSpec } from '../sim/carSpec';
+import { createContactShadow } from './blobShadows';
 import type { CarModelLibrary, CarVisual } from './carVisual';
 import { canvasTexture } from './textures';
 
@@ -32,10 +34,19 @@ export interface PodiumEntry {
   paint: ColourId;
 }
 
+/** How the podium picks its cars' level of detail: the race preset's floor and the output height. */
+export interface PodiumLod {
+  floor: 0 | 1;
+  /** Height of the full-screen view (output px), read each frame. */
+  viewHeightPx: () => number;
+}
+
 const BLOCK = { width: 5.4, depth: 6 };
 const HEIGHTS: Record<1 | 2 | 3, number> = { 1: 1.5, 2: 1, 3: 0.6 };
 const X: Record<1 | 2 | 3, number> = { 1: 0, 2: -6, 3: 6 };
 const CONFETTI = 700;
+/** Block paint: a warm light grey, not white, so the spotlit tops don't clip and glare. */
+const BLOCK_HEX = '#cfccc4';
 
 const dummy = new Object3D();
 const matrix = new Matrix4();
@@ -58,6 +69,7 @@ export class Podium {
     models: CarModelLibrary,
     entries: readonly PodiumEntry[],
     environment: Texture | null,
+    private readonly lod: PodiumLod = { floor: 0, viewHeightPx: () => 1080 },
   ) {
     const scene = this.scene;
     scene.background = new Color(0x07080d);
@@ -91,7 +103,7 @@ export class Podium {
           256,
           256,
           (ctx) => {
-            ctx.fillStyle = '#e9e6df';
+            ctx.fillStyle = BLOCK_HEX;
             ctx.fillRect(0, 0, 256, 256);
             ctx.fillStyle =
               entry.place === 1 ? '#c99a1a' : entry.place === 2 ? '#8f98a3' : '#a0623a';
@@ -103,8 +115,8 @@ export class Podium {
           8,
         ),
       );
-      const plain = this.track(new MeshStandardMaterial({ color: 0xe9e6df, roughness: 0.55 }));
-      const front = this.track(new MeshStandardMaterial({ map: numberTexture, roughness: 0.55 }));
+      const plain = this.track(new MeshStandardMaterial({ color: BLOCK_HEX, roughness: 0.7 }));
+      const front = this.track(new MeshStandardMaterial({ map: numberTexture, roughness: 0.7 }));
       // Box faces: +x, -x, +y, -y, +z (front, towards the camera), -z.
       const block = new Mesh(this.track(new BoxGeometry(BLOCK.width, height, BLOCK.depth)), [
         plain,
@@ -123,10 +135,17 @@ export class Podium {
       const visual = models.create(entry.car, entry.paint);
       visual.root.position.set(0, 0.03, 0);
       pivot.add(visual.root);
+      // The car sits on its block, not above it: the same contact shadow as on the track.
+      const contact = createContactShadow(resolveCarSpec(entry.car).geometry);
+      contact.position.y = 0.01;
+      this.track(contact.geometry);
+      this.track(contact.material);
+      this.track(contact.material.alphaMap as Texture);
+      pivot.add(contact);
       scene.add(pivot);
       this.cars.push({ visual, pivot });
 
-      const spot = new SpotLight(0xffffff, entry.place === 1 ? 320 : 200, 40, 0.42, 0.6);
+      const spot = new SpotLight(0xfff4e6, entry.place === 1 ? 240 : 160, 40, 0.42, 0.6);
       spot.position.set(X[entry.place], 14, 6);
       spot.target = pivot;
       scene.add(spot);
@@ -185,10 +204,14 @@ export class Podium {
     this.confetti.instanceMatrix.needsUpdate = true;
 
     const sway = Math.sin(this.time * 0.25) * 4;
-    this.camera.position.set(sway, 5.5 + Math.sin(this.time * 0.4) * 0.4, 18.5);
-    this.camera.lookAt(0, 2.2, 0);
+    // Framed low in the picture: the results and best-lap cards fill the top half of the screen.
+    this.camera.position.set(sway, 7 + Math.sin(this.time * 0.4) * 0.4, 19.5);
+    this.camera.lookAt(0, 4.2, 0);
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
+    // Same rule as the race views (spec 3.12), for this camera at full-screen height.
+    const height = this.lod.viewHeightPx();
+    for (const { visual } of this.cars) visual.selectLod(this.camera, height, this.lod.floor, 0);
   }
 
   dispose(): void {

@@ -39,7 +39,7 @@ import { SteerProcessor } from './input/steerProcessor';
 import { FixedStepLoop } from './loop';
 import { Race, type Racer } from './race/race';
 import { Slipstream } from './race/slipstream';
-import { ChaseCamera } from './render/chaseCamera';
+import { ChaseCamera, chaseFraming } from './render/chaseCamera';
 import { frameIntervalMs } from './render/frameStats';
 import { OverviewCamera } from './render/overviewCamera';
 import { GameRenderer, measureRefreshHz } from './render/renderer';
@@ -58,7 +58,7 @@ import { Sky } from './render/sky';
 import { overviewCell, roundRect, viewportLayout, type Rect } from './render/viewports';
 import { CarModelLibrary, type CarVisual } from './scene/carVisual';
 import { Dust } from './scene/dust';
-import { NAME_TAG_HEIGHT, createNameTag, disposeNameTag } from './scene/nameTag';
+import { NAME_TAG_CLEARANCE, createNameTag, disposeNameTag } from './scene/nameTag';
 import { Podium, type PodiumEntry } from './scene/podium';
 import { SkidMarks } from './scene/skidMarks';
 import { WorldVisual } from './scene/world';
@@ -325,7 +325,7 @@ export class SplitWaysGame {
         racer: this.race.racers[index] as Racer,
         visual,
         tag,
-        camera: new ChaseCamera(),
+        camera: new ChaseCamera(chaseFraming(car.spec.geometry)),
         hud: new ViewportHud(this.hudLayer, player.name, colourHex(player.colour), track),
         padInput: copyInput({ ...NEUTRAL_INPUT }, NEUTRAL_INPUT),
         padInputAt: 0,
@@ -380,7 +380,12 @@ export class SplitWaysGame {
     this.setCameraFar(renderer.preset.cameraFar);
     this.layout();
     this.snapCameras();
+    // Every car level the preset may draw is compiled and its textures uploaded now, not mid-race.
+    const carFloor = renderer.preset.carLodFloor;
+    const restoreCars = this.drivers.map((d) => d.visual.showAllForCompile(carFloor));
+    for (const texture of this.models.textures(carFloor)) renderer.webgl.initTexture(texture);
     await renderer.precompile(this.scene, this.firstCamera());
+    for (const restore of restoreCars) restore();
     if (this.isDisposed()) return;
     await this.loadingBenchmark();
     if (this.isDisposed()) return;
@@ -470,7 +475,12 @@ export class SplitWaysGame {
     this.world.setQuality(preset);
     this.setCameraFar(preset.cameraFar);
     this.shadows.beforeView(this.firstCamera().position);
+    const restoreCars = this.drivers.map((d) => d.visual.showAllForCompile(preset.carLodFloor));
+    for (const texture of this.models.textures(preset.carLodFloor)) {
+      this.renderer.webgl.initTexture(texture);
+    }
     await this.renderer.precompile(this.scene, this.firstCamera());
+    for (const restore of restoreCars) restore();
   }
 
   /**
@@ -742,7 +752,8 @@ export class SplitWaysGame {
 
   /**
    * Debug keys (only while the overlay is up): P autopilot, N next checkpoint, R resolution,
-   * B benchmark.
+   * B benchmark, V hides or shows every car (the overlay's draw calls and triangles with the cars
+   * hidden, subtracted from those with them, are the cars' share).
    */
   private readonly onKey = (event: KeyboardEvent): void => {
     if (!this.debug.isVisible) return;
@@ -760,6 +771,10 @@ export class SplitWaysGame {
     }
     if (event.code === 'KeyB' && this.started && this.options.bench !== 'soak') {
       void this.runBenchmark('auto');
+    }
+    if (event.code === 'KeyV') {
+      const show = !(this.drivers[0]?.visual.root.visible ?? true);
+      for (const driver of this.drivers) driver.visual.root.visible = show;
     }
   };
 
@@ -894,7 +909,10 @@ export class SplitWaysGame {
       car: result.car,
       paint: result.colour,
     }));
-    this.podium = new Podium(this.models, entries, this.scene.environment);
+    this.podium = new Podium(this.models, entries, this.scene.environment, {
+      floor: this.renderer.preset.carLodFloor,
+      viewHeightPx: () => this.fullRect.height,
+    });
     this.hudLayer.hidden = true;
     this.audio?.podium();
     this.layout();
@@ -945,7 +963,7 @@ export class SplitWaysGame {
     for (const driver of this.drivers) {
       driver.visual.update(driver.car, alpha, seconds);
       driver.tag.position.copy(driver.visual.root.position);
-      driver.tag.position.y += NAME_TAG_HEIGHT;
+      driver.tag.position.y += driver.car.spec.geometry.height + NAME_TAG_CLEARANCE;
     }
     for (let i = 0; i < this.drivers.length; i++) {
       const driver = this.drivers[i] as Driver;
@@ -969,6 +987,10 @@ export class SplitWaysGame {
         other.tag.visible =
           other !== driver &&
           other.visual.root.position.distanceToSquared(eye) > TAG_HIDE_DISTANCE ** 2;
+      }
+      const carFloor = this.renderer.preset.carLodFloor;
+      for (const other of this.drivers) {
+        other.visual.selectLod(driver.camera.camera, rect.height, carFloor, i);
       }
       const { car } = driver;
       this.renderer.renderView(
@@ -998,6 +1020,10 @@ export class SplitWaysGame {
       this.overview.update(seconds, this.carPositions, rect.width / rect.height);
       for (const driver of this.drivers) driver.tag.visible = true;
       this.shadows.beforeView(this.overview.focus);
+      const carFloor = this.renderer.preset.carLodFloor;
+      for (const driver of this.drivers) {
+        driver.visual.selectLod(this.overview.camera, rect.height, carFloor, this.drivers.length);
+      }
       this.renderer.renderView(this.drivers.length, this.scene, this.overview.camera, 0);
     }
   }
@@ -1041,8 +1067,9 @@ export class SplitWaysGame {
         physicsMs: this.sim.lastStepMs,
         autopilot: this.autopilotOn,
         viewports: this.drivers.length,
+        carsHidden: !(this.drivers[0]?.visual.root.visible ?? true),
       },
-      this.drivers.map((d) => ({
+      this.drivers.map((d, i) => ({
         name: d.player.name,
         colour: colourHex(d.player.colour),
         input: d.car.input,
@@ -1053,6 +1080,9 @@ export class SplitWaysGame {
         lap: d.racer.lap,
         nextGate: d.racer.nextGate,
         place: d.racer.place,
+        car: d.player.car,
+        lod: d.visual.lodInView(i),
+        paint: d.player.colour,
       })),
     );
   }

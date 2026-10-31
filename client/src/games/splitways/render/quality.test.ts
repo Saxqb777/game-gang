@@ -30,6 +30,12 @@ describe('quality presets', () => {
     expect(getPreset('high').shadow.kind).toBe('sun');
   });
 
+  it('gives every preset a car level floor, and Low never draws LOD0', () => {
+    expect(getPreset('high').carLodFloor).toBe(0);
+    expect(getPreset('medium').carLodFloor).toBe(0);
+    expect(getPreset('low').carLodFloor).toBe(1);
+  });
+
   it('drops one preset after a race at the floor or missing frames, and keeps smooth races', () => {
     expect(startingPreset(1)).toBe('high');
     recordRaceOutcome(1, SMOOTH);

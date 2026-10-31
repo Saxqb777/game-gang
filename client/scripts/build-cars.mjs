@@ -3,7 +3,6 @@
  * three levels of detail and a shadow stand-in (contract 3.9), and checks in the phone thumbnails.
  *
  *   pnpm assets:cars <V2 folder> [--only <id>] [--check] [--out <dir>]
- *   pnpm assets:cars --placeholder [--only <id>] [--check]
  *   pnpm assets:cars --thumbs <zip from /tools/thumbs>
  *
  * --check rebuilds in memory and fails if a result differs from the committed file or breaks a
@@ -20,20 +19,18 @@ import { readGlb } from './cars/glb.mjs';
 import { checkImageMagick } from './cars/images.mjs';
 import { simplifierReady } from './cars/mesh.mjs';
 import { buildCar } from './cars/pipeline.mjs';
-import { PLACEHOLDER_CREDIT, loadPlaceholderSource } from './cars/placeholder.mjs';
 import { budgetFailures, formatReport } from './cars/report.mjs';
+import { applyRework } from './cars/rework.mjs';
 import { loadSourceGlb } from './cars/source.mjs';
 import { installThumbs } from './cars/thumbs.mjs';
 
 const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const CARS_DIR = join(REPO_ROOT, 'assets', 'cars');
-const PLACEHOLDER_SOURCE = join(REPO_ROOT, 'assets', 'models', 'sports-car.glb');
 
 function usage(message) {
   if (message) console.error(message);
   console.error(
     'Usage: pnpm assets:cars <V2 folder> [--only <id>] [--check] [--out <dir>]\n' +
-      '       pnpm assets:cars --placeholder [--only <id>] [--check]\n' +
       '       pnpm assets:cars --thumbs <zip>',
   );
   process.exit(2);
@@ -44,7 +41,6 @@ function parseArgs(argv) {
     folder: null,
     only: null,
     check: false,
-    placeholder: false,
     out: null,
     thumbs: null,
   };
@@ -52,7 +48,6 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === '--') continue;
     if (arg === '--check') args.check = true;
-    else if (arg === '--placeholder') args.placeholder = true;
     else if (arg === '--only') args.only = argv[++i];
     else if (arg === '--out') args.out = argv[++i];
     else if (arg === '--thumbs') args.thumbs = argv[++i];
@@ -62,8 +57,7 @@ function parseArgs(argv) {
   }
   if (args.only && !CAR_IDS.includes(args.only)) usage(`Unknown car id ${args.only}`);
   if (args.thumbs) return args;
-  if (args.placeholder === Boolean(args.folder))
-    usage('Give either a source folder or --placeholder.');
+  if (!args.folder) usage('Give the source folder (one folder per car, spec 3.10).');
   if (args.check && args.out) usage('--check compares with assets/cars; it takes no --out.');
   return args;
 }
@@ -136,29 +130,24 @@ async function main() {
   checkImageMagick();
   await simplifierReady;
   const ids = args.only ? [args.only] : [...CAR_IDS];
-  let sources = null;
-  if (!args.placeholder) {
-    sources = findSources(args.folder);
-    const missing = ids.filter((id) => !sources[id]);
-    if (missing.length)
-      throw new Error(`No source car for: ${missing.join(', ')} (use --only for a subset)`);
-  }
+  const sources = findSources(args.folder);
+  const missing = ids.filter((id) => !sources[id]);
+  if (missing.length)
+    throw new Error(`No source car for: ${missing.join(', ')} (use --only for a subset)`);
   const outDir = args.out ? resolve(args.out) : CARS_DIR;
   const problems = [];
   for (const id of ids) {
-    const bytes = readFileSync(args.placeholder ? PLACEHOLDER_SOURCE : sources[id]);
+    const bytes = readFileSync(sources[id]);
     const sha = sha256(bytes);
     const geometry = CARS[id].geometry;
-    const source = args.placeholder
-      ? await loadPlaceholderSource(bytes, geometry)
-      : await loadSourceGlb(bytes);
+    const source = await loadSourceGlb(bytes);
     const notes = [];
+    applyRework(id, source, (line) => notes.push(`rework: ${line}`));
     const { glb, report } = await buildCar({
       id,
       source,
       sourceSha256: sha,
-      copyright: args.placeholder ? PLACEHOLDER_CREDIT : creditLine(id),
-      placeholder: args.placeholder,
+      copyright: creditLine(id),
       log: (line) => notes.push(line),
     });
     console.log(formatReport(id, report, geometry, { sha }));

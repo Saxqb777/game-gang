@@ -16,12 +16,6 @@ import vocabulary from '../../../../scripts/cars/vocabulary.json';
 import debrand from '../../../../scripts/debrand-words.json';
 import { CARS } from '../config';
 
-/**
- * Placeholder cars (built from the CC0 sports car) pass until the real cars land; C2b sets this
- * to false so any placeholder left fails.
- */
-const ALLOW_PLACEHOLDERS = true;
-
 const REPO_ROOT = fileURLToPath(new URL('../../../../../', import.meta.url));
 const CARS_DIR = join(REPO_ROOT, 'assets', 'cars');
 const ASSETS_MD = readFileSync(join(REPO_ROOT, 'assets', 'ASSETS.md'), 'utf8');
@@ -368,13 +362,9 @@ describe('runtime car files', () => {
         expect(extras.carId).toBe(id);
         expect(extras.builder).toBe('build-cars@1');
         expect(String(extras.sourceSha256)).toMatch(/^[0-9a-f]{64}$/);
-        if (extras.placeholder === true) {
-          expect(ALLOW_PLACEHOLDERS, 'placeholder car left in place').toBe(true);
-          expect(json.asset.copyright).toBeTruthy();
-          expect(ASSETS_MD).toContain(json.asset.copyright ?? '');
-        } else {
-          expect(json.asset.copyright).toBe(creditLine(id));
-        }
+        // The real cars only (C2b): a placeholder build left in place fails.
+        expect(extras.placeholder, 'placeholder car left in place').toBeUndefined();
+        expect(json.asset.copyright).toBe(creditLine(id));
       });
 
       it('names no real brand, place or author outside the asset block', () => {
@@ -400,11 +390,7 @@ describe('runtime car files', () => {
     });
   }
 
-  it('lists every shipped car in assets/ASSETS.md once no placeholder remains', () => {
-    const placeholders = CAR_IDS.filter(
-      (id) => readCar(id).json.asset.extras?.placeholder === true,
-    );
-    if (placeholders.length) return;
+  it('lists every shipped car in assets/ASSETS.md', () => {
     const rows = ASSETS_MD.split('\n');
     for (const id of CAR_IDS) {
       const row = rows.find((line) => line.includes(`assets/cars/${id}/${id}.glb`));

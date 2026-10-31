@@ -199,8 +199,9 @@ milestone changed is in `PROGRESS.md`. Tunable values live in `client/src/games/
   occlusion sit under each car.
 - Shaders precompile on the loading screen (`compileAsync` with the HDR scratch bound, every car
   level the preset may draw shown for the compile), then 3 warm-up frames run through the same post
-  path. The overlay counts late programs. On High the podium's first frame still compiles a little;
-  that hitch is accepted.
+  path. The overlay counts late programs. The podium is built the moment the race ends and its
+  shaders start compiling then (`compileAsync`, same scratch target, no warm-up frames), so they
+  are ready by the time it appears 3 s later; if they are not, it is shown anyway.
 - The refresh rate is measured on an idle page during loading, so it reports the display, not the
   game.
 - With 3 players the 4th cell is a live overview camera. It costs the same as a 4th player, which

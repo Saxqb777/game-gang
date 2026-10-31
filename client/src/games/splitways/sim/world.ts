@@ -22,6 +22,11 @@ export class PhysicsWorld {
   private constructor(readonly rapier: Rapier) {
     this.world = new rapier.World({ x: 0, y: -PHYSICS.gravity, z: 0 });
     this.world.timestep = 1 / PHYSICS.stepHz;
+    // World.step() ends with mapNewSoftBodies(), which walks every collider and body handle through
+    // JS callbacks (~0.5 MB of garbage per step with the track's ~1700 colliders, so a young GC
+    // twice a second). It only matters for soft-body topology changes, which we never make:
+    // createCollider/createRigidBody map their handles and removeRigidBody unmaps its colliders.
+    this.world.mapNewSoftBodies = () => {};
     this.events = new rapier.EventQueue(true);
   }
 

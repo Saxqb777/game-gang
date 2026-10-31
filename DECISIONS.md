@@ -24,7 +24,7 @@ milestone changed is in `PROGRESS.md`. Tunable values live in `client/src/games/
     press would be a lost reset.
 - Signaling over `/api/room` and `/api/signal`, with Neon as the mailbox.
   - The pad makes the offer.
-  - Offer/answer go out after ICE gathering (max 250 ms); late candidates trickle. The pad holds
+  - Offer/answer go out after ICE gathering (max 1 s; 250 ms broke iPhone joins on 2026-10-31); late candidates trickle. The pad holds
     its late candidates until the offer is posted, because the TV drops candidates for an offer it
     has not seen.
   - Each handshake attempt has a session id; stale messages are ignored.

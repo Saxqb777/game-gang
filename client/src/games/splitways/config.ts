@@ -335,67 +335,67 @@ export const CARS = {
  */
 export const PAINTS = {
   red: {
-    hex: 0xb3121a,
+    hex: 0x9c0e15,
     metalness: 0.6,
-    roughness: 0.32,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0.8,
   },
   orange: {
-    hex: 0xe8620f,
+    hex: 0xc0500a,
     metalness: 0.4,
-    roughness: 0.34,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0.6,
   },
   yellow: {
-    hex: 0xf5c518,
+    hex: 0xe3ae0c,
     metalness: 0.05,
-    roughness: 0.36,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0,
   },
   lime: {
-    hex: 0x6fc219,
+    hex: 0x5aa013,
     metalness: 0.45,
-    roughness: 0.36,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0.5,
   },
   cyan: {
-    hex: 0x11a9b5,
+    hex: 0x0b8690,
     metalness: 0.55,
-    roughness: 0.32,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0.7,
   },
   blue: {
-    hex: 0x1746c9,
+    hex: 0x1036a0,
     metalness: 0.6,
-    roughness: 0.3,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0.9,
   },
   purple: {
-    hex: 0x6a2fc8,
+    hex: 0x53239f,
     metalness: 0.6,
-    roughness: 0.3,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0.9,
   },
   pink: {
-    hex: 0xd22a86,
+    hex: 0xa71f6a,
     metalness: 0.5,
-    roughness: 0.34,
+    roughness: 0.4,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.08,
     flake: 0.6,
   },
 } as const;
@@ -712,16 +712,28 @@ export const CAR_LOD = {
 export const CAR_VISUAL = {
   /** Rear lamp glow (linear sRGB colour, emissive intensity) when rolling and when braking. */
   tailColour: 0xff1810,
-  tailRunning: 0.6,
-  tailBrake: 6,
+  /** Rear lamp lens tint (sRGB), multiplied onto the lens colour so it stays red in sunlight. */
+  tailLens: 0xc0281e,
+  tailRunning: 0.25,
+  tailBrake: 4,
   /** Brake lamps light above this brake input, and only while rolling forward faster than this (m/s). */
   brakeThreshold: 0.05,
   brakeMinSpeed: 0.5,
-  /** Metallic flake: cells per metre of body surface, and the most a flake tilts the base normal. */
+  /** Metallic flake: cells per metre of body surface, and the most a flake skews the base normal. */
   flakeCellsPerMetre: 900,
-  flakeTilt: 0.35,
+  flakeSkew: 0.25,
   /** Most a paint's greyscale detail map is brightened towards white (see `mapGain`). */
   paintMapMaxGain: 2.2,
+  /** How much of that detail map shows under the paint (0 = flat paint, 1 = the whole map). */
+  paintMapStrength: 0.15,
+  /** Paint reflections below the horizon see the road, at this share of the sky light's ground. */
+  groundReflection: 0.2,
+  /** Paint reflections of the treeline: share of the sky light, and its mean top (sine of elevation). */
+  treelineReflection: 0.15,
+  treelineTop: 0.2,
+  /** Contact shadow under each car: darkness, and how far it fades out past the body (m). */
+  contactOpacity: 0.85,
+  contactSpread: 0.7,
 } as const;
 
 /** Scripted benchmarks: `?bench=auto|matrix` (camera fly-through) and `?bench=soak`. */

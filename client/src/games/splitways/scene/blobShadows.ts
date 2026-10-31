@@ -4,19 +4,23 @@
  * instanced quad per car, one draw call. It fades as wheels leave the ground.
  */
 import {
+  DataTexture,
   DynamicDrawUsage,
   InstancedBufferAttribute,
   InstancedMesh,
+  Mesh,
+  LinearFilter,
+  LinearMipmapLinearFilter,
   Matrix4,
   MeshBasicMaterial,
   PlaneGeometry,
   Quaternion,
+  RGBAFormat,
   Vector3,
 } from 'three';
-import { SCENERY } from '../config';
+import { CAR_VISUAL } from '../config';
 import type { Car } from '../sim/car';
 import { REFERENCE_SPEC } from '../sim/carSpec';
-import { canvasTexture } from './textures';
 
 /** Height above the averaged wheel contacts (m), on top of the polygon offset. */
 const LIFT = 0.02;
@@ -27,43 +31,89 @@ const scale = new Vector3();
 const matrix = new Matrix4();
 const flat = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2);
 
+/**
+ * The contact shadow's quad, lying flat and sized for the reference car (scale it to a car's
+ * footprint), and its shade.
+ */
+function contactShadowParts(): { geometry: PlaneGeometry; texture: DataTexture } {
+  // A rounded rectangle the size of the reference car's footprint, fully dark inside (it shows
+  // between the wheels and under the sills) and fading out over `contactSpread` around it, so
+  // the car sits on the road from every side, not only where the sun's shadow falls.
+  const { width, length } = REFERENCE_SPEC.geometry;
+  const spread = CAR_VISUAL.contactSpread;
+  const halfX = width / 2 + spread;
+  const halfZ = length / 2 + spread;
+  const innerX = width / 2 - 0.05;
+  const innerZ = length / 2 - 0.05;
+  const corner = 0.3;
+  const fade = spread + 0.05;
+  const TX = 64;
+  const TZ = 128;
+  // Built as data, not on a canvas: drawn on a canvas, the black texels came back fully
+  // transparent in our browser tests, so the shadow never showed. The shade is read as an alpha
+  // map (its green channel).
+  const data = new Uint8Array(TX * TZ * 4);
+  for (let iz = 0; iz < TZ; iz++) {
+    for (let ix = 0; ix < TX; ix++) {
+      const x = Math.abs(((ix + 0.5) / TX - 0.5) * 2 * halfX);
+      const z = Math.abs(((iz + 0.5) / TZ - 0.5) * 2 * halfZ);
+      const qx = Math.max(x - (innerX - corner), 0);
+      const qz = Math.max(z - (innerZ - corner), 0);
+      const d = Math.hypot(qx, qz) - corner;
+      const a = Math.round((d <= 0 ? 1 : Math.pow(1 - Math.min(1, d / fade), 1.25)) * 255);
+      data.fill(a, (iz * TX + ix) * 4, (iz * TX + ix) * 4 + 4);
+    }
+  }
+  const texture = new DataTexture(data, TX, TZ, RGBAFormat);
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  const geometry = new PlaneGeometry(halfX * 2, halfZ * 2);
+  geometry.applyQuaternion(flat);
+  return { geometry, texture };
+}
+
+/** One contact shadow under a parked car (the podium), scaled to its footprint. */
+export function createContactShadow(footprint: {
+  width: number;
+  length: number;
+}): Mesh<PlaneGeometry, MeshBasicMaterial> {
+  const { geometry, texture } = contactShadowParts();
+  const material = new MeshBasicMaterial({
+    alphaMap: texture,
+    color: 0x000000,
+    transparent: true,
+    opacity: CAR_VISUAL.contactOpacity,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -4,
+    polygonOffsetUnits: -16,
+  });
+  const mesh = new Mesh(geometry, material);
+  mesh.scale.set(
+    footprint.width / REFERENCE_SPEC.geometry.width,
+    1,
+    footprint.length / REFERENCE_SPEC.geometry.length,
+  );
+  mesh.renderOrder = 1;
+  return mesh;
+}
+
 export class BlobShadows {
   readonly mesh: InstancedMesh;
   private readonly opacity: InstancedBufferAttribute;
 
   constructor(count: number) {
-    // Two falloffs in one texture: the wide body shadow and a tighter core under the tyres.
-    const texture = canvasTexture(128, 64, (ctx) => {
-      const image = ctx.createImageData(128, 64);
-      for (let y = 0; y < 64; y++) {
-        for (let x = 0; x < 128; x++) {
-          const u = (x + 0.5) / 64 - 1;
-          const v = (y + 0.5) / 32 - 1;
-          const r = Math.min(1, Math.hypot(u, v));
-          const wide = Math.pow(1 - r, 1.6);
-          // Core: 1.8 x 0.9 m inside the 4.4 x 2.2 m quad.
-          const rc = Math.min(1, Math.hypot(u / (1.8 / 4.4), v / (0.9 / 2.2)));
-          const core = Math.pow(1 - rc, 1.2) * (0.35 / SCENERY.blobOpacity);
-          const a = Math.min(1, wide + core * (1 - wide));
-          const i = (y * 128 + x) * 4;
-          image.data[i] = 0;
-          image.data[i + 1] = 0;
-          image.data[i + 2] = 0;
-          image.data[i + 3] = Math.round(a * 255);
-        }
-      }
-      ctx.putImageData(image, 0, 0);
-    });
-    const geometry = new PlaneGeometry(SCENERY.blobWidth, SCENERY.blobLength);
-    geometry.applyQuaternion(flat);
+    const { geometry, texture } = contactShadowParts();
     this.opacity = new InstancedBufferAttribute(new Float32Array(count).fill(1), 1);
     this.opacity.setUsage(DynamicDrawUsage);
     geometry.setAttribute('blobOpacity', this.opacity);
     const material = new MeshBasicMaterial({
-      map: texture,
+      alphaMap: texture,
       color: 0x000000,
       transparent: true,
-      opacity: SCENERY.blobOpacity,
+      opacity: CAR_VISUAL.contactOpacity,
       depthWrite: false,
       polygonOffset: true,
       polygonOffsetFactor: -4,
@@ -78,9 +128,12 @@ export class BlobShadows {
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvBlob = blobOpacity;');
       shader.fragmentShader = shader.fragmentShader
         .replace('#include <common>', '#include <common>\nvarying float vBlob;')
-        .replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.a *= vBlob;');
+        .replace(
+          '#include <alphamap_fragment>',
+          '#include <alphamap_fragment>\ndiffuseColor.a *= vBlob;',
+        );
     };
-    material.customProgramCacheKey = () => 'sw-blob-v1';
+    material.customProgramCacheKey = () => 'sw-blob-v2';
     this.mesh = new InstancedMesh(geometry, material, count);
     this.mesh.instanceMatrix.setUsage(DynamicDrawUsage);
     // The instances move all race, and three keeps an instanced mesh's first bounding sphere.
@@ -120,7 +173,7 @@ export class BlobShadows {
   dispose(): void {
     this.mesh.geometry.dispose();
     const material = this.mesh.material as MeshBasicMaterial;
-    material.map?.dispose();
+    material.alphaMap?.dispose();
     material.dispose();
     this.mesh.dispose();
   }

@@ -214,45 +214,95 @@ function mapGain(texture: Texture): number {
 }
 
 /**
- * The LOD0 paint shader: the detail map brightened by `gain` (see `mapGain`) and metallic flake,
- * tiny facets under the clear coat, each tilted at random, so a metallic paint sparkles up close.
- * The clear coat keeps the smooth geometric normal. Flakes fade out once a cell is smaller than a
- * pixel, where they would only shimmer (the base metalness already carries the averaged look).
- * One program for every paint: the amounts are uniforms.
+ * The paint shader, one program per level for every paint (the amounts are uniforms).
+ *
+ * - Detail map (LOD0): some source cars keep a whole-car atlas under the paint, each island at its
+ *   own grey. Normalised by `mapGain` and then only blended in at `paintMapStrength`, it keeps panel
+ *   lines and occlusion without blotches, and the paint stays its own colour.
+ * - Horizon: the sky light is an open sky over bright ground, but a car on this circuit sees
+ *   asphalt below it and a dark pine treeline around it. Reflections that point below the horizon
+ *   or into the treeline band are darkened, which draws the dark band and bright sky line along
+ *   the flanks that make a body read as glossy paint rather than plastic.
+ * - Metallic flake (LOD0): tiny facets under the clear coat, each skewed at random, so a metallic
+ *   paint sparkles up close. The clear coat keeps the smooth normal. Flakes fade out once a cell is
+ *   smaller than a pixel, where they would only shimmer (the base metalness carries that look).
  */
-function addPaintDetail(material: MeshPhysicalMaterial, flake: number, gain: number): void {
+function addPaintShader(
+  material: MeshPhysicalMaterial,
+  level: CarLod,
+  flake: number,
+  gain: number,
+): void {
   const uniforms = {
     paintMapGain: { value: gain },
-    flakeAmount: { value: flake * CAR_VISUAL.flakeTilt },
+    paintMapStrength: { value: CAR_VISUAL.paintMapStrength },
+    paintGroundReflect: { value: CAR_VISUAL.groundReflection },
+    paintTreeReflect: { value: CAR_VISUAL.treelineReflection },
+    paintTreeTop: { value: CAR_VISUAL.treelineTop },
+    flakeAmount: { value: flake * CAR_VISUAL.flakeSkew },
     flakeDensity: { value: CAR_VISUAL.flakeCellsPerMetre },
   };
+  const flakes = level === 0;
+  // Kept on the material so the debug console and tests can read or tune the amounts live.
+  material.userData.paintUniforms = uniforms;
   material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
     Object.assign(shader.uniforms, uniforms);
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vFlakePos;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvFlakePos = position;');
-    shader.fragmentShader = shader.fragmentShader
+    if (flakes) {
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vFlakePos;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvFlakePos = position;');
+    }
+    let fragment = shader.fragmentShader
       .replace(
         '#include <common>',
         `#include <common>
-varying vec3 vFlakePos;
 uniform float paintMapGain;
+uniform float paintMapStrength;
+uniform float paintGroundReflect;
+uniform float paintTreeReflect;
+uniform float paintTreeTop;
+${
+  flakes
+    ? `varying vec3 vFlakePos;
 uniform float flakeAmount;
 uniform float flakeDensity;
 vec3 swFlakeHash(vec3 p) {
   p = fract(p * vec3(0.1031, 0.1030, 0.0973));
   p += dot(p, p.yxz + 33.33);
   return fract((p.xxy + p.yxx) * p.zyx);
+}`
+    : ''
+}
+float swHorizon(vec3 viewDir, vec3 normal) {
+  vec3 r = inverseTransformDirection(reflect(-viewDir, normal), viewMatrix);
+  // The treeline's top varies around the compass, as the real skyline does.
+  float a = atan(r.z, r.x);
+  float top = paintTreeTop * (0.75 + 0.25 * sin(a * 7.0) * sin(a * 3.0 + 1.3));
+  float sky = smoothstep(top - 0.04, top + 0.06, r.y);
+  float ground = smoothstep(-0.2, 0.02, r.y);
+  return mix(paintGroundReflect, mix(paintTreeReflect, 1.0, sky), ground);
 }`,
       )
       .replace(
         '#include <map_fragment>',
         `#ifdef USE_MAP
   vec4 sampledDiffuseColor = texture2D(map, vMapUv);
-  diffuseColor *= vec4(min(sampledDiffuseColor.rgb * paintMapGain, vec3(1.0)), sampledDiffuseColor.a);
+  vec3 paintDetail = min(sampledDiffuseColor.rgb * paintMapGain, vec3(1.0));
+  diffuseColor.rgb *= mix(vec3(1.0), paintDetail, paintMapStrength);
 #endif`,
       )
       .replace(
+        '#include <lights_fragment_maps>',
+        `#include <lights_fragment_maps>
+#if defined( USE_ENVMAP ) && defined( RE_IndirectSpecular )
+  radiance *= swHorizon(geometryViewDir, geometryNormal);
+  #ifdef USE_CLEARCOAT
+  clearcoatRadiance *= swHorizon(geometryViewDir, geometryClearcoatNormal);
+  #endif
+#endif`,
+      );
+    if (flakes) {
+      fragment = fragment.replace(
         '#include <normal_fragment_maps>',
         `#include <normal_fragment_maps>
 {
@@ -264,8 +314,10 @@ vec3 swFlakeHash(vec3 p) {
   roughnessFactor *= 1.0 - 0.5 * flakeFade * step(0.6, flake.x * 0.5 + 0.5);
 }`,
       );
+    }
+    shader.fragmentShader = fragment;
   };
-  material.customProgramCacheKey = () => 'sw-paint-lod0-v1';
+  material.customProgramCacheKey = () => `sw-paint-v2-lod${String(level)}`;
 }
 
 /** The player's paint for one level: the template's greyscale detail maps under `PAINTS[paint]`. */
@@ -290,13 +342,15 @@ function paintMaterial(template: Material, paint: ColourId, level: CarLod): Mesh
     vertexColors: source.vertexColors,
     side: source.side,
   });
-  if (level === 0) addPaintDetail(material, finish.flake, source.map ? mapGain(source.map) : 1);
+  addPaintShader(material, level, finish.flake, source.map ? mapGain(source.map) : 1);
   return material;
 }
 
 /** A rear lamp lens for one level: lit evenly in the brake light red, dim while rolling. */
 function tailMaterial(template: Material): MeshStandardMaterial {
   const material = template.clone() as MeshStandardMaterial;
+  // Lenses read as deep red glass in daylight; a pale atlas texel would otherwise show white.
+  material.color.multiply(new Color(CAR_VISUAL.tailLens));
   material.emissive.setHex(CAR_VISUAL.tailColour);
   // The source emissive maps are mostly dark around the lenses; the lamp glows as a whole.
   material.emissiveMap = null;

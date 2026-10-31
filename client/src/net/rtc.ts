@@ -4,7 +4,7 @@ import type { IceServer, SignalPayload } from '@gamergang/shared';
 type CandidatePayload = Extract<SignalPayload, { kind: 'candidate' }>['candidate'];
 
 /** How long we wait for ICE candidates before sending an offer/answer with what we have. */
-export const ICE_GATHER_TIMEOUT_MS = 1000;
+export const ICE_GATHER_TIMEOUT_MS = 250;
 /** Poll /api/signal this often while a handshake is in flight. */
 export const HANDSHAKE_POLL_MS = 500;
 /** Give up on a handshake attempt after this long and start a fresh one. */

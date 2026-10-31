@@ -16,7 +16,7 @@ Out of scope for v1. Written down so the v1 code leaves room for them, not built
   2026-10-31), each step pushed live when green; the owner tests once at the end.
 - **M10:** Dropped for now (owner, 2026-10-10: one track only). More tracks come later through
   the generator.
-- **M11:** Feel: tyre model and assists ladder, controller v2 (60 Hz input, 250 ms failsafe,
+- **M11:** Feel: tyre model and assists ladder, controller v2 (binary input packets, 250 ms failsafe,
   handbrake slide), HUD v2, engine audio v1.
 - **M12:** Liveries and sponsor decals, class kits, and the chase-cam rewrite. (New cars and paint
   shipped in the cars update.)

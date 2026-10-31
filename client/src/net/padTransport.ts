@@ -38,6 +38,10 @@ interface Attempt {
   channels: Channels;
   open: boolean;
   offerSent: boolean;
+  /** The offer reached the mailbox. The TV drops candidates that arrive before their offer. */
+  offerPosted: boolean;
+  /** Candidates gathered after the offer's SDP was taken, held until the offer is posted. */
+  pendingLocalCandidates: RTCIceCandidate[];
   remoteDescriptionSet: boolean;
   pendingRemoteCandidates: RTCIceCandidateInit[];
   startedAt: number;
@@ -106,6 +110,8 @@ export class PadTransport {
       channels: createChannels(pc),
       open: false,
       offerSent: false,
+      offerPosted: false,
+      pendingLocalCandidates: [],
       remoteDescriptionSet: false,
       pendingRemoteCandidates: [],
       startedAt: now,
@@ -125,6 +131,9 @@ export class PadTransport {
         to: TV_PEER_ID,
         payload: { kind: 'offer', session: attempt.session, sdp: pc.localDescription.sdp },
       });
+      attempt.offerPosted = true;
+      for (const candidate of attempt.pendingLocalCandidates.splice(0))
+        this.sendCandidate(attempt, candidate);
       await this.awaitAnswer(attempt);
     } catch (error) {
       if (this.attempt === attempt) this.handleApiError(error);
@@ -133,20 +142,11 @@ export class PadTransport {
 
   private wire(attempt: Attempt): void {
     const { pc, channels } = attempt;
+    // Candidates gathered before the offer went out are inside its SDP; later ones trickle.
     pc.onicecandidate = (event) => {
       if (!event.candidate || !attempt.offerSent || this.attempt !== attempt) return;
-      void api
-        .postSignal({
-          room: this.room,
-          from: this.clientId,
-          to: TV_PEER_ID,
-          payload: {
-            kind: 'candidate',
-            session: attempt.session,
-            candidate: candidatePayload(event.candidate),
-          },
-        })
-        .catch(() => undefined);
+      if (attempt.offerPosted) this.sendCandidate(attempt, event.candidate);
+      else attempt.pendingLocalCandidates.push(event.candidate);
     };
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'closed') this.fail(attempt);
@@ -171,6 +171,21 @@ export class PadTransport {
     };
     channels.state.onmessage = onMessage;
     channels.input.onmessage = onMessage;
+  }
+
+  private sendCandidate(attempt: Attempt, candidate: RTCIceCandidate): void {
+    void api
+      .postSignal({
+        room: this.room,
+        from: this.clientId,
+        to: TV_PEER_ID,
+        payload: {
+          kind: 'candidate',
+          session: attempt.session,
+          candidate: candidatePayload(candidate),
+        },
+      })
+      .catch(() => undefined);
   }
 
   /** Polls the signaling inbox until the data channel opens or the attempt times out. */

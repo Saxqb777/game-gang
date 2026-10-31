@@ -193,6 +193,38 @@ describe('manual reset', () => {
     if (gained > track.length / 2) gained -= track.length;
     expect(gained).toBeLessThan(0);
   }, 30_000);
+  it('a reset that is still fading out when the car finishes is dropped, not teleported back', async () => {
+    const { track, race, step } = await setup(1, 1);
+    const racer = race.racers[0] as Racer;
+    skipCountdown(race, step);
+    // On its last lap with every gate but the line passed, 8 m short of the line at 30 m/s.
+    racer.lap = 1;
+    racer.nextGate = 0;
+    racer.gatesPassed = track.checkpoints.length;
+    const spawn = track.spawnAt(track.length - 8, 0);
+    racer.car.placeAt(spawn);
+    racer.car.body.setLinvel(
+      { x: Math.sin(spawn.yaw) * 30, y: 0, z: Math.cos(spawn.yaw) * 30 },
+      true,
+    );
+    racer.safeDistance = track.length - 8;
+    for (let i = 0; i < 4; i++) step();
+    expect(racer.finishedMs).toBeNull();
+    expect(race.requestRespawn(racer)).toBe(true);
+    let fadingAtFinish = false;
+    for (let t = 0; t < 1 && racer.finishedMs === null; t += 1 / 60) {
+      fadingAtFinish = racer.respawn === 'out';
+      step();
+    }
+    expect(racer.finishedMs).not.toBeNull();
+    expect(fadingAtFinish).toBe(true);
+    expect(racer.respawn).toBe('none');
+    expect(racer.fade).toBe(0);
+    for (let t = 0; t < 2; t += 1 / 60) step();
+    // Rolled on past the line rather than parked behind it.
+    expect(track.ahead(0, racer.projection.distance)).toBeLessThan(track.length / 2);
+    expect(racer.respawn).toBe('none');
+  });
 });
 
 describe('safe respawn', () => {

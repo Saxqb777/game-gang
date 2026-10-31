@@ -428,6 +428,12 @@ export const ASSISTS = {
   /** Spinning faster than this (rad/s) is gently resisted, so a spin is recoverable, not a pirouette. */
   maxYawRate: 3.1,
   yawLimitStrength: 0.35,
+  /**
+   * Rolling faster than this (rad/s) is resisted the same way, on the ground and in the air, so a hard
+   * wall hit tips the car rather than flinging it onto its roof. Racing laps peak near 0.3 rad/s, so normal driving never reaches it.
+   */
+  maxRollRate: 1.5,
+  rollLimitStrength: 0.6,
   /** Above this slip angle (rad) the car slowly aligns with where it is travelling, unless drifting. */
   slideAlignStart: 0.18,
   slideAlignStrength: 0.9,
@@ -541,7 +547,7 @@ export const STEER_INPUT = {
   /** Response curve exponent. Above 1 = finer control near the centre, same full lock. */
   gamma: 1.5,
   /** Low-pass time constant (s): smooths wifi jitter and digital keys; settles in about 5x this. */
-  lowPassSeconds: 0.04,
+  lowPassSeconds: 0.025,
 } as const;
 
 export const REVERSE = {

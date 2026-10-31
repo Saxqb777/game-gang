@@ -261,6 +261,19 @@ export class GameRenderer {
   }
 
   /**
+   * Starts compiling a scene's materials against the scratch target without the warm-up frames,
+   * so it can run while another scene is on screen. The programs are created synchronously; with
+   * KHR_parallel_shader_compile the driver finishes linking them in the background.
+   */
+  compileInBackground(scene: Scene, camera: Camera): Promise<void> {
+    const previous = this.webgl.getRenderTarget();
+    this.webgl.setRenderTarget(this.scratch);
+    const done = this.webgl.compileAsync(scene, camera).then(() => undefined);
+    this.webgl.setRenderTarget(previous);
+    return done;
+  }
+
+  /**
    * Compiles every scene material against the scratch target (program keys depend on the bound
    * target), then renders a few full frames so the shadow-depth and post programs compile too.
    * The first warm-up frame runs at the floor scale, the rest at 1, so both paths are exercised.

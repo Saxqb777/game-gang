@@ -196,6 +196,8 @@ export class SplitWaysGame {
   private readonly carColours: string[];
   private mode: 'race' | 'podium' = 'race';
   private podium: Podium | null = null;
+  /** What `podium` was built for (LOD floor and top three), to tell if it can be reused. */
+  private podiumKey = '';
   /** Final standings once the podium is up, re-sent to a pad that reloads after the race. */
   private finalStandings: RaceResult[] | null = null;
   private raceEndedAt: number | null = null;
@@ -384,6 +386,9 @@ export class SplitWaysGame {
     const carFloor = renderer.preset.carLodFloor;
     const restoreCars = this.drivers.map((d) => d.visual.showAllForCompile(carFloor));
     for (const texture of this.models.textures(carFloor)) renderer.webgl.initTexture(texture);
+    for (const { tag } of this.drivers) {
+      if (tag.material.map) renderer.webgl.initTexture(tag.material.map);
+    }
     await renderer.precompile(this.scene, this.firstCamera());
     for (const restore of restoreCars) restore();
     if (this.isDisposed()) return;
@@ -620,7 +625,7 @@ export class SplitWaysGame {
       }
     }
     if (this.raceWindowOpen && !this.raceWindowClosed && phase === 'finished') {
-      // Before the podium and its shader compile hitch.
+      // Before the podium's shaders compile.
       this.raceWindowClosed = true;
       if (!this.benchRanThisRace && this.options.bench !== 'soak') {
         const stats = renderer.stats;
@@ -889,9 +894,8 @@ export class SplitWaysGame {
     }
   };
 
-  private showPodium(): void {
-    this.mode = 'podium';
-    const results: RaceResult[] = this.race.standings().map((racer) => {
+  private raceResults(): RaceResult[] {
+    return this.race.standings().map((racer) => {
       const driver = this.drivers.find((d) => d.racer === racer);
       if (!driver) throw new Error('Racer without a driver');
       return {
@@ -904,15 +908,48 @@ export class SplitWaysGame {
         bestLapMs: racer.bestLapMs,
       };
     });
+  }
+
+  /** The podium for these standings, reusing the one built at the finish when it still matches. */
+  private podiumFor(results: readonly RaceResult[]): Podium {
     const entries: PodiumEntry[] = results.slice(0, 3).map((result, i) => ({
       place: (i + 1) as 1 | 2 | 3,
       car: result.car,
       paint: result.colour,
     }));
+    const floor = this.renderer.preset.carLodFloor;
+    const key = `${floor}|${entries.map((e) => `${e.car}:${e.paint}`).join(',')}`;
+    if (this.podium && this.podiumKey === key) return this.podium;
+    this.podium?.dispose();
+    this.podiumKey = key;
     this.podium = new Podium(this.models, entries, this.scene.environment, {
-      floor: this.renderer.preset.carLodFloor,
+      floor,
       viewHeightPx: () => this.fullRect.height,
     });
+    return this.podium;
+  }
+
+  /**
+   * Builds the podium as soon as the race ends and starts compiling its shaders, so they are ready
+   * (or nearly) by the time it appears `RACE.podiumDelaySeconds` later instead of compiling
+   * synchronously on its first frame. Runs after the race window has closed, so its programs don't
+   * count as late ones in the race telemetry.
+   */
+  private preparePodium(): void {
+    const podium = this.podiumFor(this.raceResults());
+    const full = this.fullRect;
+    podium.update(0, full.width / full.height);
+    const restore = podium.showAllForCompile();
+    // compileAsync creates the programs before it returns; it only waits for them afterwards.
+    this.renderer.compileInBackground(podium.scene, podium.camera).catch(() => undefined);
+    restore();
+  }
+
+  private showPodium(): void {
+    this.mode = 'podium';
+    const results = this.raceResults();
+    // Unfinished cars can still change places in the delay; a different top three is rebuilt.
+    this.podiumFor(results);
     this.hudLayer.hidden = true;
     this.audio?.podium();
     this.layout();
@@ -942,6 +979,7 @@ export class SplitWaysGame {
     renderer.endFrame(this.clock, this.loop.lastCpuMs);
     this.tickLoadingBench();
     if (this.started) this.trackRaceWindow(now);
+    if (this.mode === 'race' && this.raceEndedAt !== null && !this.podium) this.preparePodium();
     this.frames++;
     if (this.debug.needsPaint) this.paintDebug();
   }

@@ -214,6 +214,14 @@ export class Podium {
     for (const { visual } of this.cars) visual.selectLod(this.camera, height, this.lod.floor, 0);
   }
 
+  /** Shows every car level the podium may draw, for a shader compile; returns the undo. */
+  showAllForCompile(): () => void {
+    const restores = this.cars.map(({ visual }) => visual.showAllForCompile(this.lod.floor));
+    return () => {
+      for (const restore of restores) restore();
+    };
+  }
+
   dispose(): void {
     for (const { visual } of this.cars) visual.dispose();
     for (const item of this.disposables) item.dispose();

@@ -259,20 +259,30 @@ function simplifyAll(items, budget, weightOf, options = {}) {
   return result;
 }
 
-/** LOD0: hidden families give way first (down to LOD0_HIDDEN_MIN), then the outside. */
+/** Wheels stay as modelled at LOD0 while they take at most this share of the budget. */
+const LOD0_WHEEL_SHARE = 0.4;
+
+/**
+ * LOD0: hidden families give way first (down to LOD0_HIDDEN_MIN), then the outside. Wheels are
+ * left alone when they fit: a simplified spoked rim closes up into a flat disc.
+ */
 function simplifyLod0(buckets) {
-  const budget = budgets.lod0.triangles;
-  const total = sumTris(buckets.map((b) => b.mesh));
+  const isWheel = (b) => b.group.startsWith('wheel_');
+  const wheelTris = sumTris(buckets.filter(isWheel).map((b) => b.mesh));
+  const keepWheels = wheelTris <= budgets.lod0.triangles * LOD0_WHEEL_SHARE;
+  const items = keepWheels ? buckets.filter((b) => !isWheel(b)) : buckets;
+  const budget = budgets.lod0.triangles - (keepWheels ? wheelTris : 0);
+  const total = sumTris(items.map((b) => b.mesh));
   if (total <= budget) return;
   const isHidden = (b) => HIDDEN_FAMILIES.has(b.material.family);
-  const hidden = sumTris(buckets.filter(isHidden).map((b) => b.mesh));
+  const hidden = sumTris(items.filter(isHidden).map((b) => b.mesh));
   const visible = total - hidden;
   const target = budget * TARGET_SHARE;
   const hiddenShare =
     hidden > 0 ? Math.min(1, Math.max(LOD0_HIDDEN_MIN, (target - visible) / hidden)) : 1;
   const visibleShare = Math.min(1, (target - hidden * hiddenShare) / Math.max(1, visible));
-  const meshes = simplifyAll(buckets, budget, (b) => (isHidden(b) ? hiddenShare : visibleShare));
-  buckets.forEach((bucket, i) => {
+  const meshes = simplifyAll(items, budget, (b) => (isHidden(b) ? hiddenShare : visibleShare));
+  items.forEach((bucket, i) => {
     bucket.mesh = meshes[i];
   });
 }
@@ -751,17 +761,10 @@ function meshNode(name, mesh, material, options) {
 }
 
 /**
- * Builds one car. `source` comes from source.mjs (or the placeholder builder); returns the GLB
+ * Builds one car. `source` comes from source.mjs (after rework.mjs); returns the GLB
  * bytes and the report numbers.
  */
-export async function buildCar({
-  id,
-  source,
-  sourceSha256,
-  copyright,
-  placeholder = false,
-  log = () => undefined,
-}) {
+export async function buildCar({ id, source, sourceSha256, copyright, log = () => undefined }) {
   const wheels = measureWheels(source);
   for (const note of wheels.notes) log(note);
   const { buckets, warnings } = collectBuckets(source, wheels);
@@ -1044,7 +1047,6 @@ export async function buildCar({
       carId: id,
       sourceSha256,
       builder: BUILDER,
-      ...(placeholder ? { placeholder: true } : {}),
     },
   };
   const texturesByPackKey = new Map();

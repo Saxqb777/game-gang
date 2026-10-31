@@ -163,14 +163,14 @@ export const CARS = {
       /** Hub z = +-wheelbaseHalf from the axle midpoint. */
       wheelbaseHalf: 1.153,
       /** Hub x = +-halfTrack. */
-      halfTrackFront: 0.83,
-      halfTrackRear: 0.86,
+      halfTrackFront: 0.915,
+      halfTrackRear: 0.947,
       /** Tyre radius; also the hub height above the ground at rest. */
       radiusFront: 0.349,
       radiusRear: 0.349,
       /** Body size without mirrors. */
       length: 3.96,
-      width: 2.0,
+      width: 2.2,
       height: 1.34,
     },
     /** Kilograms. */
@@ -203,10 +203,10 @@ export const CARS = {
     /** Measured from the runtime model (pnpm assets:cars prints it; the asset test checks it). */
     geometry: {
       /** Hub z = +-wheelbaseHalf from the axle midpoint. */
-      wheelbaseHalf: 1.524,
+      wheelbaseHalf: 1.523,
       /** Hub x = +-halfTrack. */
       halfTrackFront: 0.829,
-      halfTrackRear: 0.889,
+      halfTrackRear: 0.886,
       /** Tyre radius; also the hub height above the ground at rest. */
       radiusFront: 0.364,
       radiusRear: 0.364,
@@ -250,7 +250,7 @@ export const CARS = {
       halfTrackFront: 0.833,
       halfTrackRear: 0.945,
       /** Tyre radius; also the hub height above the ground at rest. */
-      radiusFront: 0.357,
+      radiusFront: 0.356,
       radiusRear: 0.376,
       /** Body size without mirrors. */
       length: 4.79,
@@ -289,11 +289,11 @@ export const CARS = {
       /** Hub z = +-wheelbaseHalf from the axle midpoint. */
       wheelbaseHalf: 1.255,
       /** Hub x = +-halfTrack. */
-      halfTrackFront: 0.826,
-      halfTrackRear: 0.826,
+      halfTrackFront: 0.8265,
+      halfTrackRear: 0.75,
       /** Tyre radius; also the hub height above the ground at rest. */
-      radiusFront: 0.375,
-      radiusRear: 0.375,
+      radiusFront: 0.438,
+      radiusRear: 0.438,
       /** Body size without mirrors. */
       length: 4.65,
       width: 2.0,

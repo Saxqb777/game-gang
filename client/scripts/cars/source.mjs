@@ -65,8 +65,7 @@ function groupOf(object) {
 }
 
 /**
- * The neutral source model of a parsed GLB. `renameMaterial` may map source material names first
- * (the placeholder uses it for the one CC0 material name outside the vocabulary).
+ * The neutral source model of a parsed GLB. `renameMaterial` may map source material names first.
  */
 export function sourceFromParsed(parsed, { renameMaterial = (name) => name } = {}) {
   const { json, scene, images, materialMaps, materialIndexOf } = parsed;

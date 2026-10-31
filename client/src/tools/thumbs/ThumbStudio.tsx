@@ -3,6 +3,7 @@
  * with the game's own car library, paint and sky, so the phone can show the car without three.js.
  * "Download all" zips the 40 WebP files plus thumbs.json (the SHA-256 of each GLB they show);
  * `pnpm assets:cars --thumbs <zip>` checks the zip into assets/cars/.
+ * `?sheet=<id>` shows the debrand contact sheet of one car instead (ContactSheet, spec 4.6).
  */
 import './thumbs.css';
 import { CAR_IDS, PLAYER_COLOURS, carName, type CarId, type ColourId } from '@gamergang/shared';
@@ -21,6 +22,7 @@ import { zipSync } from 'three/examples/jsm/libs/fflate.module.js';
 import { LIGHTING } from '../../games/splitways/config';
 import { Sky } from '../../games/splitways/render/sky';
 import { CarModelLibrary } from '../../games/splitways/scene/carVisual';
+import ContactSheet from './ContactSheet';
 
 /** Thumbnail size and WebP quality (contract 3.9: 512x288, at most 40 KB each). */
 const WIDTH = 512;
@@ -165,7 +167,7 @@ async function zipThumbs(thumbs: Thumb[]): Promise<Blob> {
   return new Blob([zipSync(files, { level: 0 })], { type: 'application/zip' });
 }
 
-export default function ThumbStudio() {
+function ThumbGrid() {
   const total = CAR_IDS.length * PLAYER_COLOURS.length;
   const [done, setDone] = useState(0);
   const [thumbs, setThumbs] = useState<Thumb[] | null>(null);
@@ -247,4 +249,10 @@ export default function ThumbStudio() {
         ))}
     </main>
   );
+}
+
+export default function ThumbStudio() {
+  const query = new URLSearchParams(window.location.search);
+  const sheet = query.get('sheet');
+  return sheet ? <ContactSheet car={sheet} paint={query.get('paint')} /> : <ThumbGrid />;
 }

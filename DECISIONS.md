@@ -30,7 +30,7 @@ milestone changed is in `PROGRESS.md`. Tunable values live in `client/src/games/
   - Each handshake attempt has a session id; stale messages are ignored.
 - Polling: pads every 500 ms during a handshake only. The TV every 500 ms during a handshake, otherwise
   every 1 s (lobby, race and results), to see new or reconnecting pads and keep the room alive.
-- Keepalive: the TV pings every pad every 1 s in every phase; a link silent for 3 s is dropped and
+- Keepalive: the TV pings every pad every 1 s in every phase; a link silent for 5 s is dropped and
   the pad reconnects. A TV watchdog tick that comes late (the page stalled, e.g. loading a race)
   skips judging once, because no pings went out during the stall.
 - Keepalive: ping every 1 s. 5 s of silence = dead link; the pad re-handshakes with the same id and

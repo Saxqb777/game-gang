@@ -291,7 +291,7 @@ The car part of M12, pulled forward after M8 (owner, 2026-10-12). Released toget
 - Docs: DECISIONS (Cars section, D-C1 to D-C10), ROADMAP, README.
 - Controller lag fixes: pad inputs at a steady 60/s (were ~23/s with 33-50 ms gaps) with presses
   and releases sent at once, steering low-pass 0.025 s (was 0.04 s), ICE gathering wait 250 ms
-  (was 1 s), TV signal polling 1 s in a race (was 2 s), dead-link timeout 3 s (was 5 s).
+  (was 1 s), TV signal polling 1 s in a race (was 2 s), dead-link timeout kept at 5 s so a briefly stalled TV does not drop phones.
 
 **Test**
 

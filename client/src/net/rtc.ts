@@ -10,7 +10,7 @@ export const HANDSHAKE_POLL_MS = 500;
 /** Give up on a handshake attempt after this long and start a fresh one. */
 export const HANDSHAKE_TIMEOUT_MS = 15_000;
 /** A link with no traffic for this long is treated as dead (pings flow every second). */
-export const LINK_SILENCE_TIMEOUT_MS = 3000;
+export const LINK_SILENCE_TIMEOUT_MS = 5000;
 export const PING_INTERVAL_MS = 1000;
 
 export interface Channels {

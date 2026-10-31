@@ -703,7 +703,8 @@ export const RESOLUTION = {
 export const CAR_LOD = {
   /** Projected bounding-sphere diameter (output px) at or above which a car draws LOD0, LOD1. */
   lod0MinPx: 520,
-  lod1MinPx: 110,
+  /** LOD2 has no lamp lenses, so a car drops to it only once its tail lamps are a few px wide. */
+  lod1MinPx: 80,
   /** A car changes level only once it is this share past a threshold, so it never flickers. */
   hysteresis: 0.12,
 } as const;

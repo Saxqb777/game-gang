@@ -50,7 +50,7 @@ export const CAR_INFO: Record<CarId, CarInfo> = {
     body: 'Rally coupe',
     drive: 'AWD',
     tagline: 'Clean cars are slow cars.',
-    stats: { speed: 4, acceleration: 6, handling: 9, braking: 6, ease: 8 },
+    stats: { speed: 4, acceleration: 7, handling: 9, braking: 6, ease: 8 },
   },
   haymaker: {
     make: 'Brazen',

@@ -147,7 +147,7 @@ export const CARS = {
     frontShare: 0.3,
     /** Tyre grip (friction coefficient), front and rear. */
     frontGrip: 1.9,
-    rearGrip: 1.82,
+    rearGrip: 1.86,
     /** x reference braking deceleration. */
     brake: 1,
     /** x reference downforce per kg. */
@@ -180,7 +180,7 @@ export const CARS = {
     /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
     comForward: 0,
     /** Peak engine force at a standstill (N). */
-    force: 11_700,
+    force: 12_150,
     /** Speed (m/s) where the engine runs out of push. */
     topSpeed: 49,
     /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
@@ -197,7 +197,7 @@ export const CARS = {
     /** x reference air drag. */
     drag: 1,
     /** x derived inertia; below 1 is snappier. */
-    inertia: 0.9,
+    inertia: 1,
   },
   haymaker: {
     /** Measured from the runtime model (pnpm assets:cars prints it; the asset test checks it). */
@@ -222,7 +222,7 @@ export const CARS = {
     /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
     comForward: 0.05,
     /** Peak engine force at a standstill (N). */
-    force: 14_000,
+    force: 13_450,
     /** Speed (m/s) where the engine runs out of push. */
     topSpeed: 54.5,
     /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
@@ -231,7 +231,7 @@ export const CARS = {
     frontShare: 0.2,
     /** Tyre grip (friction coefficient), front and rear. */
     frontGrip: 1.84,
-    rearGrip: 1.7,
+    rearGrip: 1.768,
     /** x reference braking deceleration. */
     brake: 0.95,
     /** x reference downforce per kg. */
@@ -264,7 +264,7 @@ export const CARS = {
     /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
     comForward: -0.15,
     /** Peak engine force at a standstill (N). */
-    force: 12_384,
+    force: 12_200,
     /** Speed (m/s) where the engine runs out of push. */
     topSpeed: 54,
     /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */
@@ -273,7 +273,7 @@ export const CARS = {
     frontShare: 0.25,
     /** Tyre grip (friction coefficient), front and rear. */
     frontGrip: 1.843,
-    rearGrip: 1.69,
+    rearGrip: 1.758,
     /** x reference braking deceleration. */
     brake: 1.05,
     /** x reference downforce per kg. */
@@ -306,7 +306,7 @@ export const CARS = {
     /** Centre of mass ahead of the axle midpoint. Rearward makes the tail easier to swing out. */
     comForward: -0.08,
     /** Peak engine force at a standstill (N). */
-    force: 14_450,
+    force: 14_800,
     /** Speed (m/s) where the engine runs out of push. */
     topSpeed: 50.5,
     /** Fall-off exponent: force * (1 - (v / topSpeed) ** curve). Lower fades earlier. */

@@ -72,7 +72,7 @@ export class Sky {
       .normalize();
     this.measureHaze(data, width, height, turn);
 
-    // Lighting copy: sand below the horizon instead of mirrored sky, and the sun capped so it
+    // Lighting copy: forest-floor bounce below the horizon instead of mirrored sky, and the sun capped so it
     // doesn't double up with the directional light.
     const lightData = data.slice();
     fillGround(lightData, width, height, LIGHTING.groundBounce);

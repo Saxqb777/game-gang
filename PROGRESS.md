@@ -217,3 +217,124 @@ returns both screens to the lobby. 60 fps on the M1 is yours to confirm.
   4-car 3-lap items race.
 - Offline render of the new sounds (preview sent in chat).
 - Not verified: feel with real phones, frame rate on the M1 with every effect on screen.
+
+## M8 - Kestrel Pines, performance foundation, touch controller
+
+**Built**
+
+- Cleanup: items, item boxes, drift boost, boost pads and game modes removed; slipstream is drag
+  only (D-3, D-4). Motion steering and its permission flow removed. The old coastal track retired.
+- Trackgen v1: an original layout file plus a small override file become stations, corridor
+  chunks, a physics mesh with a surface per triangle, terrain, placements and a racing line.
+  `pnpm assets:track <folder>` checks a track folder.
+- Track 1 **Kestrel Pines**: an original 3.36 km club circuit in a pine forest (D-1: nothing from
+  Speed Dreams is used). 18 checkpoint gates, safe-point respawn, `MIN_LAP_MS` 45 s, no pit lane.
+- Render path: per-view scratch targets copied into one HDR atlas, one post chain, DPR 1 canvas with
+  an always-on upscale and sharpen pass, GPU-time dynamic resolution, High/Medium/Low presets by
+  player count with session drops, shader precompile and warm-up frames.
+- Profiling: debug overlay (fps, p50/p99, missed, GPU ms, preset, scale, draws, triangles), debug
+  keys P, N, R, B, benchmarks `?bench=auto|matrix|soak` and `?bots=1`.
+- Telemetry: the TV posts performance samples to `/api/telemetry` (no IPs, no names, 90 days);
+  `pnpm telemetry:report`.
+- Controller: Drag steer (default) and Buttons, feathered GAS, BRAKE·R with reverse arming,
+  HANDBRAKE strip, HOLD · RESET, stuck hint, R chip on pad and TV.
+- Track 1 dressing: CC0 asphalt, grass, gravel and forest floor textures, kerbs, tyre walls, armco,
+  instanced pines, low sun from behind the grid.
+- Docs: README, DECISIONS and ROADMAP rewritten for M8; `LICENCES.md` added.
+
+**Test**
+
+1. `pnpm start`, open `/tv`, join with phones in Drag steer and in Buttons; race 3 laps.
+2. Feather GAS, reverse from a wall (hold BRAKE·R at a standstill), HOLD · RESET, handbrake strip.
+3. Backtick, then `P` (autopilot), `N` (next gate), `R` (pin scale), `B` (benchmark).
+4. `/tv?bench=auto`, then `K`, `Enter`: the results table appears, then the race.
+
+**Verified here**
+
+- Unit tests, the gate and `pnpm build:vercel` pass on the release build (counts under the cars
+  update below).
+- The M8 §2.9 integration acceptance (mixed controllers, lap records, reconnect, vote, perf smoke) on
+  the merged build: **pending**.
+- Not verified: the owner's M1 run (spec §5.5: `?bench=auto`, the 30-minute soak, real races at
+  4K and 1080p on 1, 2 and 4 players): **pending**.
+
+**Known issues and open owner items**
+
+- A race is 3 laps of about 1:31 on the autopilot (about 4.5-5 min per race), possibly long for a
+  party game (R-24). Laps are one number in `overrides.json`.
+- Car feel was tuned from measurements, not yet by people with phones.
+- The car sourcing task (original-design models, a `LICENCES.md` row per candidate, a real-silhouette
+  check) was finished for the cars update below.
+
+## Cars update - five cars, car select and paint
+
+The car part of M12, pulled forward after M8 (owner, 2026-10-12). Released together with M8; Track
+1 polish (M9) is a later update (owner, 2026-10-31).
+
+**Built**
+
+- Five debranded cars from invented makes: Dashwood Nightjar (default), Mudlark Scree, Brazen
+  Haymaker, Briganti Zanna, Arvanta Sagitta. Built by `pnpm assets:cars` from the debranded sources
+  into one GLB per car with three levels of detail and a shadow stand-in. The old CC0 car, its
+  `assets:car` script and the placeholder cars are gone.
+- Car select on the phone join screen and through "Change car" in the lobby: a car card with a
+  pre-rendered thumbnail in the chosen paint, make and model, body and drive, five stat bars and the
+  credit line. The TV lobby slots show each player's car.
+- Paint: the eight player colours are the eight paints (D-C1). Same car allowed, same paint refused.
+- Per-car handling on top of the M8 reference car (D-C3), real wheel positions and sizes (D-C4,
+  D-C9), per-car autopilot speed profile.
+- TV visuals: per-viewport LOD switching with a Low floor (D-C5), paint with clearcoat and flake,
+  brake lamps, contact shadow, per-car camera framing, podium with the cars.
+- Reconnect and reload keep car and paint, in the lobby and mid-race.
+- Credits: the TV credits panel (key `C` in the lobby), the `/credits` page, a landing footer
+  link, the phone card credit line, and the README, `LICENCES.md` and `assets/ASSETS.md` entries.
+- Docs: DECISIONS (Cars section, D-C1 to D-C10), ROADMAP, README.
+
+**Test**
+
+1. Join with three phones: two pick the same car in different paints; try a taken paint (greyed out).
+2. Reload a phone in the lobby and mid-race: it comes back with the same car and paint.
+3. Race with four different cars (`?bots=1`, `K` four times, backtick, `P`).
+4. Press `C` in the TV lobby, and open `/credits` on a phone.
+
+**Verified here**
+
+- `pnpm check`: 34 test files, 321 tests passed.
+  The cars gate (brand and stale-word greps) and `pnpm build:vercel` pass.
+- Balance (`race/balance.test.ts`, autopilot, Kestrel Pines, before the final balance pass): spread
+  0.35% (limit 1.5%, target 1.0%).
+
+  | Car      | Lap 1 (s) | Lap 2, flying (s) | Top speed (km/h) |
+  | -------- | --------- | ----------------- | ---------------- |
+  | Nightjar | 94.15     | 91.00             | 169              |
+  | Scree    | 94.10     | 91.10             | 159              |
+  | Haymaker | 93.77     | 90.78             | 177              |
+  | Zanna    | 94.17     | 91.10             | 175              |
+  | Sagitta  | 93.95     | 90.90             | 164              |
+
+- The final balance and performance pass (C7) and the cars integration acceptance (four-car race,
+  paint refusal, reconnect, podium, lap records, credits, perf smoke): **pending**.
+- Not verified: the owner's M1 numbers with four different cars (Low, Medium, High and the soak).
+
+**Known issues and open owner items**
+
+- Distinctiveness reshapes are still open. The packager changed only the rims (Nightjar, Scree and
+  Zanna get generated rims), the Nightjar's grille (slats) and rear lamp colour, and the plates. Not
+  done (from the line-up plan):
+  - Zanna: door-mounted mirrors, a low duct instead of the roof snorkel, new engine-cover louvres,
+    a centre exhaust, a new tail-light graphic, its own front light signature, simpler front blades.
+  - Nightjar: new headlamp outline with twin LED blades, removing the front fender blade, side-window
+    and C-pillar outline, a segmented tail graphic, ducktail, diffuser and exhaust, new mirrors.
+  - Haymaker: a new front (slim lamps or a light bar, slatted grille, trapezoid intake), an offset
+    bonnet scoop, door mirrors, a new rear and quarter window, the missing left inner headlamp lens.
+  - Sagitta: its own headlight signature, a finished rear (diffuser fins, light bar, wing), a side
+    intake, a minimal cockpit, smaller wheels with a wider rear track.
+  - Scree: split blade lamps and a real grille, a segmented rear bar, lower ducktail, its own wing,
+    C-pillar and roof vent, an 8-10% narrower body, and the look that sets it apart from the
+    Haymaker (taller, mudflaps, light pod).
+- The owner signs off each car from its contact sheet (`/tools/thumbs?sheet=<id>`).
+- Car licences: verified on the Sketchfab API at sourcing (2026-10-10); the re-check could not
+  reach the API from the build machine, so the `LICENCES.md` rows say re-verify. The Sagitta's source
+  is dedicated to CC0 while Sketchfab labelled it "Free Standard" (R-C3, Q2): the owner's call, and
+  an archived copy of the page is still to be saved.
+- Every car uses the same synthesised engine sound (per-car engines are M11).

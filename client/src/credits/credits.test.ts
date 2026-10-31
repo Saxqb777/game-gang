@@ -7,11 +7,8 @@ import licencesDoc from '../../../LICENCES.md?raw';
 import readmeDoc from '../../../README.md?raw';
 import { CREDIT_SECTIONS, TRACK_CREDIT, TRACK_LICENCE } from './credits';
 
-/**
- * The docs part of C6 (README "Credits" and the LICENCES.md car section) lands after the
- * integration acceptance; the checks against those two files switch on with it.
- */
-const CAR_DOCS_WRITTEN = false;
+/** The docs part of C6 (README "Credits" and the LICENCES.md car section) is written. */
+const CAR_DOCS_WRITTEN = true;
 
 describe('car credits', () => {
   it('has one credit per car', () => {

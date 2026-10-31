@@ -1,6 +1,8 @@
 # Assets
 
-Every file shipped to players, where it came from, and its license.
+Every file shipped to players, where it came from, and its license. The review of every
+third-party source (including Speed Dreams, reviewed and not used) is in
+[LICENCES.md](../LICENCES.md).
 
 | File / package | What | Source | License |
 | --- | --- | --- | --- |
@@ -11,6 +13,7 @@ Every file shipped to players, where it came from, and its license.
 | `assets/cars/zanna/zanna.glb` | Briganti Zanna (car 4 of 5), three levels of detail | Briganti Zanna is based on "Fictional supercar - V12 Goblin" by Olli Teittinen (ollitei), https://sketchfab.com/3d-models/fictional-supercar-v12-goblin-0a20e49ad5774d778567cb5c3f345786, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Modified: renamed, reshaped, debranded, re-materialed, reduced to three levels of detail. Converted by `pnpm assets:cars` (rework, three levels of detail, shadow stand-in), source SHA-256 `fba32e5f...f115a` | CC BY 4.0 |
 | `assets/cars/sagitta/sagitta.glb` | Arvanta Sagitta (car 5 of 5), three levels of detail | Arvanta Sagitta is based on "FREE Concept Car 039 - public domain (CC0)" by unityfan777 (Unity Fan YouTube channel), https://sketchfab.com/3d-models/free-concept-car-039-public-domain-cc0-f17b9d37e0e34f15b4c2e417a98f5ed6, dedicated to the public domain (CC0 1.0); credited as a courtesy. Modified: renamed, reshaped, debranded, re-materialed, reduced to three levels of detail. Converted by `pnpm assets:cars` (rework, three levels of detail, shadow stand-in), source SHA-256 `cea10738...d1c55` | CC0 1.0 |
 | `assets/cars/*/thumb-*.webp`, `assets/cars/thumbs.json` | Car picker thumbnails (5 cars x 8 paints), rendered from the car files | Made for this project from the car files above with the `/tools/thumbs` studio | Same licence as each car |
+| `assets/tracks/kestrel-pines/base.layout.json`, `assets/tracks/kestrel-pines/overrides.json` | Kestrel Pines track data (layout and overrides), read by trackgen at runtime | Original project data: an original layout by the Gamer Gang project, not derived from any existing track. Each file carries `licence` "Proprietary - (C) 2026 Gamer Gang project. All rights reserved." and `credits` ["Original layout by the Gamer Gang project, 2026"] | Proprietary (project-owned) |
 | `assets/textures/asphalt/asphalt_track_*_1k.jpg` | Kestrel Pines asphalt and paved aprons (colour, normal, AO/roughness/metal) | [Asphalt Track](https://polyhaven.com/a/asphalt_track) by Dimitrios Savva, Poly Haven. Shipped as downloaded | CC0 |
 | `assets/textures/forest/forest_leaves_04_*_1k.jpg` | Forest floor (terrain far layer) | [Forest Leaves 04](https://polyhaven.com/a/forest_leaves_04) by Rob Tuytel, Poly Haven. Shipped as downloaded | CC0 |
 | `assets/textures/grass/grass004_*_1k.jpg` | Grass run-off and terrain near layer | [Grass 004](https://ambientcg.com/view?id=Grass004), ambientCG (1K-JPG). Processed with PIL: `_Color` and `_NormalGL` re-encoded as JPEG q90; ARM packed as R = `_AmbientOcclusion`, G = 0.72 + 0.28 x `_Roughness` (grass was too glossy), B = 0, JPEG q90 | CC0 |

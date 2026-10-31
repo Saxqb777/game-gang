@@ -2,6 +2,28 @@
 
 Out of scope for v1. Written down so the v1 code leaves room for them, not built.
 
+## Milestones
+
+- **M8:** Track 1 Kestrel Pines, the performance foundation (render path, presets, profiling,
+  telemetry) and the minimum touch controller. Built; done once the owner's M1 run passes. See
+  PROGRESS.md.
+- **Cars update:** five debranded cars from invented makes, car select with paint, per-car handling
+  and credits: the car part of M12, pulled forward (owner, 2026-10-12). Built; done once the
+  owner signs off the car reworks and the M1 run passes. Released together with M8 (owner,
+  2026-10-31).
+- **M9:** Track 1 polish: visuals (impostor forests, baked light, KTX2 textures, grade), car
+  feel and sound on Kestrel Pines. A later update after the M8 and cars release (owner,
+  2026-10-31), each step pushed live when green; the owner tests once at the end.
+- **M10:** Dropped for now (owner, 2026-10-10: one track only). More tracks come later through
+  the generator.
+- **M11:** Feel: tyre model and assists ladder, controller v2 (60 Hz input, 250 ms failsafe,
+  handbrake slide), HUD v2, engine audio v1.
+- **M12:** Liveries and sponsor decals, class kits, and the chase-cam rewrite. (New cars and paint
+  shipped in the cars update.)
+- **M13:** Premium TV and site UI.
+- **M14:** On hold until the owner says it is ready.
+- **M15 and after:** new tracks and car packs through the generator; the WebGPU gate.
+
 ## Platform (Gamer Gang)
 
 - **Accounts, profiles, matchmaking.** v1 rooms are anonymous and joined by QR or code.
@@ -16,8 +38,7 @@ Out of scope for v1. Written down so the v1 code leaves room for them, not built
 ## Split Ways
 
 - AI opponents.
-- More tracks (the track builder takes a list of spline control points, so this is mostly content),
-  more cars, unlockables.
-- Rubber band assist as an option (Classic is pure skill; Items only weights the item odds).
-- Drift scoring, more items, battle mode.
+- More tracks and cars (trackgen builds a track from a layout file plus a small override file, so a
+  track is mostly content), unlockables.
+- Rubber band assist as an option (races are pure skill today).
 - Spectator mode, replays, ghost laps.

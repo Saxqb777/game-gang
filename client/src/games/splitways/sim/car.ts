@@ -26,6 +26,7 @@ import {
 import { REFERENCE_SPEC, type CarSpec, type WheelSpec } from './carSpec';
 import { NEUTRAL_INPUT, copyInput, type DriveInput } from './input';
 import type { Rapier } from './rapier';
+import { WHEEL_RAY_GROUPS } from './world';
 import { SURFACE, SURFACE_NAMES, type SurfaceId } from '../track/surfaces';
 
 export const WHEEL_COUNT = 4;
@@ -246,7 +247,8 @@ export class Car {
     const reversing = this.applyDrive(forwardSpeed, dt);
     this.applyGrip(Math.abs(forwardSpeed), reversing);
 
-    vehicle.updateVehicle(dt);
+    // Wheel rays skip the wall hulls, so a glancing wall hit can't climb the suspension up the wall.
+    vehicle.updateVehicle(dt, undefined, WHEEL_RAY_GROUPS);
 
     let grounded = 0;
     for (let i = 0; i < WHEEL_COUNT; i++) if (vehicle.wheelIsInContact(i)) grounded++;
@@ -266,6 +268,16 @@ export class Car {
         .addScaledVector(WORLD_UP, -yawRate)
         .multiplyScalar(-ASSISTS.airDamping * this.spec.massScale);
       torque.add(scratch);
+    }
+    // Roll limiter, like the yaw limiter: removes a share of any roll faster than the limit.
+    const rollRate = angularVelocity.dot(forward);
+    const rollExcess = Math.abs(rollRate) - ASSISTS.maxRollRate;
+    if (rollExcess > 0) {
+      torque.addScaledVector(
+        forward,
+        (-Math.sign(rollRate) * rollExcess * this.spec.inertia.roll * ASSISTS.rollLimitStrength) /
+          dt,
+      );
     }
     body.applyImpulse(impulse.multiplyScalar(dt), true);
     body.applyTorqueImpulse(torque.multiplyScalar(dt), true);

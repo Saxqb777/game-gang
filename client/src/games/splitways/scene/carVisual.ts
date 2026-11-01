@@ -76,9 +76,43 @@ interface CarTemplate {
   readonly shadow: BufferGeometry;
   /** Textures used at each level, so a preset can upload exactly the levels it may draw. */
   readonly texturesByLevel: readonly Set<Texture>[];
+  /** Most detailed level this template still has: 1 once light mode dropped LOD0. */
+  readonly minLevel: 0 | 1;
 }
 
-function prepareTemplate(carId: CarId, scene: Object3D): CarTemplate {
+/**
+ * Light mode: takes every LOD0 node out of the car and frees what only LOD0 used (geometry arrays
+ * and decoded images), so a weak machine never holds the biggest meshes and textures in memory.
+ */
+function dropLod0(scene: Object3D, texturesByLevel: Set<Texture>[]): void {
+  const nodes: Object3D[] = [];
+  scene.traverse((object) => {
+    if (/_lod0$/.test(object.name)) nodes.push(object);
+  });
+  for (const node of nodes) {
+    node.traverse((object) => {
+      if (object instanceof Mesh) (object.geometry as BufferGeometry).dispose();
+    });
+    node.removeFromParent();
+  }
+  const inUse = new Set<Texture>();
+  scene.traverse((object) => {
+    if (!(object instanceof Mesh)) return;
+    for (const material of materialsOf(object)) {
+      for (const texture of texturesOf(material)) inUse.add(texture);
+    }
+  });
+  const level0 = texturesByLevel[0] ?? new Set<Texture>();
+  for (const texture of level0) {
+    if (inUse.has(texture)) continue;
+    level0.delete(texture);
+    texture.dispose();
+    const image: unknown = texture.image;
+    if (typeof ImageBitmap !== 'undefined' && image instanceof ImageBitmap) image.close();
+  }
+}
+
+function prepareTemplate(carId: CarId, scene: Object3D, light: boolean): CarTemplate {
   const body0 = scene.getObjectByName('body_lod0');
   const shadowNode = scene.getObjectByName('shadow');
   if (!body0 || !(shadowNode instanceof Mesh)) {
@@ -107,8 +141,10 @@ function prepareTemplate(carId: CarId, scene: Object3D): CarTemplate {
     }
   });
   scene.updateMatrixWorld(true);
+  // Measured on LOD0 even in light mode, so LOD switching and the camera fade stay the same.
   const box = new Box3().setFromObject(body0);
   const size = box.getSize(new Vector3());
+  if (light) dropLod0(scene, texturesByLevel);
   return {
     scene,
     centre: box.getCenter(new Vector3()),
@@ -116,6 +152,7 @@ function prepareTemplate(carId: CarId, scene: Object3D): CarTemplate {
     halfSize: size.multiplyScalar(0.5),
     shadow: shadowNode.geometry as BufferGeometry,
     texturesByLevel,
+    minLevel: light ? 1 : 0,
   };
 }
 
@@ -133,13 +170,13 @@ export class CarModelLibrary {
 
   private constructor(private readonly templates: ReadonlyMap<CarId, CarTemplate>) {}
 
-  /** Fetches each car in the race once, in parallel. */
-  static async load(carIds: readonly CarId[]): Promise<CarModelLibrary> {
+  /** Fetches each car in the race once, in parallel. `light` drops every car's LOD0 after loading. */
+  static async load(carIds: readonly CarId[], light = false): Promise<CarModelLibrary> {
     const loader = new GLTFLoader();
     const loaded = await Promise.all(
       [...new Set(carIds)].map(async (id) => {
         const gltf = await loader.loadAsync(carUrl(id));
-        return [id, prepareTemplate(id, gltf.scene)] as const;
+        return [id, prepareTemplate(id, gltf.scene, light)] as const;
       }),
     );
     return new CarModelLibrary(new Map(loaded));
@@ -582,7 +619,11 @@ export class CarVisual {
       camera.fov / camera.zoom,
       viewHeightPx,
     );
-    const level = chooseLod(this.viewLevels[viewIndex] ?? this.lod, diameter, floor);
+    const level = chooseLod(
+      this.viewLevels[viewIndex] ?? this.lod,
+      diameter,
+      Math.max(floor, this.template.minLevel) as 0 | 1,
+    );
     this.viewLevels[viewIndex] = level;
     if (level !== this.lod) this.show(level);
   }
@@ -639,7 +680,8 @@ export class CarVisual {
   }
 
   /** Shows every level the preset may draw so the renderer compiles them all; returns the restore. */
-  showAllForCompile(floor: 0 | 1): () => void {
+  showAllForCompile(presetFloor: 0 | 1): () => void {
+    const floor = Math.max(presetFloor, this.template.minLevel);
     for (const level of LEVELS) {
       for (const node of this.levelNodes[level] ?? []) node.visible = level >= floor;
     }

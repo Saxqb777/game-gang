@@ -6,7 +6,7 @@
  * reload of the TV page keeps it. Presets only change before a race starts, never during one.
  */
 import type { RenderPreset } from '@gamergang/shared';
-import { PRESETS, RESOLUTION } from '../config';
+import { LIGHT_PRESET, PRESETS, RESOLUTION } from '../config';
 
 export type PresetId = RenderPreset;
 
@@ -17,10 +17,12 @@ export interface QualityPreset {
   /** Dynamic-resolution floor (linear). */
   minScale: number;
   msaa: 0 | 2 | 4;
-  bloomLevels: 3 | 4;
+  /** 0 = no bloom (light mode). */
+  bloomLevels: 0 | 3 | 4;
   shadow:
     | { kind: 'sun'; mapSize: 1024 | 2048; far: number }
-    | { kind: 'focus'; mapSize: 1024 | 2048; extent: number };
+    | { kind: 'focus'; mapSize: 1024 | 2048; extent: number }
+    | { kind: 'none' };
   shadowRadius: number;
   anisotropy: number;
   /** Upscale sharpening in stops: 0 = strongest, each +1 halves it. Off is a renderer uniform. */
@@ -32,6 +34,8 @@ export interface QualityPreset {
   cameraFar: number;
   /** Most detailed car level drawn (D-C5): Low never draws LOD0, so it never uploads LOD0 textures. */
   carLodFloor: 0 | 1;
+  /** Light mode (weak machines): Low with more cut, reported as Low. */
+  light?: boolean;
 }
 
 export interface RaceRenderOutcome {
@@ -49,6 +53,13 @@ const PRESET_TABLE: Record<PresetId, QualityPreset> = {
 
 export function getPreset(id: PresetId): QualityPreset {
   return PRESET_TABLE[id];
+}
+
+const LIGHT: QualityPreset = { id: 'low', light: true, ...LIGHT_PRESET };
+
+/** The light-mode preset (weak machines); never lowered further. */
+export function lightPreset(): QualityPreset {
+  return LIGHT;
 }
 
 /** One step down; low stays low. */

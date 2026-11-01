@@ -663,6 +663,48 @@ export const PRESETS = {
 } as const;
 
 /**
+ * Light mode: for weak machines (smart TVs, little RAM or GPU), picked automatically or after a
+ * failed load (`render/lightMode.ts`). Low with the costly parts cut: no MSAA, no bloom, no shadow
+ * maps (the cars keep their blob shadows), a 720p pixel cap, a third of the pines, a shorter view
+ * and the cars never load their LOD0 meshes or textures. Telemetry and the session memory see it as
+ * Low.
+ */
+export const LIGHT_PRESET = {
+  maxInternalPixels: 1280 * 720,
+  minScale: 0.6,
+  msaa: 0,
+  bloomLevels: 0,
+  shadow: { kind: 'none' },
+  shadowRadius: 1,
+  anisotropy: 2,
+  sharpness: 0.4,
+  vegetationDensity: 0.3,
+  pineShadows: false,
+  cameraFar: 1000,
+  carLodFloor: 1,
+} as const;
+
+/**
+ * Loading guards (`loadGuard.ts`, `tv/SplitWaysStage.tsx`): no wait on the loading screen is
+ * unbounded. A shader-compile wait gives up and carries on (the programs exist; worst case the
+ * first frame that uses one stalls); an asset load or a whole attempt that runs out fails it, and a
+ * failed normal attempt is retried once in light mode.
+ */
+export const LOADING = {
+  /** Most time spent waiting for parallel shader compiles to report done (ms). */
+  compileWaitMs: 8000,
+  /** Most time for the downloads of one attempt: physics, track, cars, world textures, sky (ms). */
+  assetsMs: 40_000,
+  /**
+   * Watchdog over one whole attempt, create plus prepare (ms). A backstop: the known hangs have
+   * their own shorter caps, and SwiftShader test runs load in up to about 45 s.
+   */
+  attemptMs: 60_000,
+  /** The loading benchmark ends this long after its own cap even if no frame comes (ms). */
+  benchGraceMs: 1000,
+} as const;
+
+/**
  * Dynamic resolution, driven by GPU time (or by missed frames when the browser has no GPU timer).
  * Budgets are shares of the frame interval, which is never shorter than 1/60 s.
  */

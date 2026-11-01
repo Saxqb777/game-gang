@@ -20,7 +20,8 @@ import {
   type Camera,
   type Scene,
 } from 'three';
-import { RENDER } from '../config';
+import { LOADING, RENDER } from '../config';
+import { settleWithin } from '../loadGuard';
 import { FrameStats, frameIntervalMs, snapRefreshHz, type FrameWindow } from './frameStats';
 import { GpuTimer } from './gpuTimer';
 import { MAX_VIEWS, PostChain, type FrameViews, type Tile } from './postProcessing';
@@ -122,8 +123,17 @@ export class GameRenderer {
   private lastTriangles = 0;
   private sharpening = false;
   private programBaseline = 0;
+  /** The browser took the WebGL context away (GPU reset, out of memory, a TV driver giving up). */
+  private lost = false;
+  /** Called once when the context is lost; the game decides what to do (restart in light mode). */
+  onContextLost: (() => void) | null = null;
 
-  constructor(canvas: HTMLCanvasElement, preset: QualityPreset) {
+  constructor(
+    private readonly canvas: HTMLCanvasElement,
+    preset: QualityPreset,
+  ) {
+    // Before the context exists, so a loss during start-up is seen too.
+    canvas.addEventListener('webglcontextlost', this.handleContextLost);
     this.webgl = new WebGLRenderer({
       canvas,
       antialias: false,
@@ -134,7 +144,7 @@ export class GameRenderer {
     this.webgl.outputColorSpace = SRGBColorSpace;
     // Tone mapping happens in the composite pass.
     this.webgl.toneMapping = NoToneMapping;
-    this.webgl.shadowMap.enabled = true;
+    this.webgl.shadowMap.enabled = preset.shadow.kind !== 'none';
     this.webgl.shadowMap.type = PCFShadowMap;
     this.webgl.autoClear = false;
     // Draw-call and triangle counts are summed over the whole frame for the overlay.
@@ -164,6 +174,19 @@ export class GameRenderer {
   get preset(): QualityPreset {
     return this.currentPreset;
   }
+
+  get contextLost(): boolean {
+    return this.lost;
+  }
+
+  private readonly handleContextLost = (event: Event): void => {
+    // Without preventDefault the browser never even tries to restore the context.
+    event.preventDefault();
+    if (this.lost) return;
+    this.lost = true;
+    console.warn('[splitways] WebGL context lost');
+    this.onContextLost?.();
+  };
 
   /** The GPU timer result that arrived this frame (null if none did). */
   get frameGpuMs(): number | null {
@@ -199,6 +222,7 @@ export class GameRenderer {
     const msaaChanged = preset.msaa !== this.currentPreset.msaa;
     this.currentPreset = preset;
     this.resolution.setPreset(preset);
+    this.webgl.shadowMap.enabled = preset.shadow.kind !== 'none';
     if (msaaChanged) {
       this.scratch.dispose();
       this.scratch = sceneTarget(1, 1, preset.msaa);
@@ -280,7 +304,15 @@ export class GameRenderer {
    */
   async precompile(scene: Scene, camera: Camera): Promise<void> {
     this.webgl.setRenderTarget(this.scratch);
-    await this.webgl.compileAsync(scene, camera);
+    // compileAsync creates every program before it returns, then polls until the driver reports
+    // them linked, which never happens after a context loss or on some TV drivers. Give up on the
+    // wait after a while: the worst case is a stall the first time a program is used.
+    const compiled = await settleWithin(
+      this.webgl.compileAsync(scene, camera),
+      LOADING.compileWaitMs,
+    );
+    if (!compiled) console.warn('[splitways] shader compile wait timed out; carrying on');
+    if (this.lost) return;
     const scale = this.resolution.scale;
     for (let frame = 0; frame < RENDER.warmupFrames; frame++) {
       this.resolution.scale = frame === 0 ? this.currentPreset.minScale : 1;
@@ -326,8 +358,11 @@ export class GameRenderer {
     this.atlas.dispose();
     this.ldr.dispose();
     this.webgl.dispose();
-    // A new context per race: losing this one now keeps Chrome under its context limit.
-    this.webgl.forceContextLoss();
+    // A new context per race: losing this one now keeps Chrome under its context limit. That loss
+    // is ours, not the browser's, so it must not look like one.
+    this.canvas.removeEventListener('webglcontextlost', this.handleContextLost);
+    this.onContextLost = null;
+    if (!this.lost) this.webgl.forceContextLoss();
   }
 
   private programCount(): number {

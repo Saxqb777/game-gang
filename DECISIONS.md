@@ -348,6 +348,33 @@ Kestrel Pines on the MacBook Air M1 (4K and 1080p output), and a 30-minute soak 
 - Every third-party source gets a `LICENCES.md` row before anything is derived from it or added.
   `assets/ASSETS.md` lists every shipped file with its source and licence.
 
+## Weak TVs: loading guards and light mode
+
+- **D-TV1** (owner, 2026-11-01, after a TCL Android TV sat on "Warming up the tyres..." for ever):
+  loading can never hang. Shader-compile waits give up after 8 s and carry on (three's compileAsync
+  polls for ever after a context loss or on a driver that never reports completion; the programs
+  already exist, so the worst case is a stall the first time one is used). Downloads share a 40 s
+  cap. The loading benchmark ends on a timer even if no frame comes. A 60 s watchdog covers each
+  whole attempt (not 45 s: SwiftShader test runs load in up to about 45 s, and every known hang has
+  its own shorter cap). `webglcontextlost` is handled (preventDefault) on the loading screen and
+  in the race.
+- A normal attempt that times out, loses its context or throws is disposed and retried once in
+  light mode, and the device remembers light mode (localStorage `gamergang.splitways.light`). A
+  context lost mid-race restarts the race the same way, once (not on the podium). If that fails too,
+  the TV shows "Could not start the game" with the reason. No WebGL 2: fails at once (three needs
+  it).
+- Light mode up front: `?light=1` (and `?light=0` forces normal and forgets the memory), a
+  remembered failure, or a clearly weak device: smart-TV user agents, Android without "Mobile",
+  `deviceMemory` at most 2 GB, `MAX_TEXTURE_SIZE` at most 4096, no WebGL 2.
+- Light preset (`LIGHT_PRESET`, reported as Low): no MSAA, no bloom, no shadow maps (blob shadows
+  stay), a 720p pixel cap, 30% of the pines, 1000 m view, LOD floor 1, and the cars drop their LOD0
+  meshes and textures right after loading so they never sit in memory. Normal devices are unchanged.
+- The loading screen shows the current step under the spinner (Loading cars, Preparing graphics,
+  Testing speed, prefixed with Light mode), so a stuck TV can be read from a photo.
+- Telemetry: a light load posts `loading-benchmark` with scenario `loading-light`; a failed attempt
+  posts a frameless `loading-benchmark` row with scenario `load-fail-<timeout|lost|error>[-light]`.
+  Same schema, no server change.
+
 ## Decision index
 
 - D-1: original Track 1 layout; nothing from Speed Dreams (owner, 2026-10-10).
@@ -362,6 +389,7 @@ Kestrel Pines on the MacBook Air M1 (4K and 1080p output), and a 30-minute soak 
   1:1).
 - D-10: controller v2 stays in M11: 600 ms input failsafe, direct handbrake press.
 - D-C1 to D-C10: the cars update (see Cars).
+- D-TV1: loading guards and light mode for weak TVs.
 - Owner, 2026-10-10: one track only for now. Track 2 and Track 3 (old M9 and M10) are dropped for
   now.
 - Owner, 2026-10-12: after M8, the cars update (the car part of M12 pulled forward), then Track 1

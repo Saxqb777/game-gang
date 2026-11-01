@@ -4,6 +4,7 @@
  *    every render() call, so near shadows are crisp and far ones still exist.
  *  - focus (low): one directional light whose shadow box (±extent) is re-aimed at the car being
  *    drawn before each view. One shadow pass per view instead of two keeps 4 views at 60 fps.
+ *  - none (light mode): a plain directional light, no shadow map at all.
  * Changing the rig changes shader programs: only do it on the loading screen or in a benchmark,
  * then precompile again.
  */
@@ -58,6 +59,22 @@ export function createShadowRig(
       beforeView: () => undefined,
       dispose: () => {
         light.removeFromParent();
+        light.dispose();
+      },
+    };
+  }
+
+  if (shadow.kind === 'none') {
+    // Light mode: the sun still lights the scene, but nothing renders a shadow map.
+    const light = new DirectionalLight(colour, intensity);
+    light.position.copy(towardsSun).multiplyScalar(SUN_DISTANCE);
+    scene.add(light, light.target);
+    return {
+      light,
+      beforeView: () => undefined,
+      dispose: () => {
+        light.removeFromParent();
+        light.target.removeFromParent();
         light.dispose();
       },
     };

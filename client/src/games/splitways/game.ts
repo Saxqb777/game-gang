@@ -14,7 +14,8 @@ import {
 } from '@gamergang/shared';
 import { Color, FogExp2, Scene, Vector3, type DataTexture, type Sprite } from 'three';
 import { RaceAudio } from './audio/raceAudio';
-import { BENCH, CAR, INPUT, LIGHTING, POST, RACE, RESOLUTION } from './config';
+import { BENCH, CAR, INPUT, LIGHTING, LOADING, POST, RACE, RESOLUTION } from './config';
+import { withTimeout } from './loadGuard';
 import { autopilot } from './debug/autopilot';
 import { carSpeedProfile } from './race/speedProfile';
 import { resolveCarSpec } from './sim/carSpec';
@@ -46,6 +47,7 @@ import { GameRenderer, measureRefreshHz } from './render/renderer';
 import { installHaze } from './render/haze';
 import {
   getPreset,
+  lightPreset,
   lowerPreset,
   noteLoadingDrop,
   recordRaceOutcome,
@@ -104,12 +106,29 @@ export interface GameHooks {
   audio: AudioContext | null;
   /** Performance samples for the telemetry API (the client batches and sends them). */
   telemetry(samples: TelemetrySample[]): void;
+  /** The browser lost the WebGL context (loading or racing): the stage restarts in light mode. */
+  onContextLost?(): void;
 }
 
 /** `?bench=`: fly-through after loading (auto, matrix) or a 30-minute autopilot soak race. */
 export type BenchMode = 'auto' | 'matrix' | 'soak';
 export interface GameOptions {
   bench: BenchMode | null;
+  /** Light mode for weak machines (render/lightMode.ts): the light preset, cars without LOD0. */
+  light?: boolean;
+  /** The loading step now running, for the loading screen's status line. */
+  onStep?(step: LoadStep): void;
+}
+
+/** What the loading screen is waiting for. */
+export type LoadStep = 'physics' | 'track' | 'assets' | 'display' | 'graphics' | 'speed' | 'start';
+
+/** The WebGL context went away on the loading screen. */
+export class ContextLostError extends Error {
+  constructor() {
+    super('graphics context lost');
+    this.name = 'ContextLostError';
+  }
 }
 
 interface Driver {
@@ -236,16 +255,31 @@ export class SplitWaysGame {
     options: GameOptions = { bench: null },
   ): Promise<SplitWaysGame> {
     // Decided before anything loads: texture anisotropy comes from the preset.
-    const preset = getPreset(startingPreset(players.length));
-    const physics = await PhysicsWorld.create();
+    const light = options.light === true;
+    const preset = light ? lightPreset() : getPreset(startingPreset(players.length));
+    // Every download shares one deadline, so a stalled request fails the attempt instead of
+    // holding the loading screen for ever.
+    const deadline = performance.now() + LOADING.assetsMs;
+    const left = () => Math.max(0, deadline - performance.now());
+    options.onStep?.('physics');
+    const physics = await withTimeout(PhysicsWorld.create(), left(), 'Loading physics');
     try {
-      const track = await loadTrack1();
+      options.onStep?.('track');
+      const track = await withTimeout(loadTrack1(), left(), 'Loading track');
       const terrain = new Terrain(track);
-      const [models, world, skyTexture] = await Promise.all([
-        CarModelLibrary.load(players.map((p) => p.car)),
-        WorldVisual.create(track, terrain, preset),
-        Sky.loadTexture(),
-      ]);
+      options.onStep?.('assets');
+      const [models, world, skyTexture] = await withTimeout(
+        Promise.all([
+          CarModelLibrary.load(
+            players.map((p) => p.car),
+            light,
+          ),
+          WorldVisual.create(track, terrain, preset),
+          Sky.loadTexture(),
+        ]),
+        left(),
+        'Loading cars',
+      );
       return new SplitWaysGame(
         container,
         players,
@@ -280,6 +314,12 @@ export class SplitWaysGame {
     this.hudLayer.className = 'sw-hud-layer';
     container.append(this.canvas, this.hudLayer);
     this.renderer = new GameRenderer(this.canvas, preset);
+    this.renderer.onContextLost = () => {
+      // Nothing more can be drawn on this canvas: release the loading screen's waits.
+      this.loadingBench?.resolve();
+      this.loadingBench = null;
+      this.hooks.onContextLost?.();
+    };
 
     this.sky = new Sky(this.renderer.webgl, skyTexture);
     this.sky.apply(this.scene);
@@ -383,8 +423,14 @@ export class SplitWaysGame {
    */
   async prepare(): Promise<void> {
     const renderer = this.renderer;
+    const step = (name: LoadStep) => {
+      if (renderer.contextLost) throw new ContextLostError();
+      this.options.onStep?.(name);
+    };
+    step('display');
     renderer.frameStats.setRefreshHz(await measureRefreshHz());
     if (this.isDisposed()) return;
+    step('graphics');
     this.setCameraFar(renderer.preset.cameraFar);
     this.layout();
     this.snapCameras();
@@ -398,8 +444,10 @@ export class SplitWaysGame {
     await renderer.precompile(this.scene, this.firstCamera());
     for (const restore of restoreCars) restore();
     if (this.isDisposed()) return;
+    step('speed');
     await this.loadingBenchmark();
     if (this.isDisposed()) return;
+    step('start');
     renderer.resolution.enabled = true;
     renderer.resolution.resetStats();
     renderer.frameStats.resetWindow();
@@ -505,6 +553,7 @@ export class SplitWaysGame {
     renderer.frameStats.resetWindow();
     this.loop.stepping = false;
     const gpu: number[] = [];
+    let fallback: ReturnType<typeof setTimeout> | undefined;
     await new Promise<void>((resolve) => {
       this.loadingBench = {
         frames: 0,
@@ -512,11 +561,19 @@ export class SplitWaysGame {
         until: performance.now() + RESOLUTION.loadingBenchMaxMs,
         resolve,
       };
+      // The cap is checked per frame; if frames stop coming (a stuck GPU, a lost context, a
+      // throwing render), this still ends the benchmark.
+      fallback = setTimeout(() => {
+        this.loadingBench = null;
+        resolve();
+      }, RESOLUTION.loadingBenchMaxMs + LOADING.benchGraceMs);
       this.loop.start();
     });
-    if (this.isDisposed()) return;
+    clearTimeout(fallback);
+    if (this.isDisposed() || renderer.contextLost) return;
     const window = renderer.frameStats.snapshot();
-    const sample = telemetrySample('loading-benchmark', 'loading', window, renderer.stats);
+    const scenario = measured.light === true ? 'loading-light' : 'loading';
+    const sample = telemetrySample('loading-benchmark', scenario, window, renderer.stats);
     const target = RESOLUTION.targetShare * frameIntervalMs(renderer.frameStats.refreshHz());
     gpu.sort((a, b) => a - b);
     const gpuMedian = gpu[gpu.length >> 1];
@@ -722,6 +779,7 @@ export class SplitWaysGame {
   }
 
   dispose(): void {
+    if (this.disposed) return;
     this.disposed = true;
     this.loop.stop();
     if (this.statusTimer !== null) clearInterval(this.statusTimer);

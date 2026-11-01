@@ -305,6 +305,12 @@ The car part of M12, pulled forward after M8 (owner, 2026-10-12). Released toget
 - Controller lag fixes: pad inputs at a steady 60/s (were ~23/s with 33-50 ms gaps) with presses
   and releases sent at once, steering low-pass 0.025 s (was 0.04 s), ICE gathering wait 250 ms (reverted to 1 s after iPhones got stuck connecting)
   (was 1 s), TV signal polling 1 s in a race (was 2 s), dead-link timeout kept at 5 s so a briefly stalled TV does not drop phones.
+- Weak-TV loading fix (D-TV1): every loading wait is capped (compile waits 8 s, downloads 40 s,
+  60 s watchdog per attempt), WebGL context loss is handled, a failed load retries once in light
+  mode and the device remembers it, weak devices start light, and the loading screen shows the
+  current step. Checked in SwiftShader: normal load unchanged (High, no light mode), `?light=1`,
+  a context loss while preparing graphics (retries light and races), a loss on both attempts
+  (failure with reason), and a driver that never reports compiles done (loads after the 8 s cap).
 
 **Test**
 
